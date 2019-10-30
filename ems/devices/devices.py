@@ -59,7 +59,6 @@ def devices(device_name, minpow=0, maxpow=0, stocap=None, eta=None, init_soc=Non
         return dict_unit_hp
 
     # for test
-    #
     # use case for electric vehicle
     elif device_name == 'ev':
 
