@@ -7,8 +7,9 @@ import pandas as pd
 import json as js
 from scipy.interpolate import UnivariateSpline
 
-from ems.ems import ems as ems_loc
-from ems.ems import ems_write as emswrite
+from ems.ems_mod import ems as ems_loc
+from ems.ems_mod import ems_write as emswrite
+
 
 def devices(device_name, minpow=0, maxpow=0, stocap=None, eta=None, init_soc=None, end_soc=None, ev_aval=None,
             sto_volume=0, path=None):
@@ -45,7 +46,9 @@ def devices(device_name, minpow=0, maxpow=0, stocap=None, eta=None, init_soc=Non
 
             hp_cop = hp_q.div(hp_p)
             fact_p = maxpow / hp_p.mean(axis=0)[1]
-            unit.update({'maxpow': hp_p.multiply(fact_p), 'COP': hp_cop})
+
+            # change the DataFrame to Dict
+            unit.update({'maxpow': hp_p.multiply(fact_p).to_dict('dict'), 'COP': hp_cop.to_dict('dict')})
             df_unit_hp = unit
             dict_unit_hp = {device_name: df_unit_hp}
 
@@ -87,7 +90,7 @@ def devices(device_name, minpow=0, maxpow=0, stocap=None, eta=None, init_soc=Non
             temp_min = 18
             temp_max = 50
             if stocap is None:
-                stocap = sto_volume * 0.997 * 4.186 * (temp_max - temp_min)/3600
+                stocap = sto_volume * 0.997 * 4.186 * (temp_max - temp_min) / 3600
             unit.update({'stocap': stocap, 'mintemp': temp_min, 'maxtemp': temp_max,
                          'self_discharge': 0.005}
                         )
@@ -141,10 +144,10 @@ test
 # my_ems1['devices'].update(devices(device_name='chp', path = 'C:/Users/ge57vam/emsflex/ems/chp01_ems.txt'))
 # my_ems1['devices'].update(devices(device_name='ev', path = 'C:/Users/ge57vam/emsflex/ems/ev01_ems.txt'))
 # my_ems1['devices'].update(devices(device_name='sto', path = 'C:/Users/ge57vam/emsflex/ems/sto01_ems.txt'))
-#emswrite(my_ems1, path='C:/Users/ge57vam/emsflex/ems/ems01_ems.txt')
+# emswrite(my_ems1, path='C:/Users/ge57vam/emsflex/ems/ems01_ems.txt')
 if __name__ == '__main__':
     my_ems1 = ems_loc(initialize=True, path='C:/Users/ge57vam/emsflex/ems/ems01_ems.txt')
-    a=my_ems1['devices'].keys()
+    a = my_ems1['devices'].keys()
 
     hp_param = my_ems1['devices']['hp']
     hp_ther_cap = pd.DataFrame.from_dict(hp_param['maxpow'])
@@ -154,10 +157,8 @@ if __name__ == '__main__':
     spl_ther_pow = UnivariateSpline(b, c)
     print(spl_ther_pow(300))
 
-#count = raw_input('Number of variables:')
+# count = raw_input('Number of variables:')
 # for i in my_ems1['devices'].keys():
 #     exec('var_' + str(i) + ' = ' + str(my_ems1['devices'][i]))
 
-#device_write(my_ems1, 'bat', path='C:/Users/ge57vam/emsflex/ems/bat01_ems.txt')
-
-
+# device_write(my_ems1, 'bat', path='C:/Users/ge57vam/emsflex/ems/bat01_ems.txt')
