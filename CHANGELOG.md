@@ -1,8 +1,10 @@
 # Changelog
 
-## [v0.1](https://github.com/zxc8063898/emsflexpy/tree/v0.1) (2019-11-04)
+## [v0.1](https://github.com/tum-ewk/emsflexpy/tree/v0.1) (2019-11-04)
 
-[Full Changelog](https://github.com/zxc8063898/emsflexpy/compare/d51fe8993ff00ddb6b1bbd3bfc3ab15863e71811...v0.1)
+[Full Changelog](https://github.com/tum-ewk/emsflexpy/compare/d51fe8993ff00ddb6b1bbd3bfc3ab15863e71811...v0.1)
+
+build the basic structure of flexibility model, fill the details of every sub-model
 
 
 
