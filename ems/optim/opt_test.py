@@ -34,8 +34,9 @@ def run_hp_opt(ems_local, plot_fig=True, result_folder='C:'):
     print('Load Results ...\n')
 
     # electricity variable
-    HP_ele_cap, HP_ele_run, elec_import, elec_export, lastprofil_elec, ev_pow, CHP_cap, pv_power, bat_cont, bat_power, bat_power_pos, bat_power_neg = \
-        (np.zeros(length) for i in range(12));
+    HP_ele_cap, HP_ele_run, elec_import, elec_export, lastprofil_elec, ev_pow, CHP_cap, pv_power, bat_cont, bat_power, \
+    bat_pv2demand, bat_grid2bat, bat_power_pos, bat_power_neg = \
+        (np.zeros(length) for i in range(14));
     # heat variable
     boiler_cap, CHP_heat_cap, HP_heat_run, HP_heat_cap, CHP_op, HP_operation, lastprofil_heat, sto_e_pow, sto_e_pow_pos, sto_e_pow_neg, sto_e_cont = \
         (np.zeros(length) for i in range(11));
@@ -63,8 +64,11 @@ def run_hp_opt(ems_local, plot_fig=True, result_folder='C:'):
         CHP_op[i] = value(prob.CHP_cap[idx]);
         CHP_cap[i] = value(prob.CHP_cap[idx] * prob.chp_elec_max_cap);
         pv_power[i] = value(prob.PV_cap[idx] * prob.pv_effic * prob.solar[idx]);
-        bat_cont[i] = value(prob.bat_cont[idx]);
-        bat_power[i] = value(prob.bat_pow[idx]);
+        bat_cont[i] = value(prob.bat_cont[idx])
+        bat_power_pos[i] = value(prob.bat_pow_neg[idx])
+        bat_power_neg[i] = -value(prob.bat_pow_pos[idx])
+        bat_pv2demand[i] = min(pv_power[i], lastprofil_elec[i])
+        bat_grid2bat[i] = min(elec_import[i], -bat_power_neg[i])
 
         ##heat balance
         boiler_cap[i] = value(prob.boiler_cap[idx]);
@@ -85,17 +89,11 @@ def run_hp_opt(ems_local, plot_fig=True, result_folder='C:'):
 
         i += 1;
 
-        SOC_heat = sto_e_cont / sto_cont_max * 100;
-        SOC_elec = bat_cont / bat_max_cont * 100;
+    SOC_heat = sto_e_cont / sto_cont_max * 100;
+    SOC_elec = bat_cont / bat_max_cont * 100;
     # battery_power
 
-    for i in range(length):
-        if bat_power[i] > 0:
-            bat_power_neg[i] = -bat_power[i];
-        else:
-            bat_power_pos[i] = -bat_power[i];
-
-    # heat storage power   
+    # heat storage power
     for i in range(length):
         if sto_e_pow[i] > 0:
             sto_e_pow_neg[i] = -sto_e_pow[i];
@@ -222,8 +220,11 @@ def run_hp_opt(ems_local, plot_fig=True, result_folder='C:'):
                   'HP_heat_run': list(HP_heat_run),
                   'HP_ele_run': list(HP_ele_run), 'CHP_operation': list(CHP_op), 'SOC_heat': list(SOC_heat),
                   'SOC_elec': list(SOC_elec),
-                  'battery_SOC': list(bat_cont / bat_max_cont * 100), 'battery_power': list(bat_power),
-                  'PV_power': list(pv_power),
+                  'PV_power': list(pv_power), 'bat_pv2demand': list(bat_pv2demand), 'grid_import': list(elec_import),
+                  'Last_elec': list(lastprofil_elec), 'grid_export': list(elec_export),
+                  'bat_grid2bat': list(bat_grid2bat),
+                  'battery_input_power': list(-bat_power_neg), 'battery_output_power': list(bat_power_pos),
+                  'battery_SOC': list(bat_cont / bat_max_cont * 100),
                   'EV_power': list(ev_pow), 'min cost': list(cost_min)}
 
     df = pd.DataFrame(data=data_input)
@@ -240,12 +241,10 @@ def run_hp(ems_local):
     # record the time
     t0 = tm.time()
     # get all the data from the external file
-    # my_ems1 = ems_loc(initialize=True, path='C:/Users/ge57vam/emsflex/ems/ems01_ems.txt')
-    my_ems1 = ems_local
-    devices = my_ems1['devices']
+    # ems_local = ems_loc(initialize=True, path='C:/Users/ge57vam/emsflex/ems/ems01_ems.txt')
+    devices = ems_local['devices']
 
     # read data from excel file
-
 
     print('Data Read. time: ' + "{:.1f}".format(tm.time() - t0) + ' s\n')
 
@@ -262,19 +261,18 @@ def run_hp(ems_local):
     #    source_import =data['import']
     #    source_export =data['export']
 
-
     # system
     # get the initial time step
-    #time_step_initial = parameter.loc['System']['value']
+    # time_step_initial = parameter.loc['System']['value']
     time_step_initial = 0
-    timesteps_all = np.arange(1, 96)
+    timesteps_all = np.arange(0, 96)
     # timestep_1 = timesteps[0]
 
     timesteps = timesteps_all[time_step_initial:96]
     t_dn = 6
     t_up = 6
-    timesteps_dn = timesteps[time_step_initial+1:96 - t_dn]
-    timesteps_up = timesteps[time_step_initial+1:96 - t_up]
+    timesteps_dn = timesteps[time_step_initial + 1:96 - t_dn]
+    timesteps_up = timesteps[time_step_initial + 1:96 - t_up]
 
     # 15 min for every timestep/ timestep by one hour
     # create the concrete model
@@ -318,6 +316,7 @@ def run_hp(ems_local):
     bat_max_cont = bat_param['stocap']
     bat_SOC_init = bat_param['initSOC']
     bat_pow_max = bat_param['maxpow']
+    bat_eta = bat_param['eta']
 
     ## create the parameter
     print('Define Model ...\n')
@@ -343,6 +342,7 @@ def run_hp(ems_local):
     m.bat_cont_max = pyen.Param(initialize=bat_max_cont)
     m.bat_SOC_init = pyen.Param(initialize=bat_SOC_init)
     m.bat_power_max = pyen.Param(initialize=bat_pow_max)
+    m.bat_eta = pyen.Param(initialize=bat_eta)
 
     # hp
     m.hp_ther_pow = pyen.Param(m.t, initialize=1, mutable=True, within=pyen.NonNegativeReals,
@@ -421,9 +421,9 @@ def run_hp(ems_local):
 
     m.ev_power = pyen.Var(m.t, within=pyen.Boolean,
                           doc='operation of the EV')
-    m.boiler_cap, m.PV_cap, m.elec_import, m.elec_export, m.costs, m.bat_cont, m.sto_e_cont = \
-        (pyen.Var(m.t, within=pyen.NonNegativeReals) for i in range(7))
-    m.bat_pow, m.sto_e_pow = (pyen.Var(m.t, within=pyen.Reals) for i in range(2))
+    m.boiler_cap, m.PV_cap, m.elec_import, m.elec_export, m.bat_cont, m.sto_e_cont, m.bat_pow_pos, m.bat_pow_neg = \
+        (pyen.Var(m.t, within=pyen.NonNegativeReals) for i in range(8))
+    m.sto_e_pow, m.costs = (pyen.Var(m.t, within=pyen.Reals) for i in range(2))
 
     # Constrains
 
@@ -440,7 +440,7 @@ def run_hp(ems_local):
 
     def heat_balance_rule(m, t):
         return m.boiler_cap[t] + m.CHP_cap[t] * m.chp_elec_max_cap / m.chp_elec_effic * m.chp_ther_effic + \
-               m.hp_run[t] * m.hp_ther_pow[t] - m.lastprofil_heat[t] - m.sto_e_pow[t] == 0;
+               m.hp_run[t] * m.hp_ther_pow[t] - m.lastprofil_heat[t] - m.sto_e_pow[t] == 0
 
     m.heat_power_balance = pyen.Constraint(m.t,
                                            rule=heat_balance_rule,
@@ -449,9 +449,11 @@ def run_hp(ems_local):
     # battery
     def battery_e_cont_def_rule(m, t):
         if t > m.t[1]:
-            return m.bat_cont[t] == m.bat_cont[t - 1] + m.bat_pow[t] * p2e;
+            return m.bat_cont[t] == m.bat_cont[t - 1] + (
+                    m.bat_pow_pos[t] * m.bat_eta - m.bat_pow_neg[t] / m.bat_eta) * p2e
         else:
-            return m.bat_cont[t] == m.bat_cont_max * m.bat_SOC_init / 100 + m.bat_pow[t] * p2e;
+            return m.bat_cont[t] == m.bat_cont_max * m.bat_SOC_init / 100 + (m.bat_pow_pos[t] * m.bat_eta -
+                                                                             m.bat_pow_neg[t] / m.bat_eta) * p2e
 
     m.bat_e_cont_def = pyen.Constraint(m.t,
                                        rule=battery_e_cont_def_rule,
@@ -460,11 +462,9 @@ def run_hp(ems_local):
     def elec_balance_rule(m, t):
         return m.elec_import[t] + m.CHP_cap[t] * m.chp_elec_max_cap + m.PV_cap[t] * m.pv_effic * m.solar[t] - \
                m.elec_export[t] - m.hp_run[t] * m.hp_ele_pow[t] - m.lastprofil_elec[t] - \
-               m.bat_pow[t] - m.ev_power[t] * m.ev_max_pow == 0;
+               (m.bat_pow_pos[t] - m.bat_pow_neg[t]) - m.ev_power[t] * m.ev_max_pow == 0
 
-    m.elec_power_balance = pyen.Constraint(m.t,
-                                           rule=elec_balance_rule,
-                                           doc='elec_balance')
+    m.elec_power_balance = pyen.Constraint(m.t, rule=elec_balance_rule, doc='elec_balance')
 
     def cost_sum_rule(m, t):
         return m.costs[t] == p2e * (m.boiler_cap[t] / m.boiler_eff * m.gas_price[t] \
@@ -571,7 +571,7 @@ def run_hp(ems_local):
     m.elec_export_def = pyen.Constraint(m.t,
                                         rule=elec_export_rule)
 
-    ##storage
+    # storage
     # storage content
     def sto_e_cont_min_rule(m, t):
         return m.sto_e_cont[t] / m.sto_cont >= 0.1;
@@ -586,39 +586,48 @@ def run_hp(ems_local):
                                        rule=sto_e_cont_max_rule)
 
     def bat_e_cont_min_rule(m, t):
-        return m.bat_cont[t] / m.bat_cont_max >= 0.1;
+        return m.bat_cont[t] / m.bat_cont_max >= 0.1
 
     m.bat_e_cont_min = pyen.Constraint(m.t,
                                        rule=bat_e_cont_min_rule)
 
     def bat_e_cont_max_rule(m, t):
-        return m.bat_cont[t] / m.bat_cont_max <= 0.9;
+        return m.bat_cont[t] / m.bat_cont_max <= 0.9
 
-    m.bat_e_cont_max = pyen.Constraint(m.t,
-                                       rule=bat_e_cont_max_rule)
+    m.bat_e_cont_max = pyen.Constraint(m.t, rule=bat_e_cont_max_rule)
+
+    # def bat_pv_demand_rule(m, t):
+    #     return m.pv2demand[t] == min(m.lastprofil_elec[t], m.PV_cap[t] * m.pv_effic * m.solar[t])
+    #
+    # m.bat_PV_demand = pyen.Constraint(m.t, rule=bat_pv_demand_rule)
+    #
+    # def bat_grid2battery_rule(m, t):
+    #     return m.grid2bat[t] == min(m.elec_import[t], m.bat_pow_pos[t])
+    #
+    # m.grid2battery = pyen.Constraint(m.t, rule=bat_grid2battery_rule)
 
     # storage power
 
     def sto_e_max_pow_rule_1(m, t):
-        return m.sto_e_pow[t] <= m.sto_cont;
+        return m.sto_e_pow[t] <= m.sto_cont
 
     m.sto_e_pow_max_1 = pyen.Constraint(m.t,
                                         rule=sto_e_max_pow_rule_1)
 
     def sto_e_max_pow_rule_2(m, t):
-        return m.sto_e_pow[t] >= -m.sto_cont;
+        return m.sto_e_pow[t] >= -m.sto_cont
 
     m.sto_e_pow_max_2 = pyen.Constraint(m.t,
                                         rule=sto_e_max_pow_rule_2)
 
     def bat_e_max_pow_rule_1(m, t):
-        return m.bat_pow[t] <= m.bat_power_max;
+        return m.bat_pow_pos[t] <= m.bat_power_max;
 
     m.bat_e_pow_max_1 = pyen.Constraint(m.t,
                                         rule=bat_e_max_pow_rule_1)
 
     def bat_e_max_pow_rule_2(m, t):
-        return m.bat_pow[t] >= -m.bat_power_max;
+        return m.bat_pow_neg[t] <= m.bat_power_max;
 
     m.bat_e_pow_max_2 = pyen.Constraint(m.t,
                                         rule=bat_e_max_pow_rule_2)
