@@ -35,8 +35,8 @@ def run_hp_opt(ems_local, plot_fig=True, result_folder='C:'):
 
     # electricity variable
     HP_ele_cap, HP_ele_run, elec_import, elec_export, lastprofil_elec, ev_pow, CHP_cap, pv_power, bat_cont, bat_power, \
-    bat_pv2demand, bat_grid2bat, bat_power_pos, bat_power_neg = \
-        (np.zeros(length) for i in range(14));
+    pv_pv2demand, pv_pv2grid, bat_grid2bat, bat_power_pos, bat_power_neg = \
+        (np.zeros(length) for i in range(15));
     # heat variable
     boiler_cap, CHP_heat_cap, HP_heat_run, HP_heat_cap, CHP_op, HP_operation, lastprofil_heat, sto_e_pow, sto_e_pow_pos, sto_e_pow_neg, sto_e_cont = \
         (np.zeros(length) for i in range(11));
@@ -57,17 +57,18 @@ def run_hp_opt(ems_local, plot_fig=True, result_folder='C:'):
 
     for idx in timesteps:
         # electricity balance
-        ev_pow[i] = value(prob.ev_power[idx]) * value(prob.ev_max_pow);
-        elec_import[i] = value(prob.elec_import[idx]);
-        elec_export[i] = value(prob.elec_export[idx]);
-        lastprofil_elec[i] = value(prob.lastprofil_elec[idx]);
-        CHP_op[i] = value(prob.CHP_cap[idx]);
-        CHP_cap[i] = value(prob.CHP_cap[idx] * prob.chp_elec_max_cap);
-        pv_power[i] = value(prob.PV_cap[idx] * prob.pv_effic * prob.solar[idx]);
+        ev_pow[i] = value(prob.ev_power[idx]) * value(prob.ev_max_pow)
+        elec_import[i] = value(prob.elec_import[idx])
+        elec_export[i] = value(prob.elec_export[idx])
+        lastprofil_elec[i] = value(prob.lastprofil_elec[idx])
+        CHP_op[i] = value(prob.CHP_cap[idx])
+        CHP_cap[i] = value(prob.CHP_cap[idx] * prob.chp_elec_max_cap)
+        pv_power[i] = value(prob.PV_cap[idx] * prob.pv_effic * prob.solar[idx])
         bat_cont[i] = value(prob.bat_cont[idx])
         bat_power_pos[i] = value(prob.bat_pow_neg[idx])
         bat_power_neg[i] = -value(prob.bat_pow_pos[idx])
-        bat_pv2demand[i] = min(pv_power[i], lastprofil_elec[i])
+        pv_pv2demand[i] = min(pv_power[i], lastprofil_elec[i])
+        pv_pv2grid[i] = max(0, min(pv_power[i]-pv_pv2demand[i]+bat_power_neg[i], elec_export[i]))
         bat_grid2bat[i] = min(elec_import[i], -bat_power_neg[i])
 
         ##heat balance
@@ -220,11 +221,12 @@ def run_hp_opt(ems_local, plot_fig=True, result_folder='C:'):
                   'HP_heat_run': list(HP_heat_run),
                   'HP_ele_run': list(HP_ele_run), 'CHP_operation': list(CHP_op), 'SOC_heat': list(SOC_heat),
                   'SOC_elec': list(SOC_elec),
-                  'PV_power': list(pv_power), 'bat_pv2demand': list(bat_pv2demand), 'grid_import': list(elec_import),
+                  'PV_power': list(pv_power), 'pv_pv2demand': list(pv_pv2demand), 'pv_pv2grid': pv_pv2grid,
+                  'grid_import': list(elec_import),
                   'Last_elec': list(lastprofil_elec), 'grid_export': list(elec_export),
                   'bat_grid2bat': list(bat_grid2bat),
-                  'battery_input_power': list(-bat_power_neg), 'battery_output_power': list(bat_power_pos),
-                  'battery_SOC': list(bat_cont / bat_max_cont * 100),
+                  'bat_input_power': list(-bat_power_neg), 'bat_output_power': list(bat_power_pos),
+                  'bat_SOC': list(bat_cont / bat_max_cont * 100),
                   'EV_power': list(ev_pow), 'min cost': list(cost_min)}
 
     df = pd.DataFrame(data=data_input)
