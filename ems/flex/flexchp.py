@@ -14,19 +14,21 @@ from ems.ems_mod import ems as ems_loc
 from ems.flex.flex_draw import plot_flex as plot_flex
 from ems.flex.flex_draw import save_results as save_results
 
-def calc_flex_hp(ems):  # datafram open and break it down
+def calc_flex_chp(ems):  # datafram open and break it down
 
     optm_df = pd.DataFrame.from_dict(ems['optplan'])
-    timesteps = len(optm_df['HP_operation'])
+    timesteps = len(optm_df['CHP_operation'])
     pow2energy = 24 / timesteps
     # get the values from hp dataframe
 
-    hp_operation = optm_df['HP_operation']
-    hp_heat_ifrun = optm_df['HP_heat_run']
-    hp_elec_ifrun = optm_df['HP_ele_run']
+    chp_operation = optm_df['CHP_operation']
+    chp_heat_ifrun = optm_df['CHP_heat_run']
+    chp_elec_ifrun = optm_df['CHP_elec_run']
+    chp_gas_ifrun = optm_df['CHP_gas_run']
     soc_heat = optm_df['SOC_heat']
-    hp_heat_pow = hp_operation * hp_heat_ifrun
-    hp_elec_pow = hp_operation * hp_elec_ifrun
+    chp_heat_pow = chp_operation * chp_heat_ifrun
+    chp_elec_pow = chp_operation * chp_elec_ifrun
+    chp_gas_pow = chp_operation * chp_gas_ifrun
 
     # get the values of heat storage
     hs_param = ems['devices']['sto']
@@ -42,26 +44,27 @@ def calc_flex_hp(ems):  # datafram open and break it down
     dur_max_opt = np.zeros(timesteps)
 
     for i in range(timesteps):
-        if hp_operation[i] > 0:
-            dur_max_opt[i] = next((x for x, val in enumerate(hp_operation[i:]) if val == 0), timesteps - i) + i - 1
+        if chp_operation[i] > 0:
+            dur_max_opt[i] = next((x for x, val in enumerate(chp_operation[i:]) if val == 0), timesteps - i) + i - 1
         else:
-            dur_max_opt[i] = next((x for x, val in enumerate(hp_operation[i:]) if val > 0), timesteps - i) + i - 1
+            dur_max_opt[i] = next((x for x, val in enumerate(chp_operation[i:]) if val > 0), timesteps - i) + i - 1
 
     # max duration from available regeneration time
 
     dur_max_reg = np.zeros(timesteps)
     for i in range(timesteps):
-        if hp_operation[i] > 0:
-            dur_max_reg[i] = i + sum(1-hp_operation[i:]) - 1
+        if chp_operation[i] > 0:
+            # dur_max_reg[i] = i + sum(1-chp_operation[i:]) - 1
+            dur_max_reg[i] = min(i + sum(1 - chp_operation[i:]) - 1 + 2, timesteps - 3)
         else:
-            dur_max_reg[i] = i + sum(hp_operation[i:]) - 1
-
+            # dur_max_reg[i] = i + sum(chp_operation[i:]) - 1
+            dur_max_reg[i] = min(i + sum(chp_operation[i:]) - 1 + 2, timesteps - 3)
     # max duration from storage capacity
     dur_max_sto = np.zeros(timesteps)
 
     # on/off states to soc change
 
-    soc_change = hp_heat_ifrun / hs_cap * (0.5 - hp_operation) * 2 * 100
+    soc_change = chp_heat_ifrun / hs_cap * (0.5 - chp_operation) * 2 * 100
     for i in range(timesteps):
         soc = soc_heat[i]
         idx = i
@@ -77,9 +80,9 @@ def calc_flex_hp(ems):  # datafram open and break it down
 
     # summary of flexpow and flexenergy
 
-    pow_schedual = -hp_elec_pow
-    pow_pos = -pow_schedual
-    pow_neg = -(hp_elec_ifrun + pow_schedual)
+    pow_schedual = chp_elec_pow
+    pow_pos = chp_elec_ifrun - chp_elec_pow
+    pow_neg = -pow_schedual
     energy_pos = np.zeros(timesteps)
     energy_neg = np.zeros(timesteps)
     idx_no_flex = np.zeros(timesteps)
@@ -89,30 +92,34 @@ def calc_flex_hp(ems):  # datafram open and break it down
             pow_pos[i] = 0
             pow_neg[i] = 0
             dur_max[i] = i
-        if hp_operation[i] > 0:
-            energy_pos[i] = pow2energy * pow_pos[i] * (dur_max[i] - i + 1)
-        else:
+        if chp_operation[i] > 0:
             energy_neg[i] = pow2energy * pow_neg[i] * (dur_max[i] - i + 1)
+        else:
+            energy_pos[i] = pow2energy * pow_pos[i] * (dur_max[i] - i + 1)
 
     # get the price
 
     # cost_elec_input = list(map(float, list(ems['fcst']['ele_price_in'])))
-    cost_elec_input = pd.DataFrame.from_dict(ems['fcst']['ele_price_in'], orient='index')[0]
+    # cost_gas_input = pd.DataFrame.from_dict(ems['fcst']['gas'], orient='index')[0]
+    cost_gas_input = ems['fcst']['gas']
+    cost_elec_input = ems['optplan']['elec_supply_price']
     cost_diff_pos = np.zeros(timesteps)
     cost_diff_neg = np.zeros(timesteps)
     for i in range(timesteps):
         count_flex_ts = dur_max[i] - i + 1
-        if hp_operation[i] > 0:
-            cost_modified = list(map(float, cost_elec_input[dur_max[i] + 1:])) + hp_operation[dur_max[i] + 1:] * 100
-            cost_orig = sum(cost_elec_input[i:dur_max[i] + 1])
-            cost_new = sum(heapq.nsmallest(count_flex_ts, cost_modified))
-            cost_diff_pos[i] = (cost_new - cost_orig) / count_flex_ts * 1.15 * (1-idx_no_flex[i])
+        if chp_operation[i] > 0:
+            cost_modified = list(map(float, cost_gas_input[dur_max[i] + 1:])) + chp_operation[dur_max[i] + 1:] * 0.05
+            cost_elec_modified = list(map(float, cost_elec_input[dur_max[i] + 1:])) + (1 - chp_operation[dur_max[i] + 1:]) * 0.1
+            cost_orig = sum(cost_gas_input[i:dur_max[i] + 1]) + sum(heapq.nsmallest(count_flex_ts, cost_elec_modified))
+            cost_new = sum(heapq.nsmallest(count_flex_ts, cost_modified)) + sum(cost_elec_input[i:dur_max[i] + 1])
+            cost_diff_neg[i] = ((cost_new * 1.1 - cost_orig) / count_flex_ts - np.mean(cost_elec_input[i:dur_max[i] + 1])) * (1-idx_no_flex[i])
         else:
-            cost_modified = (-hp_operation[dur_max[i] + 1:] + 1) * 100 + \
-                            list(map(float, cost_elec_input[dur_max[i] + 1:]))
-            cost_orig = sum(heapq.nsmallest(count_flex_ts, cost_modified))
-            # cost_new = sum(cost_elec_input[i:dur_max[i] + 1])
-            cost_diff_neg[i] = -cost_orig / count_flex_ts * 0.85 * (1-idx_no_flex[i])
+            cost_modified = (chp_operation[dur_max[i] + 1:] - 1) * 100 + \
+                            list(map(float, cost_gas_input[dur_max[i] + 1:])) + (chp_operation[dur_max[i] + 1:] - 1) * 0.05
+            cost_elec_modified = list(map(float, cost_elec_input[dur_max[i] + 1:]))
+            cost_orig = sum(heapq.nlargest(count_flex_ts, cost_modified)) + sum(cost_elec_input[i:dur_max[i] + 1])
+            cost_new = sum(cost_gas_input[i:dur_max[i] + 1]) + sum(heapq.nlargest(count_flex_ts, cost_elec_modified))
+            cost_diff_pos[i] = ((cost_new * 1.1 - cost_orig) / count_flex_ts + 0.1)* (1-idx_no_flex[i])
 
     # write the results in data
 
@@ -133,7 +140,7 @@ def calc_flex_hp(ems):  # datafram open and break it down
 
 if __name__ == '__main__':
 
-    my_ems = ems_loc(initialize=True, path='C:/Users/ge57vam/emsflex/ems/test_time_60min.txt')
-    my_ems['flexopts']['hp'] = calc_flex_hp(my_ems)
-   # plot_flex(my_ems, 'hp')
+    my_ems = ems_loc(initialize=True, path='C:/Users/ge57vam/emsflex/ems/test_chp.txt')
+    my_ems['flexopts']['chp'] = calc_flex_chp(my_ems)
+    plot_flex(my_ems, 'chp')
    # save_results(my_ems['flexopts']['hp'])

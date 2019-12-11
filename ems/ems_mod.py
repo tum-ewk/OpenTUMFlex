@@ -12,7 +12,8 @@ import json as js
 # from ems.optim.opt_test import run_hp_opt as opt
 
 
-def ems(emsid=000000, userpref=None, flexprodtype=None, timeintervall=15, initialize=False, path=None):
+def ems(emsid=000000, userpref=None, flexprodtype=None, timeintervall=15, days=1, dataintervall=15,
+        initialize=False, path=None):
     # get the time index series
     date = pd.date_range(start='00:00:00', dtype='datetime64[ns]', periods=5, freq=str(timeintervall) + ' ' + 'T')
     datestr = pd.Series(date.format())
@@ -38,9 +39,17 @@ def ems(emsid=000000, userpref=None, flexprodtype=None, timeintervall=15, initia
                                     'negpower': [-2.11, -3.554, -4.55, 0.985, -2.88],
                                     'posergy': [0.11, 0.554, 0.55, 0.985, 0.88]}, index=datestr
                                    )
+
+        time_data = {'nsteps': int(24*60/timeintervall),
+                     'ntsteps': int(60/timeintervall),
+                     't_inval': timeintervall,
+                     'd_inval': dataintervall,
+                     'days': days}
+
         dic_ems = {'ID': emsid,
                    'userpref': userpref,
                    'flexprodtype': flexprodtype,
+                   'time_data': time_data,
                    'timeintervall': timeintervall,
                    'fcst': df_fcst.to_dict('dict'),
                    'optplan': df_optplan.to_dict('dict'),
@@ -53,6 +62,9 @@ def ems(emsid=000000, userpref=None, flexprodtype=None, timeintervall=15, initia
 
         with open(path) as f:
             dic_ems = js.load(f)
+
+        # dic_ems['time_data']['nsteps'] = int(dic_ems['time_data']['days'] * 24 * 60 / dic_ems['time_data']['t_inval'])
+        # dic_ems['time_data']['ntsteps'] = int(60 / dic_ems['time_data']['t_inval'])
 
         # change the dic(fcst,optplan,flexopts) into DataFrames
         # dic_ems['fcst'] = pd.DataFrame.from_dict(dic_ems['fcst'])
@@ -72,5 +84,11 @@ def ems_write(dict_ems, path):
 
 
 if __name__ == '__main__':
-    c = ems(initialize=True, path='C:/Users/ge57vam/emsflex/ems/755552222_ems.txt')
-    ems_write(c, path='C:/Users/ge57vam/emsflex/ems/7555522200_ems.txt')
+    c = ems(initialize=True, path='C:/Users/ge57vam/emsflex/ems/ems_test_02_wopt.txt')
+    c['time_data'] = {}
+    c['time_data']['nsteps'] = 24
+    c['time_data']['ntsteps'] = 1
+    c['time_data']['t_inval'] = 60
+    c['time_data']['d_inval'] = 15
+    c['time_data']['days'] = 1
+    ems_write(c, path='C:/Users/ge57vam/emsflex/ems/test_time.txt')

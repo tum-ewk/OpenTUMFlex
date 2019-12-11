@@ -64,11 +64,11 @@ def Batflex(my_ems):
     # Pricing
     for i in range(nsteps):
         if Bat_flex.iloc[i, 1] < 0 and i < nsteps-1:
-            max_val = list(my_ems['fcst']['ele_price_in'].values())
+            max_val = my_ems['optplan']['elec_supply_price']
             max_val = statistics.mean(max_val[i:nsteps])
             Bat_flex.iloc[i, 5] = -1*max_val
         elif Bat_flex.iloc[i, 1] < 0 and i == nsteps-1:
-            Bat_flex.iloc[i, 5] = -1*my_ems['fcst']['ele_price_in'][i]
+            Bat_flex.iloc[i, 5] = -1*my_ems['optplan']['elec_supply_price'][i]
                     
     
     # Battery positive flexibility
@@ -124,11 +124,11 @@ def Batflex(my_ems):
     # Pricing
     for i in range(nsteps):
         if Bat_flex.iloc[i, 2] > 0 and i < nsteps-1:
-            min_val = list(my_ems['fcst']['ele_price_in'].values())
+            min_val = my_ems['optplan']['elec_supply_price']
             min_val = statistics.mean(min_val[i:nsteps])
             Bat_flex.iloc[i, 6] = 1*min_val        
         elif Bat_flex.iloc[i, 2] > 0 and i == nsteps-1:
-            Bat_flex.iloc[i, 6] = my_ems['fcst']['ele_price_in'][i]
+            Bat_flex.iloc[i, 6] = my_ems['optplan']['elec_supply_price'][i]
              
     return Bat_flex
                    
