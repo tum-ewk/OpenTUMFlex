@@ -25,7 +25,7 @@ from ems.plot.flex_draw import plot_flex as plot
 from ems.plot.flex_draw import save_results
 
 # load the predefined ems data, initialization by user input is also possible:
-my_ems = ems_loc(initialize=True, path='C:/Users/ge57vam/emsflex/tests/data/test_Nr_01.txt')
+my_ems = ems_loc(initialize=True, path='data/test_Nr_01.txt')
 
 # change the time interval
 my_ems['time_data']['t_inval'] = 15
