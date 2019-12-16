@@ -34,7 +34,9 @@ def plot_flex(my_ems, device):
         if dat1.iloc[x, 3] < 0:
             neg_leg = 1
             theta = cum_data[x]
+
             slots = int(round(ntsteps * dat1.iloc[x, 3] / dat1.iloc[x, 1]))
+
             slot_flex = dat1.iloc[x, 3] / slots
             for y in range(1, slots + 1):
                 p2 = plt_cum.plot([x + y - 1, x + y], [theta, cum_data[x + y] + (slot_flex * y)], color='b')

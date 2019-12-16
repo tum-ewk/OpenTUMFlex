@@ -16,6 +16,9 @@ from ems.plot.flex_draw import save_results as save_results
 
 def calc_flex_hp(ems):  # datafram open and break it down
 
+    # week = pd.DataFrame(index=pd.date_range(start="00:00", end="23:59", freq='15min').strftime('%H:%M'),
+    #                     columns={'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'})
+
     optm_df = pd.DataFrame.from_dict(ems['optplan'])
     timesteps = len(optm_df['HP_operation'])
     pow2energy = 24 / timesteps

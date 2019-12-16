@@ -11,8 +11,7 @@ import heapq
 
 
 from ems.ems_mod import ems as ems_loc
-from ems.flex.flex_draw import plot_flex as plot_flex
-from ems.flex.flex_draw import save_results as save_results
+
 
 def calc_flex_chp(ems):  # datafram open and break it down
 

@@ -34,11 +34,7 @@ def ems(emsid=000000, userpref=None, flexprodtype=None, timeintervall=15, days=1
                                    'evstate': [1, 0, 0, 1, 1]}, index=datestr
                                   )
         # DataFrame of flexibility options for example
-        df_flexopts = pd.DataFrame({'optplan': [1, 0, 0, 1, 1],
-                                    'pospower': [2.11, 3.554, 4.55, 0.985, 2.88],
-                                    'negpower': [-2.11, -3.554, -4.55, 0.985, -2.88],
-                                    'posergy': [0.11, 0.554, 0.55, 0.985, 0.88]}, index=datestr
-                                   )
+        df_flexopts = {}
 
         time_data = {'nsteps': int(24*60/timeintervall),
                      'ntsteps': int(60/timeintervall),
@@ -53,7 +49,7 @@ def ems(emsid=000000, userpref=None, flexprodtype=None, timeintervall=15, days=1
                    'timeintervall': timeintervall,
                    'fcst': df_fcst.to_dict('dict'),
                    'optplan': df_optplan.to_dict('dict'),
-                   'flexopts': df_flexopts.to_dict('dict'),
+                   'flexopts': df_flexopts,
                    'devices': None
                    }
 
@@ -62,6 +58,9 @@ def ems(emsid=000000, userpref=None, flexprodtype=None, timeintervall=15, days=1
 
         with open(path) as f:
             dic_ems = js.load(f)
+
+            for key in dic_ems['flexopts']:
+                dic_ems['flexopts'][key] = pd.DataFrame.from_dict(dic_ems['flexopts'][key])
 
         # dic_ems['time_data']['nsteps'] = int(dic_ems['time_data']['days'] * 24 * 60 / dic_ems['time_data']['t_inval'])
         # dic_ems['time_data']['ntsteps'] = int(60 / dic_ems['time_data']['t_inval'])
@@ -77,9 +76,11 @@ def ems(emsid=000000, userpref=None, flexprodtype=None, timeintervall=15, days=1
 def ems_write(dict_ems, path):
     #dict_ems['fcst'] = dict_ems['fcst'].to_dict('dict')
     # dict_ems['optplan'] = dict_ems['optplan'].to_dict('dict')
-    #dict_ems['flexopts'] = dict_ems['flexopts'].to_dict('dict')
+    # dict_ems['flexopts'][] = dict_ems['flexopts'].to_dict('dict')
 
     with open(path, 'w') as f:
+        for key in dict_ems['flexopts']:
+            dict_ems['flexopts'][key] = dict_ems['flexopts'][key].to_dict('dict')
         js.dump(dict_ems, f)
 
 
