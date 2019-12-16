@@ -5,6 +5,8 @@ be sorted in an adequate serving other modules like optplan and flexopts.
 
 import pandas as pd
 import json as js
+import numpy as np
+import datetime
 from scipy.interpolate import UnivariateSpline
 
 from ems.ems_mod import ems as ems_loc
@@ -12,7 +14,7 @@ from ems.ems_mod import ems_write as emswrite
 
 
 def devices(device_name, minpow=0, maxpow=0, stocap=None, eta=None, init_soc=None, end_soc=None, ev_aval=None,
-            sto_volume=0, path=None):
+            _timesteps=96, sto_volume=0, path=None):
     # define general unit parameters
 
     unit = {'minpow': minpow,
@@ -68,9 +70,21 @@ def devices(device_name, minpow=0, maxpow=0, stocap=None, eta=None, init_soc=Non
 
         if path is None:
 
-            ev_aval = [0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0]
+            # ev_aval = ["10:00", "14:00", "17:45", "19:15"]
+            _ev_aval_date = ev_aval
+            _ev_aval = [datetime.datetime.strptime(x, "%H:%M") for x in _ev_aval_date]
+            _points = int(len(_ev_aval) / 2)
+            _timesteps = 96
+            aval = np.zeros(_timesteps)
 
-            unit.update({'endSOC': end_soc, 'aval': ev_aval})
+            idx = 0
+            for i in range(_points):
+                _aval_start = int(_ev_aval[idx].hour * 4 + _ev_aval[idx].minute / 15)
+                _aval_end = int(_ev_aval[idx + 1].hour * 4 + _ev_aval[idx + 1].minute / 15 - 1)
+                aval[_aval_start:_aval_end + 1] = 1
+                idx = idx + 2
+
+            unit.update({'endSOC': end_soc, 'aval': list(aval)})
             df_unit_ev = unit
             dict_unit_ev = {device_name: df_unit_ev}
 
@@ -146,18 +160,31 @@ test
 # my_ems1['devices'].update(devices(device_name='sto', path = 'C:/Users/ge57vam/emsflex/ems/sto01_ems.txt'))
 # emswrite(my_ems1, path='C:/Users/ge57vam/emsflex/ems/ems01_ems.txt')
 if __name__ == '__main__':
-    my_ems1 = ems_loc(initialize=True, path='C:/Users/ge57vam/emsflex/ems/ems01_ems.txt')
-    a = my_ems1['devices'].keys()
+    # my_ems1 = ems_loc(initialize=True, path='C:/Users/ge57vam/emsflex/ems/ems01_ems.txt')
+    # a = my_ems1['devices'].keys()
+    #
+    # hp_param = my_ems1['devices']['hp']
+    # hp_ther_cap = pd.DataFrame.from_dict(hp_param['maxpow'])
+    # hp_cop = pd.DataFrame.from_dict(hp_param['COP'])
+    # b = list(map(float, hp_ther_cap.columns.values))
+    # c = list(hp_ther_cap.iloc[0, :])
+    # spl_ther_pow = UnivariateSpline(b, c)
+    # print(spl_ther_pow(300))
 
-    hp_param = my_ems1['devices']['hp']
-    hp_ther_cap = pd.DataFrame.from_dict(hp_param['maxpow'])
-    hp_cop = pd.DataFrame.from_dict(hp_param['COP'])
-    b = list(map(float, hp_ther_cap.columns.values))
-    c = list(hp_ther_cap.iloc[0, :])
-    spl_ther_pow = UnivariateSpline(b, c)
-    print(spl_ther_pow(300))
+    ev_aval_date = ["10:00", "14:00", "17:45", "19:15", "21:30", "23:15"]
+    ev_aval = [datetime.datetime.strptime(x, "%H:%M") for x in ev_aval_date]
+    points = int(len(ev_aval)/2)
+    timesteps = 96
+    aval = np.zeros(timesteps)
 
-# count = raw_input('Number of variables:')
+    idx = 0
+    for i in range(points):
+        aval_start = int(ev_aval[idx].hour*4 + ev_aval[idx].minute/15)
+        aval_end = int(ev_aval[idx+1].hour*4 + ev_aval[idx+1].minute/15-1)
+        aval[aval_start:aval_end+1] = 1
+        idx = idx + 2
+
+    # count = raw_input('Number of variables:')
 # for i in my_ems1['devices'].keys():
 #     exec('var_' + str(i) + ' = ' + str(my_ems1['devices'][i]))
 
