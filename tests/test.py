@@ -43,13 +43,13 @@ my_ems['fcst'] = load_data(my_ems)
 my_ems['devices'].update(devices(device_name='hp', minpow=0, maxpow=2))
 my_ems['devices']['sto']['stocap'] = 15
 my_ems['devices']['boiler']['maxpow'] = 20
-my_ems['devices']['chp']['maxpow'] = 0
+my_ems['devices']['chp']['maxpow'] = 3
 # my_ems['devices'].update(dev(device_name='chp', path="C:/Users/ge57vam/emsflex/ems/chp01_ems.txt"))
 my_ems['devices']['pv']['maxpow'] = 5
-my_ems['devices']['bat']['stocap'] = 0
-my_ems['devices']['bat']['maxpow'] = 0
+my_ems['devices']['bat']['stocap'] = 10
+my_ems['devices']['bat']['maxpow'] = 10
 my_ems['devices'].update(devices(device_name='ev', minpow=0, maxpow=8, stocap=40, init_soc=20, end_soc=90, eta=0.98,
-                                 ev_aval=["10:00", "14:00", "17:45", "19:15", "21:30", "23:15"], _timesteps=96))
+                                 ev_aval=["4:00", "7:00", "17:45", "19:15", "21:30", "23:15"], _timesteps=96))
 # my_ems['devices']['ev']['maxpow'] = 5
 
 # write the device parameter data in JSON file for reuse,
@@ -60,10 +60,13 @@ my_ems['devices'].update(devices(device_name='ev', minpow=0, maxpow=8, stocap=40
 my_ems['optplan'] = opt(my_ems, plot_fig=True, result_folder='C:/Users/ge57vam/emsflex/tests/')
 
 # calculate the flexibility of one device
-my_ems['flexopts']['hp'] = calc_flex_hp(my_ems)
+# my_ems['flexopts']['hp'] = calc_flex_hp(my_ems)
+# my_ems['flexopts']['chp'] = calc_flex_chp(my_ems)
+# my_ems['flexopts']['bat'] = Batflex(my_ems)
+# my_ems['flexopts']['pv'] = PVflex(my_ems)
 
 # plot the results
 # plot(my_ems, "hp")
 
 # store the data of the whole ems for reuse
-ems_write(my_ems, path='C:/Users/ge57vam/emsflex/tests/data/test_Nr_02.txt')
+# ems_write(my_ems, path='C:/Users/ge57vam/emsflex/tests/data/test_Nr_02.txt')

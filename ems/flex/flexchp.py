@@ -100,7 +100,7 @@ def calc_flex_chp(ems):  # datafram open and break it down
 
     # cost_elec_input = list(map(float, list(ems['fcst']['ele_price_in'])))
     # cost_gas_input = pd.DataFrame.from_dict(ems['fcst']['gas'], orient='index')[0]
-    cost_gas_input = ems['fcst']['gas']
+    cost_gas_input = list(ems['fcst']['gas'])
     cost_elec_input = ems['optplan']['elec_supply_price']
     cost_diff_pos = np.zeros(timesteps)
     cost_diff_neg = np.zeros(timesteps)

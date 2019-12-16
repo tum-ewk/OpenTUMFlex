@@ -52,7 +52,7 @@ pv_pow = technic_config.iloc[12]
 bat_cap = technic_config.iloc[14]
 
 nr_haushalt_start = 1
-nr_haushalt_end = 48
+nr_haushalt_end = 3
 
 for i in range(nr_haushalt_start, nr_haushalt_end + 1):
     print(i)
