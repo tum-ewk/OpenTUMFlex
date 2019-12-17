@@ -149,27 +149,8 @@ def device_write(dict_ems, device_name, path):
 test
 """
 
-# my_ems1 = ems_loc(initialize=True, path='C:/Users/ge57vam/emsflex/ems/755552222_ems.txt')
-# # path_loc = 'C:/Users/ge57vam/emsflex/ems/75555222215_ems.txt'
-# my_ems1['devices'].update(devices(device_name='bat', path = 'C:/Users/ge57vam/emsflex/ems/bat01_ems.txt'))
-# my_ems1['devices'].update(devices(device_name='pv', path = 'C:/Users/ge57vam/emsflex/ems/pv01_ems.txt'))
-# my_ems1['devices'].update(devices(device_name='boiler', path = 'C:/Users/ge57vam/emsflex/ems/boiler01_ems.txt'))
-# my_ems1['devices'].update(devices(device_name='hp', path = 'C:/Users/ge57vam/emsflex/ems/hp01_ems.txt'))
-# my_ems1['devices'].update(devices(device_name='chp', path = 'C:/Users/ge57vam/emsflex/ems/chp01_ems.txt'))
-# my_ems1['devices'].update(devices(device_name='ev', path = 'C:/Users/ge57vam/emsflex/ems/ev01_ems.txt'))
-# my_ems1['devices'].update(devices(device_name='sto', path = 'C:/Users/ge57vam/emsflex/ems/sto01_ems.txt'))
-# emswrite(my_ems1, path='C:/Users/ge57vam/emsflex/ems/ems01_ems.txt')
+
 if __name__ == '__main__':
-    # my_ems1 = ems_loc(initialize=True, path='C:/Users/ge57vam/emsflex/ems/ems01_ems.txt')
-    # a = my_ems1['devices'].keys()
-    #
-    # hp_param = my_ems1['devices']['hp']
-    # hp_ther_cap = pd.DataFrame.from_dict(hp_param['maxpow'])
-    # hp_cop = pd.DataFrame.from_dict(hp_param['COP'])
-    # b = list(map(float, hp_ther_cap.columns.values))
-    # c = list(hp_ther_cap.iloc[0, :])
-    # spl_ther_pow = UnivariateSpline(b, c)
-    # print(spl_ther_pow(300))
 
     ev_aval_date = ["10:00", "14:00", "17:45", "19:15", "21:30", "23:15"]
     ev_aval = [datetime.datetime.strptime(x, "%H:%M") for x in ev_aval_date]

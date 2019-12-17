@@ -16,6 +16,7 @@ def ems(emsid=000000, userpref=None, flexprodtype=None, timeintervall=15, days=1
         initialize=False, path=None):
     # get the time index series
     date = pd.date_range(start='00:00:00', periods=5, freq=str(timeintervall) + ' ' + 'T')
+    # date = pd.date_range(start='00:00:00', periods=5, freq=str(timeintervall) + ' ' + 'T')
     datestr = pd.Series(date.format())
 
     # initialize the ems by user input
@@ -85,11 +86,11 @@ def ems_write(dict_ems, path):
 
 
 if __name__ == '__main__':
-    c = ems(initialize=True, path='C:/Users/ge57vam/emsflex/ems/ems_test_02_wopt.txt')
+    c = ems(initialize=True, path='../ems/ems_test_02_wopt.txt')
     c['time_data'] = {}
     c['time_data']['nsteps'] = 24
     c['time_data']['ntsteps'] = 1
     c['time_data']['t_inval'] = 60
     c['time_data']['d_inval'] = 15
     c['time_data']['days'] = 1
-    ems_write(c, path='C:/Users/ge57vam/emsflex/ems/test_time.txt')
+    ems_write(c, path='../ems/test_time.txt')
