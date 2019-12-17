@@ -72,6 +72,8 @@ def devices(device_name, minpow=0, maxpow=0, stocap=None, eta=None, init_soc=Non
 
             # ev_aval = ["10:00", "14:00", "17:45", "19:15"]
             _ev_aval_date = ev_aval
+            aval_time_init = ev_aval[::2]
+            aval_time_end = ev_aval[1::2]
             _ev_aval = [datetime.datetime.strptime(x, "%H:%M") for x in _ev_aval_date]
             _points = int(len(_ev_aval) / 2)
             _timesteps = 96
@@ -97,8 +99,9 @@ def devices(device_name, minpow=0, maxpow=0, stocap=None, eta=None, init_soc=Non
                                                 (_aval_start - _aval_end)
                 idx = idx + 2
 
-            unit.update({'endSOC': end_soc, 'aval': list(aval), 'consm': list(consum), 'soc_check': list(soc_check)
-                         , 'node': list(node)})
+            unit.update({'endSOC': end_soc, 'aval': list(aval), 'aval_init': list(aval_time_init),
+                         'aval_end': list(aval_time_end),
+                         'consm': list(consum), 'soc_check': list(soc_check), 'node': list(node)})
             df_unit_ev = unit
             dict_unit_ev = {device_name: df_unit_ev}
 
