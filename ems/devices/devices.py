@@ -76,15 +76,29 @@ def devices(device_name, minpow=0, maxpow=0, stocap=None, eta=None, init_soc=Non
             _points = int(len(_ev_aval) / 2)
             _timesteps = 96
             aval = np.zeros(_timesteps)
-
+            soc_check = np.zeros(_timesteps)
+            consum = np.zeros(_timesteps)
+            node = np.zeros((_points-1) * 2)
             idx = 0
             for i in range(_points):
                 _aval_start = int(_ev_aval[idx].hour * 4 + _ev_aval[idx].minute / 15)
                 _aval_end = int(_ev_aval[idx + 1].hour * 4 + _ev_aval[idx + 1].minute / 15 - 1)
                 aval[_aval_start:_aval_end + 1] = 1
+                soc_check[_aval_end] = end_soc[i]
                 idx = idx + 2
 
-            unit.update({'endSOC': end_soc, 'aval': list(aval)})
+            idx = 0
+            for j in range(_points - 1):
+                _aval_end = int(_ev_aval[idx + 1].hour * 4 + _ev_aval[idx + 1].minute / 15)
+                _aval_start = int(_ev_aval[idx + 2].hour * 4 + _ev_aval[idx + 2].minute / 15)
+                node[idx] = _aval_end
+                node[idx+1] = _aval_start - 1
+                consum[_aval_end:_aval_start] = (end_soc[j] - init_soc[j + 1]) / 100 * stocap / \
+                                                (_aval_start - _aval_end)
+                idx = idx + 2
+
+            unit.update({'endSOC': end_soc, 'aval': list(aval), 'consm': list(consum), 'soc_check': list(soc_check)
+                         , 'node': list(node)})
             df_unit_ev = unit
             dict_unit_ev = {device_name: df_unit_ev}
 
@@ -149,20 +163,19 @@ def device_write(dict_ems, device_name, path):
 test
 """
 
-
 if __name__ == '__main__':
 
     ev_aval_date = ["10:00", "14:00", "17:45", "19:15", "21:30", "23:15"]
     ev_aval = [datetime.datetime.strptime(x, "%H:%M") for x in ev_aval_date]
-    points = int(len(ev_aval)/2)
+    points = int(len(ev_aval) / 2)
     timesteps = 96
     aval = np.zeros(timesteps)
 
     idx = 0
     for i in range(points):
-        aval_start = int(ev_aval[idx].hour*4 + ev_aval[idx].minute/15)
-        aval_end = int(ev_aval[idx+1].hour*4 + ev_aval[idx+1].minute/15-1)
-        aval[aval_start:aval_end+1] = 1
+        aval_start = int(ev_aval[idx].hour * 4 + ev_aval[idx].minute / 15)
+        aval_end = int(ev_aval[idx + 1].hour * 4 + ev_aval[idx + 1].minute / 15 - 1)
+        aval[aval_start:aval_end + 1] = 1
         idx = idx + 2
 
     # count = raw_input('Number of variables:')
