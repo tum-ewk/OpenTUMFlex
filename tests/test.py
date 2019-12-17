@@ -18,6 +18,7 @@ from ems.optim.opt_test import run_hp_opt as opt
 # import flex devices modules
 from ems.flex.flexhp import calc_flex_hp
 from ems.flex.flexchp import calc_flex_chp
+from ems.flex.flex_ev import calc_flex_ev
 from ems.flex.Bat import Batflex
 from ems.flex.PV import PVflex
 
@@ -65,6 +66,7 @@ my_ems['optplan'] = opt(my_ems, plot_fig=True, result_folder='data/')
 # calculate the flexibility of one device
 # my_ems['flexopts']['hp'] = calc_flex_hp(my_ems)
 # my_ems['flexopts']['chp'] = calc_flex_chp(my_ems)
+my_ems['flexopts']['ev'] = calc_flex_ev(my_ems)
 # my_ems['flexopts']['bat'] = Batflex(my_ems)
 # my_ems['flexopts']['pv'] = PVflex(my_ems)
 
