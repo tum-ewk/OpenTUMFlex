@@ -1,6 +1,7 @@
 
 import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
 
 # import ems and devices modules
 from ems.ems_mod import ems as ems_loc
@@ -47,8 +48,11 @@ my_ems['devices']['chp']['maxpow'] = 3
 my_ems['devices']['pv']['maxpow'] = 5
 my_ems['devices']['bat']['stocap'] = 10
 my_ems['devices']['bat']['maxpow'] = 10
-my_ems['devices'].update(devices(device_name='ev', minpow=0, maxpow=8, stocap=40, init_soc=20, end_soc=90, eta=0.98,
-                                 ev_aval=["4:00", "7:00", "17:45", "19:15", "21:30", "23:15"], _timesteps=96))
+my_ems['devices'].update(devices(device_name='ev', minpow=0, maxpow=8, stocap=40, init_soc=[20, 35, 30],
+                                 end_soc=[50, 50, 20], eta=0.98,
+                                 ev_aval=["4:00", "9:00", "13:45", "18:15", "19:30", "23:15"], _timesteps=96))
+
+plt.plot(my_ems['devices']['ev']['consm'])
 # my_ems['devices']['ev']['maxpow'] = 5
 
 # write the device parameter data in JSON file for reuse,
@@ -59,13 +63,14 @@ my_ems['devices'].update(devices(device_name='ev', minpow=0, maxpow=8, stocap=40
 my_ems['optplan'] = opt(my_ems, plot_fig=True, result_folder='data/')
 
 # calculate the flexibility of one device
-my_ems['flexopts']['hp'] = calc_flex_hp(my_ems)
+# my_ems['flexopts']['hp'] = calc_flex_hp(my_ems)
 # my_ems['flexopts']['chp'] = calc_flex_chp(my_ems)
 # my_ems['flexopts']['bat'] = Batflex(my_ems)
 # my_ems['flexopts']['pv'] = PVflex(my_ems)
 
-# plot the results
-plot(my_ems, "hp")
+# plot the results#
+
+# plot(my_ems, "hp")
 
 # store the data of the whole ems for reuse
 # ems_write(my_ems, path='data/test_Nr_02.txt')
