@@ -9,7 +9,7 @@ import pandas as pd
 
 # from tkinter import filedialog
 
-def load_data(my_ems, path=r"C:\Optimierung\Eingangsdaten_hp.xlsx"):
+def load_data(my_ems, path=r"../forecast/Testdata/Eingangsdaten_hp.xlsx"):
     # path = filedialog.askopenfilename()
     if my_ems['time_data']['t_inval'] == my_ems['time_data']['d_inval']:
         df = pd.read_excel(path, sheet_name='time_series', usecols='B:H', nrows=my_ems['time_data']['nsteps'])

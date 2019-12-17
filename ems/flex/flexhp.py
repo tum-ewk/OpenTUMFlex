@@ -139,7 +139,7 @@ def calc_flex_hp(ems):  # datafram open and break it down
 
 
 if __name__ == '__main__':
-    my_ems = ems_loc(initialize=True, path='C:/Users/ge57vam/emsflex/ems/test_chp.txt')
+    my_ems = ems_loc(initialize=True, path='../ems/test_chp.txt')
     my_ems['flexopts']['hp'] = calc_flex_hp(my_ems)
     # plot_flex(my_ems, 'hp')
-    save_results(my_ems['flexopts']['hp'], "C:\data" + "\hauhalte1_hp.csv")
+    # save_results(my_ems['flexopts']['hp'], "C:\data" + "\hauhalte1_hp.csv")

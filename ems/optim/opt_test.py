@@ -224,12 +224,12 @@ def run_hp_opt(ems_local, plot_fig=True, result_folder='C:'):
 
     print('Save Results to Reportfile...\n')
 
-    # xx ="\\nas.ads.mwn.de\ge57vam\TUM-PC\Desktop\Unterlagen\result"
+
     # Create Name of Resultfile
     t0 = tm.time()
     # inputfilename = input_file
     now = datetime.now().strftime('%Y%m%dT%H%M')
-    resultfile = os.path.join(result_folder, 'result-{}.xlsx'.format(now))
+    resultfile = os.path.join(result_folder, 'result_optimization_{}.xlsx'.format(now))
     writer = pd.ExcelWriter(resultfile)
 
     data_input = {'HP_operation': list(HP_operation), 'HP_heat_power': list(HP_heat_cap),
@@ -253,7 +253,7 @@ def run_hp_opt(ems_local, plot_fig=True, result_folder='C:'):
 
     df = pd.DataFrame(data=data_input)
     df.to_excel(writer, 'operation_plan', merge_cells=False)
-    scipy.io.savemat('C:\Optimierung\AAAAA.mat', {'struct1': df.to_dict("list")})
+    scipy.io.savemat('data/operationalPlan.mat', {'struct1': df.to_dict("list")})
     writer.save()  # save
 
     # print('Results Saved. time: ' + "{:.1f}".format(tm.time() - t0) + ' s\n')
