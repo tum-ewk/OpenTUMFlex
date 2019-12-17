@@ -25,7 +25,7 @@ from ems.plot.flex_draw import plot_flex as plot
 from ems.plot.flex_draw import save_results
 
 # load the predefined ems data, initialization by user input is also possible:
-my_ems = ems_loc(initialize=True, path='C:/Users/ge57vam/emsflex/tests/data/test_Nr_01.txt')
+my_ems = ems_loc(initialize=True, path='data/test_Nr_01.txt')
 
 # change the time interval
 my_ems['time_data']['t_inval'] = 15
@@ -63,7 +63,7 @@ my_ems['optplan'] = opt(my_ems, plot_fig=True, result_folder='C:/Users/ge57vam/e
 # my_ems['flexopts']['hp'] = calc_flex_hp(my_ems)
 # my_ems['flexopts']['chp'] = calc_flex_chp(my_ems)
 # my_ems['flexopts']['bat'] = Batflex(my_ems)
-# my_ems['flexopts']['pv'] = PVflex(my_ems)
+my_ems['flexopts']['pv'] = PVflex(my_ems)
 
 # plot the results
 # plot(my_ems, "hp")

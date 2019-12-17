@@ -15,7 +15,8 @@ import json as js
 def ems(emsid=000000, userpref=None, flexprodtype=None, timeintervall=15, days=1, dataintervall=15,
         initialize=False, path=None):
     # get the time index series
-    date = pd.date_range(start='00:00:00', dtype='datetime64[ns]', periods=5, freq=str(timeintervall) + ' ' + 'T')
+    # date = pd.date_range(start='00:00:00', dtype='datetime64[ns]', periods=5, freq=str(timeintervall) + ' ' + 'T')
+    date = pd.date_range(start='00:00:00', periods=5, freq=str(timeintervall) + ' ' + 'T')
     datestr = pd.Series(date.format())
 
     # initialize the ems by user input
