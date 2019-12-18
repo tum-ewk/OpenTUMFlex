@@ -53,7 +53,7 @@ my_ems['devices'].update(devices(device_name='ev', minpow=0, maxpow=8, stocap=40
                                  end_soc=[50, 50, 20], eta=0.98,
                                  ev_aval=["4:00", "9:00", "13:45", "18:15", "19:30", "23:15"], _timesteps=96))
 
-plt.plot(my_ems['devices']['ev']['consm'])
+# plt.plot(my_ems['devices']['ev']['consm'])
 # my_ems['devices']['ev']['maxpow'] = 5
 
 # write the device parameter data in JSON file for reuse,
@@ -61,7 +61,7 @@ plt.plot(my_ems['devices']['ev']['consm'])
 # device_write(my_ems, 'ev', '../ems/devices/ev_test.txt')
 
 # calculate the timetable for all the devices
-my_ems['optplan'] = opt(my_ems, plot_fig=True, result_folder='data/')
+# my_ems['optplan'] = opt(my_ems, plot_fig=True, result_folder='data/')
 
 # calculate the flexibility of one device
 # my_ems['flexopts']['hp'] = calc_flex_hp(my_ems)
