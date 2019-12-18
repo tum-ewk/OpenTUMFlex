@@ -74,7 +74,7 @@ def devices(device_name, minpow=0, maxpow=0, stocap=None, eta=None, init_soc=Non
             _ev_aval_date = ev_aval
             aval_time_init = ev_aval[::2]
             aval_time_end = ev_aval[1::2]
-            _ev_aval = [datetime.datetime.strptime(x, "%H:%M") for x in _ev_aval_date]
+            _ev_aval = [datetime.datetime.strptime(x, '%Y-%m-%d %H:%M') for x in _ev_aval_date]
             _points = int(len(_ev_aval) / 2)
             _timesteps = 96
             aval = np.zeros(_timesteps)

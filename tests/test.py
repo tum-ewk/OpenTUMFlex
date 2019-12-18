@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 # import ems and devices modules
 from ems.ems_mod import ems as ems_loc
 from ems.ems_mod import ems_write
+from ems.ems_mod import update_time_data
 from ems.devices.devices import devices
 from ems.devices.devices import device_write
 
@@ -32,8 +33,8 @@ my_ems = ems_loc(initialize=True, path='data/test_Nr_01.txt')
 # change the time interval
 my_ems['time_data']['t_inval'] = 15
 my_ems['time_data']['d_inval'] = 15
-my_ems['time_data']['ntsteps'] = int(60 / my_ems['time_data']['t_inval'])
-my_ems['time_data']['nsteps'] = my_ems['time_data']['ntsteps'] * 24
+my_ems['time_data']['start_time'] = '2019-12-18 00:00'
+my_ems['time_data']['end_time'] = '2019-12-19 12:00'
 my_ems['time_data']['days'] = 1
 
 # load the weather and price data
@@ -51,7 +52,10 @@ my_ems['devices']['bat']['stocap'] = 10
 my_ems['devices']['bat']['maxpow'] = 10
 my_ems['devices'].update(devices(device_name='ev', minpow=0, maxpow=8, stocap=40, init_soc=[20, 35, 30],
                                  end_soc=[50, 50, 20], eta=0.98,
-                                 ev_aval=["4:00", "9:00", "13:45", "18:15", "19:30", "23:15"], _timesteps=96))
+                                 ev_aval=["2019-12-18 4:00", "2019-12-18 9:00",
+                                          "2019-12-18 13:45", "2019-12-18 18:15",
+                                          "2019-12-19 19:30", "2019-12-19 23:15"], _timesteps=96))
+my_ems.update(update_time_data(my_ems))
 
 # plt.plot(my_ems['devices']['ev']['consm'])
 # my_ems['devices']['ev']['maxpow'] = 5
