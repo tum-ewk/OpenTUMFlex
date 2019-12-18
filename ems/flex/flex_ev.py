@@ -36,10 +36,28 @@ def calc_flex_ev(my_ems):
     n_avail_periods = len(my_ems['devices']['ev']['initSOC'])
 
     # Go through all availability periods and calculate flexibility
-    for i in range(n_avail_periods):
-        idx_start = 0
-        idx_end = 0
+    for j in range(n_avail_periods):
+        ev_flex_temp = pd.DataFrame(0, columns={'Opt_Power', 'Remaining_Energy', 'Pos_Flex_Power', 'Neg_Flex_Power',
+                                                'Pos_Flex_Energy', 'Neg_Flex_Energy', 'Pos_Cum_Flex_Energy',
+                                                'Neg_Cum_Flex_Energy'},
+                                    index=pd.date_range(start=my_ems['devices']['ev']['aval_init'][j],
+                                                        end=my_ems['devices']['ev']['aval_end'][j],
+                                                        freq=str(my_ems['time_data']['t_inval'])+'Min'))
 
+        # Calculate remaining energy that is charged in kWh ####
+        ev_flex_temp['Remaining_Energy'].iat[0] = (my_ems['devices']['ev']['endSOC'][j] -
+                                             my_ems['devices']['ev']['initSOC'][j]) / 100 * \
+                                            my_ems['devices']['ev']['stocap']  # in kWh
+        for i in range(len(ev_flex_temp)):
+            ev_flex_temp.Remaining_Energy.iat[i + 1] = ev_flex_temp.Req_Energy.iat[i] - (
+                        ev_flex_temp.Opt_Power.iat[i] / (my_ems['time_data']['ntsteps'] * my_ems['devices']['ev']['eta']))
+            if ev_flex_temp.Remaining_Energy.iat[i + 1] < 0.1:
+                ev_flex_temp.Remaining_Energy.iat[i + 1] = 0
+
+        for i in range(n_time_steps):  # benötigte Zeitschritte zur vollständigen Ladung mit maximaler Leistung
+            ev_flex_temp.Remaining_Energy.iat[i] = math.ceil(ev_flex_temp.Remaining_Energy.iat[i] /
+                                                             (my_ems['devices']['ev']['maxpow'] /
+                                                              my_ems['time_data']['ntsteps']))
 
     #### req_energy ####                                                                                                # verbleibende Ladung des Akkus in Wh  #muss in kwh umgewandelt werden
     req_energy[0] = (my_ems['devices']['ev']['endSOC'] - my_ems['devices']['ev']['initSOC']) / 100 * my_ems['devices']['ev']['stocap']  # in kWh
