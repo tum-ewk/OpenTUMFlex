@@ -311,11 +311,12 @@ def run_hp(ems_local):
     # get the initial time step
     # time_step_initial = parameter.loc['System']['value']
     time_step_initial = 0
-    time_step_end = int(60 / time_interval * 24)
-    timesteps_all = np.arange(0, time_step_end)
+    # time_step_end = int(60 / time_interval * 24)
+    time_step_end = ems_local['time_data']['nsteps']
+    timesteps = np.arange(0, time_step_end)
     # timestep_1 = timesteps[0]
 
-    timesteps = timesteps_all[time_step_initial:time_step_end]
+    # timesteps = timesteps_all[time_step_initial:time_step_end]
     t_dn = 2
     # 6*time_step_end/96
     t_up = 2
@@ -552,9 +553,9 @@ def run_hp(ems_local):
     # ev battery balance
     def ev_cont_def_rule(m, t):
         if t > m.t[1]:
-            return m.ev_cont[t] == m.ev_cont[t - 1] + m.ev_power[t] * p2e - m.ev_consm[t]
+            return m.ev_cont[t] == m.ev_cont[t - 1] + m.ev_power[t] * p2e * ev_eta - m.ev_consm[t]
         else:
-            return m.ev_cont[t] == m.ev_sto_cap * ev_soc_init[0] / 100 + m.ev_power[t] * p2e - m.ev_consm[t]
+            return m.ev_cont[t] == m.ev_sto_cap * ev_soc_init[0] / 100 + m.ev_power[t] * p2e * ev_eta - m.ev_consm[t]
 
     m.ev_cont_def = pyen.Constraint(m.t, rule=ev_cont_def_rule, doc='EV_balance')
 

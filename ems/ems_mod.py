@@ -91,8 +91,9 @@ def update_time_data(dict_ems):
     dict_time = dict_ems['time_data']
     dict_time['time_slots'] = pd.date_range(start=dict_time['start_time'], end=dict_time['end_time'],
                                             freq=str(dict_time['t_inval']) + 'min').strftime('%Y-%m-%d %H:%M')
+
+    dict_time['nsteps'] = len(dict_time['time_slots'])
     dict_time['ntsteps'] = int(60 / dict_ems['time_data']['t_inval'])
-    dict_time['nsteps'] = dict_ems['time_data']['ntsteps'] * 24
     dict_time_data = {'time_data': dict_time}
     return dict_time_data
 
