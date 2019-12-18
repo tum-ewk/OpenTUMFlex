@@ -13,73 +13,68 @@ def calc_flex_ev(my_ems):
     n_time_steps_phour = my_ems['time_data']['t_inval']
     tsteps = range(len(my_ems['devices']['ev']['aval']))
 
-    NegFlexPower = np.zeros(n_time_steps)                                                                               # Anlegen der ndarrays für alle benötigten Variablen
-    PosFlexPower = np.zeros(n_time_steps)
-    NegFlexEnergy = np.zeros(n_time_steps)
-    PosFlexEnergy = np.zeros(n_time_steps)
-    NegFlexPrice = np.zeros(n_time_steps)
-    FlexPrice = np.zeros(n_time_steps)
-    NegCumFlexEnergy = np.zeros(n_time_steps)
-    PosCumFlexEnergy = np.zeros(n_time_steps)
-    req_energy = np.zeros(n_time_steps)
-    req_time = np.zeros(n_time_steps)
-    endpunkt_posflex = np.zeros(n_time_steps)
-                                                                                                                        # eigene Funktionen
-    #### t_start, t_end ####                                                                                            # Definition von t_start und t_end
-    #availability_arr = np.asarray(ev_dict["availability"])
-    availability_arr = np.asarray(my_ems['devices']['ev']['aval'])
-    t_working = np.argwhere(availability_arr > 0)
-    t_start = int(t_working[0])
-    t_end = t_start + len(t_working)
+    # Flexibility Table for entire time period
+    ev_flex = pd.DataFrame(0, columns={'Opt_Power', 'Remaining_Energy', 'Pos_Flex_Power', 'Neg_Flex_Power',
+                                            'Pos_Flex_Energy', 'Neg_Flex_Energy', 'Pos_Cum_Flex_Energy',
+                                            'Neg_Cum_Flex_Energy'},
+                                index=pd.date_range(start=my_ems['time_data']['start_time'],
+                                                    end=my_ems['time_data']['end_time'],
+                                                    freq=str(my_ems['time_data']['t_inval']) + 'Min'))
+
+    ev_flex.Opt_Power.at[:] = my_ems['optplan']['EV_power']
 
     # Check number of periods ev is available
     n_avail_periods = len(my_ems['devices']['ev']['initSOC'])
 
     # Go through all availability periods and calculate flexibility
     for j in range(n_avail_periods):
-        ev_flex_temp = pd.DataFrame(0, columns={'Opt_Power', 'Remaining_Energy', 'Pos_Flex_Power', 'Neg_Flex_Power',
+        ev_flex_temp = pd.DataFrame(0.0, columns={'Opt_Power', 'Remaining_Energy', 'Pos_Flex_Power', 'Neg_Flex_Power',
                                                 'Pos_Flex_Energy', 'Neg_Flex_Energy', 'Pos_Cum_Flex_Energy',
                                                 'Neg_Cum_Flex_Energy'},
                                     index=pd.date_range(start=my_ems['devices']['ev']['aval_init'][j],
                                                         end=my_ems['devices']['ev']['aval_end'][j],
                                                         freq=str(my_ems['time_data']['t_inval'])+'Min'))
 
-        # Calculate remaining energy that is charged in kWh ####
+        # Copy optimal power to flex table
+        ev_flex_temp.Opt_Power.at[:] = ev_flex.Opt_Power[my_ems['devices']['ev']['aval_init'][j]:my_ems['devices']['ev']['aval_end'][j]]
+
+        # Calculate remaining energy that needs to be charged in kWh ####
+        # Initially remaining energy is equal to desired end soc minus start soc multiplied by capacity
         ev_flex_temp['Remaining_Energy'].iat[0] = (my_ems['devices']['ev']['endSOC'][j] -
                                              my_ems['devices']['ev']['initSOC'][j]) / 100 * \
-                                            my_ems['devices']['ev']['stocap']  # in kWh
-        for i in range(len(ev_flex_temp)):
-            ev_flex_temp.Remaining_Energy.iat[i + 1] = ev_flex_temp.Req_Energy.iat[i] - (
-                        ev_flex_temp.Opt_Power.iat[i] / (my_ems['time_data']['ntsteps'] * my_ems['devices']['ev']['eta']))
-            if ev_flex_temp.Remaining_Energy.iat[i + 1] < 0.1:
+                                            my_ems['devices']['ev']['stocap']
+        # Goes through all time steps and checks how much more energy needs to be charged
+        for i in range(len(ev_flex_temp) - 1):
+            ev_flex_temp.Remaining_Energy.iat[i + 1] = ev_flex_temp.Remaining_Energy.iat[i] - \
+                                                       ev_flex_temp.Opt_Power.iat[i] / \
+                                                       my_ems['time_data']['ntsteps'] \
+                                                       * my_ems['devices']['ev']['eta']   # wird aktuell vom Optimierer nicht berücksichtigt
+            # Reset all values of remaining energy if smaller zero
+            if ev_flex_temp.Remaining_Energy.iat[i + 1] < 0:
                 ev_flex_temp.Remaining_Energy.iat[i + 1] = 0
 
-        for i in range(n_time_steps):  # benötigte Zeitschritte zur vollständigen Ladung mit maximaler Leistung
-            ev_flex_temp.Remaining_Energy.iat[i] = math.ceil(ev_flex_temp.Remaining_Energy.iat[i] /
-                                                             (my_ems['devices']['ev']['maxpow'] /
-                                                              my_ems['time_data']['ntsteps']))
+        # Calculation FlexPower ######################
+        for i in range(len(ev_flex_temp)):
+            # wenn gerade nicht geladen wird und das EV noch nicht fertig geladen ist
+            if ev_flex_temp.Opt_Power.iat[i] == 0 and ev_flex_temp.Remaining_Energy.iat[i] > 0:
+                # NegFlexPower[i] mit maximal möglicher Ladeleistung benennen
+                ev_flex_temp.Neg_Flex_Power.iat[i] = my_ems['devices']['ev']['maxpow']
+            else:
+                ev_flex_temp.Pos_Flex_Power.iat[i] = ev_flex_temp.Opt_Power.iat[i]
 
-    #### req_energy ####                                                                                                # verbleibende Ladung des Akkus in Wh  #muss in kwh umgewandelt werden
-    req_energy[0] = (my_ems['devices']['ev']['endSOC'] - my_ems['devices']['ev']['initSOC']) / 100 * my_ems['devices']['ev']['stocap']  # in kWh
-    for i in range(n_time_steps-1):
-        req_energy[i + 1] = req_energy[i] - (plan_dataframe.at[tsteps[i], 'evpower'] / (n_time_steps_phour * ev_dict["eta"]))
-        if req_energy[i+1] < 0.1:
-            req_energy[i+1] = 0
+        # Calculation FlexEnergy ###################
+        for i in range(t_end, t_start - 1, -1):
+            if plan_dataframe.at[tsteps[i], 'evpower'] > 0:  # wenn das EV gerade geladen wird
+                if i == t_end:
+                    PosFlexEnergy[i] = req_energy[i]
+                else:
+                    PosFlexEnergy[i] = req_energy[i] - req_energy[
+                        i + 1]  # PosFlexEnergy[i] ist die Energiemenge, die im Zeitabschnitt geladen wird
+            else:  # wenn das EV gerade nicht geladen wird
+                NegFlexEnergy[i] = NegFlexPower[i] / n_time_steps_phour
 
-    for i in range(n_time_steps):                                                                                       # benötigte Zeitschritte zur vollständigen Ladung mit maximaler Leistung
-        req_time[i] = math.ceil(req_energy[i] / (ev_dict["maxpow"]/4))
 
-    ######################################################################################
-    ################################ calc_flex_offers ####################################
-
-    ################ Berechnung FlexPower ######################
-    for i in range(t_start, t_end):
-        if plan_dataframe.at[tsteps[i], 'evpower'] == 0 and req_energy[i] > 0:                                                                     # wenn gerade nicht geladen wird und das EV noch nicht fertig geladen ist
-            NegFlexPower[i] = ev_dict["maxpow"]                                                                         # NegFlexPower[i] mit maximal möglicher Ladeleistung benennen
-        else:                                                                                                           # ansonsten
-            PosFlexPower[i] = plan_dataframe.at[tsteps[i], 'evpower']                                                   # PosFlexPower[i] mit tatsächlich gewählter Ladeleistung benennen
-
-    ################ Berechnung FlexEnergy ###################
+    # Calculation FlexEnergy ###################
     for i in range(t_end, t_start-1, -1):
         if plan_dataframe.at[tsteps[i], 'evpower'] > 0:                                                                 # wenn das EV gerade geladen wird
             if i == t_end:

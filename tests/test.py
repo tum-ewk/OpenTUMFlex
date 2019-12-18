@@ -34,7 +34,7 @@ my_ems = ems_loc(initialize=True, path='data/test_Nr_01.txt')
 my_ems['time_data']['t_inval'] = 15
 my_ems['time_data']['d_inval'] = 15
 my_ems['time_data']['start_time'] = '2019-12-18 00:00'
-my_ems['time_data']['end_time'] = '2019-12-19 12:00'
+my_ems['time_data']['end_time'] = '2019-12-18 23:45'
 my_ems['time_data']['days'] = 1
 
 # load the weather and price data
@@ -65,7 +65,7 @@ my_ems.update(update_time_data(my_ems))
 # device_write(my_ems, 'ev', '../ems/devices/ev_test.txt')
 
 # calculate the timetable for all the devices
-# my_ems['optplan'] = opt(my_ems, plot_fig=True, result_folder='data/')
+my_ems['optplan'] = opt(my_ems, plot_fig=True, result_folder='data/')
 
 # calculate the flexibility of one device
 # my_ems['flexopts']['hp'] = calc_flex_hp(my_ems)
