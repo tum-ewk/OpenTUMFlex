@@ -37,10 +37,12 @@ def ems(emsid=000000, userpref=None, flexprodtype=None, timeintervall=15, days=1
         # DataFrame of flexibility options for example
         df_flexopts = {}
 
-        time_data = {'nsteps': int(24*60/timeintervall),
-                     'ntsteps': int(60/timeintervall),
+        time_data = {'nsteps': int(24 * 60 / timeintervall),
+                     'ntsteps': int(60 / timeintervall),
                      't_inval': timeintervall,
                      'd_inval': dataintervall,
+                     'start_time': '2019-12-18 00:00',
+                     'end_time': '2019-12-19 12:00',
                      'days': days}
 
         dic_ems = {'ID': emsid,
@@ -75,7 +77,7 @@ def ems(emsid=000000, userpref=None, flexprodtype=None, timeintervall=15, days=1
 
 
 def ems_write(dict_ems, path):
-    #dict_ems['fcst'] = dict_ems['fcst'].to_dict('dict')
+    # dict_ems['fcst'] = dict_ems['fcst'].to_dict('dict')
     # dict_ems['optplan'] = dict_ems['optplan'].to_dict('dict')
     # dict_ems['flexopts'][] = dict_ems['flexopts'].to_dict('dict')
 
@@ -83,6 +85,16 @@ def ems_write(dict_ems, path):
         for key in dict_ems['flexopts']:
             dict_ems['flexopts'][key] = dict_ems['flexopts'][key].to_dict('dict')
         js.dump(dict_ems, f)
+
+
+def update_time_data(dict_ems):
+    dict_time = dict_ems['time_data']
+    dict_time['time_slots'] = pd.date_range(start=dict_time['start_time'], end=dict_time['end_time'],
+                                            freq=str(dict_time['t_inval']) + 'min').strftime('%Y-%m-%d %H:%M')
+    dict_time['ntsteps'] = int(60 / dict_ems['time_data']['t_inval'])
+    dict_time['nsteps'] = dict_ems['time_data']['ntsteps'] * 24
+    dict_time_data = {'time_data': dict_time}
+    return dict_time_data
 
 
 if __name__ == '__main__':
