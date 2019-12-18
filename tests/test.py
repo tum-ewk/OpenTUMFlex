@@ -32,9 +32,10 @@ my_ems = ems_loc(initialize=True, path='data/test_Nr_01.txt')
 # change the time interval
 my_ems['time_data']['t_inval'] = 15
 my_ems['time_data']['d_inval'] = 15
-my_ems['time_data']['start_time'] = '2019-12-18 00:00'
-my_ems['time_data']['end_time'] = '2019-12-19 12:00'
+my_ems['time_data']['start_time'] = '2019-12-18 02:00'
+my_ems['time_data']['end_time'] = '2019-12-19 11:59'
 my_ems['time_data']['days'] = 1
+my_ems.update(update_time_data(my_ems))
 
 # load the weather and price data
 my_ems['fcst'] = load_data(my_ems)
@@ -53,8 +54,9 @@ my_ems['devices'].update(devices(device_name='ev', minpow=0, maxpow=8, stocap=40
                                  end_soc=[50, 50, 20], eta=0.98,
                                  ev_aval=["2019-12-18 4:00", "2019-12-18 9:00",
                                           "2019-12-18 13:45", "2019-12-18 18:15",
-                                          "2019-12-19 19:30", "2019-12-19 23:15"], _timesteps=96))
-my_ems.update(update_time_data(my_ems))
+                                          "2019-12-19 9:30", "2019-12-19 11:15"],
+                                 timesetting=my_ems['time_data']))
+
 
 # plt.plot(my_ems['devices']['ev']['consm'])
 # my_ems['devices']['ev']['maxpow'] = 5
