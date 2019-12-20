@@ -64,7 +64,7 @@ def run_hp_opt(ems_local, plot_fig=True, result_folder='C:'):
     for idx in timesteps:
         # electricity balance
 
-        ev_pow[i] = value(prob.ev_power[idx])
+        ev_pow[i] = value(prob.ev_power[idx]) * value(prob.ev_max_pow)
         ev_soc[i] = value(prob.ev_cont[idx])/value(prob.ev_sto_cap)
         elec_import[i] = value(prob.elec_import[idx])
         elec_export[i] = value(prob.elec_export[idx])
@@ -471,7 +471,7 @@ def run_hp(ems_local):
     m.CHP_run = pyen.Var(m.t, within=pyen.Boolean,
                          doc='operation of the CHP')
 
-    m.ev_power = pyen.Var(m.t, within=pyen.NonNegativeReals, bounds=(ev_min_power, ev_max_power),
+    m.ev_power = pyen.Var(m.t, within=pyen.Boolean,
                           doc='power of the EV')
     m.boiler_cap, m.PV_cap, m.elec_import, m.elec_export, m.bat_cont, m.sto_e_cont, m.bat_pow_pos, m.bat_pow_neg,\
         m.ev_cont = (pyen.Var(m.t, within=pyen.NonNegativeReals) for i in range(9))
@@ -516,7 +516,7 @@ def run_hp(ems_local):
     def elec_balance_rule(m, t):
         return m.elec_import[t] + m.CHP_run[t] * m.chp_elec_run[t] + m.PV_cap[t] * m.pv_effic * m.solar[t] - \
                m.elec_export[t] - m.hp_run[t] * m.hp_ele_pow[t] - m.lastprofil_elec[t] - \
-               (m.bat_pow_pos[t] - m.bat_pow_neg[t]) - m.ev_power[t] == 0
+               (m.bat_pow_pos[t] - m.bat_pow_neg[t]) - m.ev_power[t] * m.ev_max_pow == 0
 
     m.elec_power_balance = pyen.Constraint(m.t, rule=elec_balance_rule, doc='elec_balance')
 
@@ -553,9 +553,9 @@ def run_hp(ems_local):
     # ev battery balance
     def ev_cont_def_rule(m, t):
         if t > m.t[1]:
-            return m.ev_cont[t] == m.ev_cont[t - 1] + m.ev_power[t] * p2e * ev_eta - m.ev_consm[t]
+            return m.ev_cont[t] == m.ev_cont[t - 1] + m.ev_power[t] * m.ev_max_pow * p2e * ev_eta - m.ev_consm[t]
         else:
-            return m.ev_cont[t] == m.ev_sto_cap * ev_soc_init[0] / 100 + m.ev_power[t] * p2e * ev_eta - m.ev_consm[t]
+            return m.ev_cont[t] == m.ev_sto_cap * ev_soc_init[0] / 100 + m.ev_power[t] * m.ev_max_pow * p2e * ev_eta - m.ev_consm[t]
 
     m.ev_cont_def = pyen.Constraint(m.t, rule=ev_cont_def_rule, doc='EV_balance')
 
@@ -566,7 +566,7 @@ def run_hp(ems_local):
 
 
     def EV_aval_rule(m, t):
-        return m.ev_power[t] <= m.ev_aval[t] * m.ev_max_pow
+        return m.ev_power[t] <= m.ev_aval[t]
 
     m.EV_aval_def = pyen.Constraint(m.t, rule=EV_aval_rule)
 
