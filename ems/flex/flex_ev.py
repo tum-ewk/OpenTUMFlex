@@ -143,9 +143,6 @@ def calc_flex_ev(my_ems):
                 ev_flex_temp.Neg_Flex_Price.iat[i] = statistics.mean(nlargest(n_flex_delivery_tsteps,
                                                                               ev_flex_temp.Price_Fcst[i + n_flex_delivery_tsteps:])) * (risk_margin - 1)
 
-            print(i)
-
-
         # Clean-up ##########################################
         # Drop unnecessary cumulated energy column
         ev_flex_temp = ev_flex_temp.drop(columns={'Remaining_Energy', 'Pos_Cum_Flex_Energy', 'Neg_Cum_Flex_Energy'})
