@@ -58,28 +58,28 @@ def plot_flex(my_ems, device):
             
     # Legend
     if neg_leg==1 and pos_leg==1:
-        plt_cum.legend((p1[0], p2[0], p3[0]),('Cummulative', 'Neg_flex', 'Pos_flex'),
+        plt_cum.legend((p1[0], p2[0], p3[0]),('$Cummulative$', '$Neg\_flex$', '$Pos\_flex$'),
                 prop={'size': 20}, bbox_to_anchor=(1.01, 0), loc="lower left")
         plt_pow.legend((p4, p5), ('$P_{Neg\_flex}}$', '$P_{Pos\_flex}}$'),
                 prop={'size': 22}, bbox_to_anchor=(1.01, 0), loc="lower left")
         plt_prc.legend((p6, p7), ('$C_{Neg\_flex}}$', '$C_{Pos\_flex}}$'),
                 prop={'size': 22}, bbox_to_anchor=(1.01, 0), loc="lower left") 
     elif neg_leg==1:
-        plt_cum.legend((p1[0], p2[0]),('Cummulative', 'Neg_flex'),
+        plt_cum.legend((p1[0], p2[0]),('$Cummulative$', '$Neg\_flex$'),
                 prop={'size': 20}, bbox_to_anchor=(1.01, 0), loc="lower left")
         plt_pow.legend(p4, ['$P_{Neg\_flex}}$'], 
                 prop={'size': 22}, bbox_to_anchor=(1.01, 0), loc="lower left")
         plt_prc.legend(p6, ['$C_{Neg\_flex}}$'],
                 prop={'size': 18}, bbox_to_anchor=(1.01, 0), loc="lower left")
     elif pos_leg==1:
-        plt_cum.legend((p1[0], p3[0]),('Cummulative', 'Pos_flex'),
+        plt_cum.legend((p1[0], p3[0]),('$Cummulative$', '$Pos\_flex$'),
                 prop={'size': 20}, bbox_to_anchor=(1.01, 0), loc="lower left")
         plt_pow.legend((p5), ['$P_{Pos\_flex}}$'],
                 prop={'size': 22}, bbox_to_anchor=(1.01, 0), loc="lower left")
         plt_prc.legend((p7), ['$C_{Pos\_flex}}$'],
                 prop={'size': 22}, bbox_to_anchor=(1.01, 0), loc="lower left")
     else:
-        plt_cum.legend((p1[0]),('Cummulative'),
+        plt_cum.legend((p1[0]),('$Cummulative$'),
                 prop={'size': 20}, bbox_to_anchor=(1.01, 0), loc="lower left")
           
     # Labels            
