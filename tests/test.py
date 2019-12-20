@@ -33,13 +33,10 @@ my_ems = ems_loc(initialize=True, path='data/test_Nr_01.txt')
 # change the time interval
 my_ems['time_data']['t_inval'] = 15
 my_ems['time_data']['d_inval'] = 15
-<<<<<<< HEAD
 my_ems['time_data']['start_time'] = '2019-12-18 00:00'
 my_ems['time_data']['end_time'] = '2019-12-18 23:45'
-=======
 my_ems['time_data']['start_time'] = '2019-12-18 02:00'
 my_ems['time_data']['end_time'] = '2019-12-19 11:59'
->>>>>>> a670e5041d287a4e34a3aeeaf449b99f2bd660d7
 my_ems['time_data']['days'] = 1
 my_ems.update(update_time_data(my_ems))
 
@@ -57,10 +54,10 @@ my_ems['devices']['pv']['maxpow'] = 5
 my_ems['devices']['bat']['stocap'] = 10
 my_ems['devices']['bat']['maxpow'] = 10
 my_ems['devices'].update(devices(device_name='ev', minpow=0, maxpow=8, stocap=40, init_soc=[20, 35, 30],
-                                 end_soc=[50, 50, 20], eta=0.98,
+                                 end_soc=[50, 50, 50], eta=0.98,
                                  ev_aval=["2019-12-18 4:00", "2019-12-18 9:00",
                                           "2019-12-18 13:45", "2019-12-18 18:15",
-                                          "2019-12-19 9:30", "2019-12-19 11:15"],
+                                          "2019-12-18 20:30", "2019-12-18 23:15"],
                                  timesetting=my_ems['time_data']))
 
 
