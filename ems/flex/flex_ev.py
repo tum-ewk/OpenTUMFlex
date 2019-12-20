@@ -123,25 +123,25 @@ def calc_flex_ev(my_ems):
         ev_flex_temp.Pos_Flex_Energy = ev_flex_temp.Pos_Cum_Flex_Energy
         ev_flex_temp.Neg_Flex_Energy = ev_flex_temp.Neg_Cum_Flex_Energy
 
-        # Calculating Flex Prices ###########################################################################
-        for i in range(len(ev_flex_temp)):
-            # Positive flexibility
-            if ev_flex_temp.Pos_Flex_Energy.iat[i] > 0:
-                # Calculate how many time steps energy needs to be charged after flex call
-                n_charge_remainder_tsteps = math.ceil(ev_flex_temp.Remaining_Energy.iat[i] / \
-                                    my_ems['devices']['ev']['maxpow'] * n_time_steps_phour)
-                n_flex_delivery_tsteps = math.ceil(ev_flex_temp.Pos_Flex_Energy.iat[i] / \
-                                                   ev_flex_temp.Pos_Flex_Power.iat[i] * n_time_steps_phour)
-                ev_flex_temp.Pos_Flex_Price.iat[i] = statistics.mean(nsmallest
-                                                                     (n_charge_remainder_tsteps,
-                                                                      ev_flex_temp.Price_Fcst[i + n_flex_delivery_tsteps:])) * (1 + risk_margin)
-
-            # Negative flexibility
-            elif ev_flex_temp.Neg_Flex_Energy.iat[i] > 0:
-                n_flex_delivery_tsteps = math.ceil(ev_flex_temp.Neg_Flex_Energy.iat[i] / \
-                                                   ev_flex_temp.Neg_Flex_Power.iat[i] * n_time_steps_phour)
-                ev_flex_temp.Neg_Flex_Price.iat[i] = statistics.mean(nlargest(n_flex_delivery_tsteps,
-                                                                              ev_flex_temp.Price_Fcst[i + n_flex_delivery_tsteps:])) * (risk_margin - 1)
+        # # Calculating Flex Prices ###########################################################################
+        # for i in range(len(ev_flex_temp)):
+        #     # Positive flexibility
+        #     if ev_flex_temp.Pos_Flex_Energy.iat[i] > 0:
+        #         # Calculate how many time steps energy needs to be charged after flex call
+        #         n_charge_remainder_tsteps = math.ceil(ev_flex_temp.Remaining_Energy.iat[i] / \
+        #                             my_ems['devices']['ev']['maxpow'] * n_time_steps_phour)
+        #         n_flex_delivery_tsteps = math.ceil(ev_flex_temp.Pos_Flex_Energy.iat[i] / \
+        #                                            ev_flex_temp.Pos_Flex_Power.iat[i] * n_time_steps_phour)
+        #         ev_flex_temp.Pos_Flex_Price.iat[i] = statistics.mean(nsmallest
+        #                                                              (n_charge_remainder_tsteps,
+        #                                                               ev_flex_temp.Price_Fcst[i + n_flex_delivery_tsteps:])) * (1 + risk_margin)
+        #
+        #     # Negative flexibility
+        #     elif ev_flex_temp.Neg_Flex_Energy.iat[i] > 0:
+        #         n_flex_delivery_tsteps = math.ceil(ev_flex_temp.Neg_Flex_Energy.iat[i] / \
+        #                                            ev_flex_temp.Neg_Flex_Power.iat[i] * n_time_steps_phour)
+        #         ev_flex_temp.Neg_Flex_Price.iat[i] = statistics.mean(nlargest(n_flex_delivery_tsteps,
+        #                                                                       ev_flex_temp.Price_Fcst[i + n_flex_delivery_tsteps:])) * (risk_margin - 1)
 
         # Clean-up ##########################################
         # Drop unnecessary cumulated energy column
