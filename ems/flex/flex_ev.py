@@ -2,24 +2,25 @@ import numpy as np
 import pandas as pd
 import math
 import statistics
+from heapq import nsmallest
 
 
 def calc_flex_ev(my_ems):
-    ######################################################################################
-    ################################## vorbereitung ######################################
-
-    n_time_steps = my_ems['time_data']['nsteps']    # Zeiten und timesteps
+    # Time Data ###########################
+    n_time_steps = my_ems['time_data']['nsteps']
     temp_res = my_ems['time_data']['t_inval']
-    n_time_steps_phour = my_ems['time_data']['t_inval']
+    n_time_steps_phour = my_ems['time_data']['ntsteps']
     tsteps = range(len(my_ems['devices']['ev']['aval']))
 
-    # Flexibility Table for entire time period
-    ev_flex = pd.DataFrame(0, columns={'Opt_Power', 'Remaining_Energy', 'Pos_Flex_Power', 'Neg_Flex_Power',
-                                            'Pos_Flex_Energy', 'Neg_Flex_Energy', 'Pos_Cum_Flex_Energy',
-                                            'Neg_Cum_Flex_Energy'},
-                                index=pd.date_range(start=my_ems['time_data']['start_time'],
-                                                    end=my_ems['time_data']['end_time'],
-                                                    freq=str(my_ems['time_data']['t_inval']) + 'Min'))
+    # Risk Margin comes in from user preferences
+    risk_margin = 0.3
+
+    # Flexibility Table for entire time period #############################################
+    ev_flex = pd.DataFrame(0, columns={'Opt_Power', 'Pos_Flex_Power', 'Neg_Flex_Power', 'Pos_Flex_Energy',
+                                       'Neg_Flex_Energy', 'Pos_Flex_Price', 'Neg_Flex_Price'},
+                           index=pd.date_range(start=my_ems['time_data']['start_time'],
+                                               end=my_ems['time_data']['end_time'],
+                                               freq=str(my_ems['time_data']['t_inval']) + 'Min'))
 
     ev_flex.Opt_Power.at[:] = my_ems['optplan']['EV_power']
 
@@ -29,8 +30,8 @@ def calc_flex_ev(my_ems):
     # Go through all availability periods and calculate flexibility
     for j in range(n_avail_periods):
         ev_flex_temp = pd.DataFrame(0.0, columns={'Opt_Power', 'Remaining_Energy', 'Pos_Flex_Power', 'Neg_Flex_Power',
-                                                'Pos_Flex_Energy', 'Neg_Flex_Energy', 'Pos_Cum_Flex_Energy',
-                                                'Neg_Cum_Flex_Energy'},
+                                                  'Pos_Flex_Energy', 'Neg_Flex_Energy', 'Pos_Cum_Flex_Energy',
+                                                  'Neg_Cum_Flex_Energy', 'Pos_Flex_Price', 'Neg_Flex_Price'},
                                     index=pd.date_range(start=my_ems['devices']['ev']['aval_init'][j],
                                                         end=my_ems['devices']['ev']['aval_end'][j],
                                                         freq=str(my_ems['time_data']['t_inval'])+'Min'))
@@ -63,99 +64,81 @@ def calc_flex_ev(my_ems):
                 ev_flex_temp.Pos_Flex_Power.iat[i] = ev_flex_temp.Opt_Power.iat[i]
 
         # Calculation FlexEnergy ###################
-        for i in range(t_end, t_start - 1, -1):
-            if plan_dataframe.at[tsteps[i], 'evpower'] > 0:  # wenn das EV gerade geladen wird
-                if i == t_end:
-                    PosFlexEnergy[i] = req_energy[i]
+        for i in range(len(ev_flex_temp)):
+            # If EV is being charged
+            if ev_flex_temp.Opt_Power.iat[i] > 0:
+                # PosFlexEnergy[i] ist die Energiemenge, die im Zeitabschnitt geladen wird
+                if i == len(ev_flex_temp)-1:
+                    ev_flex_temp.Pos_Flex_Energy.iat[i] = ev_flex_temp.Remaining_Energy.iat[i]
                 else:
-                    PosFlexEnergy[i] = req_energy[i] - req_energy[
-                        i + 1]  # PosFlexEnergy[i] ist die Energiemenge, die im Zeitabschnitt geladen wird
-            else:  # wenn das EV gerade nicht geladen wird
-                NegFlexEnergy[i] = NegFlexPower[i] / n_time_steps_phour
-
-
-    # Calculation FlexEnergy ###################
-    for i in range(t_end, t_start-1, -1):
-        if plan_dataframe.at[tsteps[i], 'evpower'] > 0:                                                                 # wenn das EV gerade geladen wird
-            if i == t_end:
-                PosFlexEnergy[i] = req_energy[i]
+                    ev_flex_temp.Pos_Flex_Energy.iat[i] = ev_flex_temp.Remaining_Energy.iat[i] \
+                                                          - ev_flex_temp.Remaining_Energy.iat[i + 1]
+            # If EV is not charged
             else:
-                PosFlexEnergy[i] = req_energy[i] - req_energy[i + 1]                                                        # PosFlexEnergy[i] ist die Energiemenge, die im Zeitabschnitt geladen wird
-        else:                                                                                                           # wenn das EV gerade nicht geladen wird
-            NegFlexEnergy[i] = NegFlexPower[i] / n_time_steps_phour                                                     # NegFlexEnergy[i] ist die maximal mögliche Energiemente, die in dem Zeitabschnitt geladen werden kann
+                ev_flex_temp.Neg_Flex_Energy[i] = ev_flex_temp.Neg_Flex_Power.iat[i] / n_time_steps_phour
 
-    ################ Cumulated Flex Energy #####################
-    for i in range(t_end, t_start-1, -1):                                                                               # In the last step there cannot be a summed flex offer
-        if i == t_end:                                                                                                  # für den letzten Zeitschritt des Ladezeitraums
-            NegCumFlexEnergy[i] = NegFlexEnergy[i]
-            PosCumFlexEnergy[i] = PosFlexEnergy[i]
-        elif NegFlexEnergy[i] == 0:                                                                                     # wenn es keine NegFlexEnergy gibt, gibt es positive
-            PosCumFlexEnergy[i] = PosFlexEnergy[i] + PosCumFlexEnergy[i + 1]                                            # "aufsummieren" der PosCumFlexEnergies
-        else:
-            NegCumFlexEnergy[i] = NegFlexEnergy[i] + NegCumFlexEnergy[i + 1]                                            # "aufsummieren" der NegCumFlexEnergies
+        # Cumulated Flex Energy #####################
+        for i in range(len(ev_flex_temp)-1, -1, -1):
+            if i == len(ev_flex_temp)-1:  # für den letzten Zeitschritt des Ladezeitraums
+                ev_flex_temp.Neg_Cum_Flex_Energy.iat[i] = ev_flex_temp.Neg_Flex_Energy.iat[i]
+                ev_flex_temp.Pos_Cum_Flex_Energy.iat[i] = ev_flex_temp.Pos_Flex_Energy.iat[i]
+            # Positive flex energy
+            elif ev_flex_temp.Neg_Flex_Energy.iat[i] == 0:
+                ev_flex_temp.Pos_Cum_Flex_Energy.iat[i] = ev_flex_temp.Pos_Flex_Energy.iat[i] \
+                                                          + ev_flex_temp.Pos_Cum_Flex_Energy.iat[i + 1]
+            # Negative flex energy
+            else:
+                ev_flex_temp.Neg_Cum_Flex_Energy.iat[i] = ev_flex_temp.Neg_Flex_Energy.iat[i] + ev_flex_temp.Neg_Cum_Flex_Energy.iat[i + 1]
 
-    ################ Check wether offered flex energy is positive or negative #######################
-    for i in range(n_time_steps):
-        endpunkt_posflex[i] = round(tsteps[i] + n_time_steps_phour * PosCumFlexEnergy[i] / PosFlexPower[i])
-        n_timeslots_remaining = t_end - i
-        if t_end-endpunkt_posflex[i] < req_time[i]:
-            PosCumFlexEnergy[i] = (n_timeslots_remaining - req_time[i]) / n_time_steps_phour * ev_dict["maxpow"]
-        elif plan_dataframe.at[tsteps[i], 'evpower'] > 0 and n_timeslots_remaining == 0:
-            PosCumFlexEnergy[i] = (n_timeslots_remaining-req_time[i]) / n_time_steps_phour * ev_dict["maxpow"]
-        if PosCumFlexEnergy[i] < 0:
-            PosCumFlexEnergy[i] = 0
-            PosFlexPower[i] = 0
+        # Check whether offered flex energy can be caught up later #######################
+        for i in range(len(ev_flex_temp)):
+            end_idx_pos = round(i + n_time_steps_phour * ev_flex_temp.Pos_Cum_Flex_Energy.iat[i] /
+                                ev_flex_temp.Pos_Flex_Power.iat[i])
+            n_tsteps_remaining = len(ev_flex_temp) - i
+            idx_required = math.ceil(ev_flex_temp.Remaining_Energy.iat[i] /
+                                     (my_ems['devices']['ev']['maxpow'] / n_time_steps_phour))
+            if len(ev_flex_temp) - end_idx_pos < idx_required:
+                ev_flex_temp.Pos_Cum_Flex_Energy.iat[i] = (n_tsteps_remaining - idx_required) / n_time_steps_phour \
+                                                          * my_ems['devices']['ev']['maxpow']
+            elif ev_flex_temp.Opt_Power.iat[i] > 0 and n_tsteps_remaining == 0:
+                ev_flex_temp.Pos_Cum_Flex_Energy.iat[i] = (n_tsteps_remaining - idx_required) / n_time_steps_phour \
+                                                          * my_ems['devices']['ev']['maxpow']
+            if ev_flex_temp.Pos_Cum_Flex_Energy.iat[i] < 0:
+                ev_flex_temp.Pos_Cum_Flex_Energy.iat[i] = 0
+                ev_flex_temp.Pos_Flex_Power.iat[i] = 0
 
-    neg_flex_indices = np.argwhere(NegCumFlexEnergy != 0)
-    for i in neg_flex_indices:                                                                                          # NegFlexIndices
-        if NegCumFlexEnergy[i] > req_energy[i]:                                                                         # Überprüfen, ob der errechnete Wert im Rahmen der Möglichkeiten liegt
-            NegCumFlexEnergy[i] = req_energy[i]
+        # Get all indices for negative and positive flex offers
+        neg_flex_indices = [i for i, x in enumerate(ev_flex_temp.Neg_Cum_Flex_Energy) if x]
+        pos_flex_indices = [i for i, x in enumerate(ev_flex_temp.Pos_Cum_Flex_Energy) if x]
+        # check whether offered negative energy is above remaining energy amount
+        for i in neg_flex_indices:
+            if ev_flex_temp.Neg_Cum_Flex_Energy.iat[i] > ev_flex_temp.Remaining_Energy.iat[i]:
+                ev_flex_temp.Neg_Cum_Flex_Energy.iat[i] = ev_flex_temp.Remaining_Energy.iat[i]
 
-    ################ Cleaning tables ###################
-    for i in range(n_time_steps):
-        PosFlexEnergy[i] = PosCumFlexEnergy[i]
-        NegFlexEnergy[i] = NegCumFlexEnergy[i]
+        # From now the cumulated energy is the offered flexible energy ###############################
+        # Copy cumulated energy to energy tables
+        ev_flex_temp.Pos_Flex_Energy = ev_flex_temp.Pos_Cum_Flex_Energy
+        ev_flex_temp.Neg_Flex_Energy = ev_flex_temp.Neg_Cum_Flex_Energy
 
-    PosCumFlexEnergy = np.zeros(n_time_steps)
-    NegCumFlexEnergy = np.zeros(n_time_steps)
+        # Calculating Flex Prices ###########################################################################
+        for i in range(len(ev_flex_temp)):
+            # Positive flexibility
+            if ev_flex_temp.Pos_Flex_Energy.iat[i] > 0:
+                n_flex_delivery_tsteps = math.ceil(ev_flex_temp.Pos_Flex_Energy.iat[i] / \
+                                                   ev_flex_temp.Pos_Flex_Power.iat[i] * n_time_steps_phour)
 
-    ################ Calculating Flex Prices #################
 
-    for i in range(t_start, t_end):
-        if PosFlexEnergy[i] > 0:                                                                                        # PosFlexEnergy:
-            timesteps = np.linspace(i+1, t_end, t_end-i)                                                                # für alle Zeitwerte von i+1 bis t_end werden alle Zeitpunkte gesucht, an denen PosFlexEnergy = 0 gilt. Von all diesen Zeitschritten wird der preisliche Mittelwert gebildet und als FlexPrice[i] eingetragen
-            PosFlexEnergyAct = np.zeros(n_time_steps)
-            for j in range(i+1, t_end+1):
-                PosFlexEnergyAct[j] = PosFlexEnergy[j]
-            search = np.argwhere(PosFlexEnergyAct == 0)
-            result = np.zeros(n_time_steps)
-            for k in search:
-                result[k] = plan_dataframe.at[tsteps[int(k)], 'cost']
-            result.sort()
-            FlexPrice[i] = statistics.mean(plan_dataframe["cost"]) * (1+user_dict["riskmarg"])
+                # Takes mean of n smallest forecast electricity prices from end of flex till end of availability
+                #ev_flex_temp.Pos_Flex_Price = statistics.mean(nsmallest(n_flex_delivery_tsteps, my_ems['fcst']['ele_price_in'][i+n_flex_delivery_tsteps:]) * (1 + risk_margin))
+            # Negative flexibility
+            #elif ev_flex_temp.Neg_Flex_Energy.iat[i] > 0:
 
-        elif NegFlexEnergy[i] > 0:                                                                                      # NegFlexEnergy:
-            d = np.zeros(n_time_steps)                                                                                  # vorher: n_time_steps - i  #   für alle Zeitwerte von i+1 bis t_end wird der preisliche Mittelwert gebildet und als FlexPrice[i] eingetragen
-            x = np.linspace(i+1, t_end, t_end-i)
-            for k in range(i, t_end+1):
-                d[k] = plan_dataframe.at[tsteps[int(k)], 'cost']
-#            d.sort()
-            test = abs(NegFlexEnergy[i]/NegFlexPower[i]*n_time_steps_phour)
-            FlexPrice[i] = statistics.mean(plan_dataframe["cost"]) * (user_dict["riskmarg"]-1)
-#            FlexPrice[i] = statistics.mean(d[:len(x)]) * (user_dict["riskmarg"]-1)
-#            FlexPrice[i] = statistics.mean(np.argmin(d, abs(NegFlexEnergy[i])/abs(NegFlexPower[i])*n_time_steps_phour))*(user_dict["riskmarg"]-1)
 
-    ######################################################################################
-    #################################### ausgabe #########################################
-    flex_dataframe = pd.DataFrame(index=tsteps, columns={'optpow', 'pospow', 'negpower', 'posenergy', 'negenergy', 'posprice', 'negprice'})
 
-    for i in range(n_time_steps):                                                                                       # Ausgeben der Werte
-        flex_dataframe.at[tsteps[i], 'optpow'] = plan_dataframe.at[tsteps[i], 'evpower']
-        flex_dataframe.at[tsteps[i], 'pospow'] = PosFlexPower[i]
-        flex_dataframe.at[tsteps[i], 'negpower'] = NegFlexPower[i]
-        flex_dataframe.at[tsteps[i], 'posenergy'] = PosFlexEnergy[i]
-        flex_dataframe.at[tsteps[i], 'negenergy'] = NegFlexEnergy[i]
-        flex_dataframe.at[tsteps[i], 'posprice'] = FlexPrice[i]
-        flex_dataframe.at[tsteps[i], 'negprice'] = NegFlexPrice[i]
+        # Clean-up ##########################################
+        # Drop unnecessary cumulated energy column
+        ev_flex_temp = ev_flex_temp.drop(columns={'Remaining_Energy', 'Pos_Cum_Flex_Energy', 'Neg_Cum_Flex_Energy'})
 
-    return flex_dataframe
+        # Copy temporary data frame to overall dataframe
+
+    return ev_flex
