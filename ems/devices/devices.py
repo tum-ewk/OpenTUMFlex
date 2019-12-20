@@ -14,7 +14,7 @@ from ems.ems_mod import ems_write as emswrite
 
 
 def devices(device_name, minpow=0, maxpow=0, stocap=None, eta=None, init_soc=None, end_soc=None, ev_aval=None,
-            _timesteps=96, sto_volume=0, path=None):
+            timesetting=96, sto_volume=0, path=None):
     # define general unit parameters
 
     unit = {'minpow': minpow,
@@ -76,25 +76,43 @@ def devices(device_name, minpow=0, maxpow=0, stocap=None, eta=None, init_soc=Non
             aval_time_end = ev_aval[1::2]
             _ev_aval = [datetime.datetime.strptime(x, '%Y-%m-%d %H:%M') for x in _ev_aval_date]
             _points = int(len(_ev_aval) / 2)
-            _timesteps = 96
+            _timesteps = timesetting['nsteps']
+            ntsteps = timesetting['ntsteps']
+            nsteps = timesetting['nsteps']
             aval = np.zeros(_timesteps)
             soc_check = np.zeros(_timesteps)
             consum = np.zeros(_timesteps)
-            node = np.zeros((_points-1) * 2)
+            node = np.zeros((_points - 1) * 2)
+            start_time = datetime.datetime.strptime(timesetting['start_time'], '%Y-%m-%d %H:%M')
+            day_start = start_time.day
+            hour_start = start_time.hour
+            min_start = start_time.minute
+
             idx = 0
             for i in range(_points):
-                _aval_start = int(_ev_aval[idx].hour * 4 + _ev_aval[idx].minute / 15)
-                _aval_end = int(_ev_aval[idx + 1].hour * 4 + _ev_aval[idx + 1].minute / 15 - 1)
+                _aval_start = int(((_ev_aval[idx].day - day_start) * 24 +
+                                   (_ev_aval[idx].hour - hour_start) +
+                                   (_ev_aval[idx].minute - min_start) / 60) * ntsteps)
+                # _aval_end = int(_ev_aval[idx + 1].hour * 4 + _ev_aval[idx + 1].minute / 15 - 1)
+                _aval_end = int(((_ev_aval[idx + 1].day - day_start) * 24 +
+                                 (_ev_aval[idx + 1].hour - hour_start) +
+                                 (_ev_aval[idx + 1].minute - min_start) / 60) * ntsteps - 1)
                 aval[_aval_start:_aval_end + 1] = 1
                 soc_check[_aval_end] = end_soc[i]
                 idx = idx + 2
 
             idx = 0
             for j in range(_points - 1):
-                _aval_end = int(_ev_aval[idx + 1].hour * 4 + _ev_aval[idx + 1].minute / 15)
-                _aval_start = int(_ev_aval[idx + 2].hour * 4 + _ev_aval[idx + 2].minute / 15)
+                #_aval_end = int(_ev_aval[idx + 1].hour * 4 + _ev_aval[idx + 1].minute / 15)
+                _aval_end = int(((_ev_aval[idx + 1].day - day_start) * 24 +
+                                 (_ev_aval[idx + 1].hour - hour_start) +
+                                 (_ev_aval[idx + 1].minute - min_start) / 60) * ntsteps)
+                #_aval_start = int(_ev_aval[idx + 2].hour * 4 + _ev_aval[idx + 2].minute / 15)
+                _aval_start = int(((_ev_aval[idx + 2].day - day_start) * 24 +
+                                 (_ev_aval[idx + 2].hour - hour_start) +
+                                 (_ev_aval[idx + 2].minute - min_start) / 60) * ntsteps)
                 node[idx] = _aval_end
-                node[idx+1] = _aval_start - 1
+                node[idx + 1] = _aval_start - 1
                 consum[_aval_end:_aval_start] = (end_soc[j] - init_soc[j + 1]) / 100 * stocap / \
                                                 (_aval_start - _aval_end)
                 idx = idx + 2
