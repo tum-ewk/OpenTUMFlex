@@ -1,9 +1,5 @@
-import numpy as np
 import pandas as pd
 import math
-import statistics
-from heapq import nsmallest
-from heapq import nlargest
 
 
 def calc_flex_ev(my_ems):
@@ -52,25 +48,19 @@ def calc_flex_ev(my_ems):
         ev_flex_temp.Price_Fcst.at[:] = ev_flex.Price_Fcst[my_ems['devices']['ev']['aval_init'][j]:my_ems['devices']['ev']['aval_end'][j]]
 
         # Calculate remaining energy that needs to be charged in kWh ####
-        # Initially remaining energy is equal to desired end soc minus start soc multiplied by capacity
-        ev_flex_temp['Remaining_Energy'].iat[0] = (my_ems['devices']['ev']['endSOC'][j] -
-                                             my_ems['devices']['ev']['initSOC'][j]) / 100 * \
-                                            my_ems['devices']['ev']['stocap']
-        # Goes through all time steps and checks how much more energy needs to be charged
-        for i in range(len(ev_flex_temp) - 1):
-            ev_flex_temp.Remaining_Energy.iat[i + 1] = ev_flex_temp.Remaining_Energy.iat[i] - \
-                                                       ev_flex_temp.Opt_Power.iat[i] / \
-                                                       my_ems['time_data']['ntsteps'] \
-                                                       * my_ems['devices']['ev']['eta']   # wird aktuell vom Optimierer nicht berücksichtigt
-            # Reset all values of remaining energy if smaller zero
-            if ev_flex_temp.Remaining_Energy.iat[i + 1] < 0:
-                ev_flex_temp.Remaining_Energy.iat[i + 1] = 0
+        remaining_energy = list((ev_flex_temp.Opt_Power / n_time_steps_phour).sum() -
+                                (ev_flex_temp.Opt_Power / n_time_steps_phour).cumsum())
+        remaining_energy.insert(0, (ev_flex_temp.Opt_Power / n_time_steps_phour).sum())
+        remaining_energy = remaining_energy[:-1]
+        ev_flex_temp['Remaining_Energy'] = remaining_energy
 
-        # Calculation FlexPower ######################
+        # Calculation flexible power ######################
         ev_flex_temp.Pos_Flex_Power = ev_flex_temp.Opt_Power
         ev_flex_temp.Neg_Flex_Power = my_ems['devices']['ev']['maxpow'] - ev_flex_temp.Opt_Power
-        # Reset negative flex power if remaining energy is smaller or equal to zero
+        # Reset flex power if power or energy is smaller or equal to zero
         ev_flex_temp.loc[ev_flex_temp.Remaining_Energy <= 0, 'Neg_Flex_Power'] = 0
+        ev_flex_temp.loc[ev_flex_temp.Pos_Flex_Power <= 0, 'Pos_Flex_Power'] = 0
+        ev_flex_temp.loc[ev_flex_temp.Neg_Flex_Power <= 0, 'Neg_Flex_Power'] = 0
 
         # Calculation of flex energy ###################
         for i in range(len(ev_flex_temp)):
@@ -87,20 +77,13 @@ def calc_flex_ev(my_ems):
             # Positive flex offers
             if ev_flex_temp.Pos_Flex_Power.iat[i] > 0:
                 # Calculate last index of positive flex offer
-                idx_flex_end = round(i + n_time_steps_phour * ev_flex_temp.Pos_Flex_Energy.iat[i] /
-                                     ev_flex_temp.Pos_Flex_Power.iat[i])
-                n_tsteps_remaining = len(ev_flex_temp) - i      # remaining time steps
-                idx_required = math.ceil(ev_flex_temp.Remaining_Energy.iat[i] /
+                idx_remaining = len(ev_flex_temp) - round(i + n_time_steps_phour * ev_flex_temp.Pos_Flex_Energy.iat[i] /
+                                                          ev_flex_temp.Pos_Flex_Power.iat[i])
+                idx_required = math.ceil(ev_flex_temp.Pos_Flex_Energy.iat[i] /
                                          (my_ems['devices']['ev']['maxpow'] / n_time_steps_phour))
-                if len(ev_flex_temp) - idx_flex_end < idx_required:
-                    ev_flex_temp.Pos_Flex_Energy.iat[i] = (n_tsteps_remaining - idx_required) / n_time_steps_phour \
+                if idx_remaining < idx_required:
+                    ev_flex_temp.Pos_Flex_Energy.iat[i] = idx_remaining / n_time_steps_phour \
                                                               * my_ems['devices']['ev']['maxpow']
-                elif ev_flex_temp.Opt_Power.iat[i] > 0 and n_tsteps_remaining == 0:
-                    ev_flex_temp.Pos_Flex_Energy.iat[i] = (n_tsteps_remaining - idx_required) / n_time_steps_phour \
-                                                              * my_ems['devices']['ev']['maxpow']
-                if ev_flex_temp.Pos_Flex_Energy.iat[i] < 0:
-                    ev_flex_temp.Pos_Flex_Energy.iat[i] = 0
-                    ev_flex_temp.Pos_Flex_Power.iat[i] = 0
 
             # Negative flex offers
             if ev_flex_temp.Neg_Flex_Power.iat[i] > 0:
@@ -111,38 +94,46 @@ def calc_flex_ev(my_ems):
 
         # # Calculating Flex Prices ###########################################################################
         for i in range(len(ev_flex_temp)):
+            # # Positive flexibility
+            # if ev_flex_temp.Pos_Flex_Energy.iat[i] > 0:
+            #     # Calculate number of time steps for flex offer
+            #     n_flex_delivery_tsteps = math.ceil(ev_flex_temp.Pos_Flex_Energy.iat[i] / \
+            #                                        ev_flex_temp.Pos_Flex_Power.iat[i] * n_time_steps_phour)
+            #     # Create pricing df
+            #     pricing = pd.DataFrame(0, columns={'P_avail', 'C_fcst', 'E_charge', 'E_cumsum', 'C_energy'},
+            #                            index=ev_flex_temp.index[i+n_flex_delivery_tsteps:])
+            #     pricing.C_fcst = ev_flex_temp.Price_Fcst
+            #     # Calculate remaining charging power besides optimal plan (considers also modulated charging power)
+            #     pricing.P_avail = my_ems['devices']['ev']['maxpow'] - ev_flex_temp.Opt_Power
+            #     pricing = pricing.sort_values(by=['C_fcst'])
+            #     pricing.E_charge = pricing.P_avail / n_time_steps_phour
+            #     pricing.E_cumsum = pricing.E_charge.cumsum()
+            #     pricing.C_energy = pricing.C_fcst * pricing.E_charge
+            #     print(str(i), ' = i ', str(j), ' = j')
+            #     # Get index at which energy is caught up (considers modulated charging power)
+            #     idx_pricing_caught_up = pricing.index[pricing['E_cumsum'] >= ev_flex_temp.Pos_Flex_Energy.iat[i]][0]
+            #     # Calculate pos flex price by taking cheapest remaining t-steps and taking average of energy costs
+            #     ev_flex_temp.Pos_Flex_Price.iat[i] = pricing.C_energy.loc[:idx_pricing_caught_up].sum()\
+            #                                          * (1 + risk_margin) \
+            #                                          / pricing.E_cumsum.loc[idx_pricing_caught_up]
+
             # Positive flexibility
             if ev_flex_temp.Pos_Flex_Energy.iat[i] > 0:
-                # Calculate number of time steps for flex offer
-                n_flex_delivery_tsteps = math.ceil(ev_flex_temp.Pos_Flex_Energy.iat[i] / \
-                                                   ev_flex_temp.Pos_Flex_Power.iat[i] * n_time_steps_phour)
-                # Create pricing df
-                pricing = pd.DataFrame(0, columns={'P_avail', 'C_fcst', 'E_charge', 'E_cumsum', 'C_energy'}, index=ev_flex_temp.index[i+n_flex_delivery_tsteps:])
-                pricing.C_fcst = ev_flex_temp.Price_Fcst
-                # Calculate remaining charging power besides optimal plan (considers also modulated charging power)
-                pricing.P_avail = my_ems['devices']['ev']['maxpow'] - ev_flex_temp.Opt_Power
-                pricing = pricing.sort_values(by=['C_fcst'])
-                pricing.E_charge = pricing.P_avail / n_time_steps_phour
-                pricing.E_cumsum = pricing.E_charge.cumsum()
-                pricing.C_energy = pricing.C_fcst * pricing.E_charge
-                # Get index at which energy is caught up (considers modulated charging power)
-                idx_pricing_caught_up = pricing.index[pricing['E_cumsum'] >= ev_flex_temp.Pos_Flex_Energy.iat[i]][0]
-                # Calculate pos flex price by taking cheapest remaining t-steps and taking average of energy costs
-                ev_flex_temp.Pos_Flex_Price.iat[i] = pricing.C_energy.loc[:idx_pricing_caught_up].sum()\
-                                                     * (1 + risk_margin) \
-                                                     / pricing.E_cumsum.loc[idx_pricing_caught_up]
-
+                idx_required = math.ceil(ev_flex_temp.Pos_Flex_Energy.iat[i] / my_ems['devices']['ev']['maxpow']
+                                         / n_time_steps_phour)
+                idx_flex = math.ceil(ev_flex_temp.Pos_Flex_Energy.iat[i] / ev_flex_temp.Pos_Flex_Power.iat[i]
+                                         * n_time_steps_phour)
+                ev_flex_temp.Pos_Flex_Price.iat[i] = ev_flex_temp.Price_Fcst[i + idx_flex - 1:].nsmallest(idx_required).mean()\
+                                                     * (1 + risk_margin)
             # Negative flexibility
             if ev_flex_temp.Neg_Flex_Energy.iat[i] > 0:
-                n_flex_delivery_tsteps = math.ceil(ev_flex_temp.Neg_Flex_Energy.iat[i] / \
+                idx_flex = math.ceil(ev_flex_temp.Neg_Flex_Energy.iat[i] / \
                                                    ev_flex_temp.Neg_Flex_Power.iat[i] * n_time_steps_phour)
-                ev_flex_temp.Neg_Flex_Price.iat[i] = statistics.mean(nlargest(n_flex_delivery_tsteps,
-                                                                              ev_flex_temp.Price_Fcst[
-                                                                              i + n_flex_delivery_tsteps:]))\
+                ev_flex_temp.Neg_Flex_Price.iat[i] = ev_flex_temp.Price_Fcst[i + idx_flex - 1:].nlargest(idx_flex).mean()\
                                                      * (risk_margin - 1)
 
         # Clean-up ##########################################
-        # Drop unnecessary cumulated energy column
+        # Drop unnecessary columns
         ev_flex_temp = ev_flex_temp.drop(columns={'Remaining_Energy'})
 
         # Copy temporary data frame to overall dataframe
