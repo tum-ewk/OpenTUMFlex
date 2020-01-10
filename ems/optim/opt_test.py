@@ -355,7 +355,8 @@ def run_hp(ems_local):
     ev_soc_end = ev_param['endSOC']
     ev_aval = ev_param['aval']
     ev_consm = ev_param['consm']
-    ev_soc_check = ev_param['soc_check']
+    ev_init_soc_check = ev_param['init_soc_check']
+    ev_end_soc_check = ev_param['end_soc_check']
     # CHP
     chp_param = devices['chp']
     chp_elec_eff = chp_param['eta'][0]
@@ -474,7 +475,7 @@ def run_hp(ems_local):
     m.ev_power = pyen.Var(m.t, within=pyen.NonNegativeReals, bounds=(ev_min_power, ev_max_power),
                           doc='power of the EV')
     m.boiler_cap, m.PV_cap, m.elec_import, m.elec_export, m.bat_cont, m.sto_e_cont, m.bat_pow_pos, m.bat_pow_neg,\
-        m.ev_cont = (pyen.Var(m.t, within=pyen.NonNegativeReals) for i in range(9))
+        m.ev_cont, m.ev_var_pow = (pyen.Var(m.t, within=pyen.NonNegativeReals) for i in range(10))
     m.sto_e_pow, m.costs = (pyen.Var(m.t, within=pyen.Reals) for i in range(2))
 
     # Constrains
@@ -553,16 +554,21 @@ def run_hp(ems_local):
     # ev battery balance
     def ev_cont_def_rule(m, t):
         if t > m.t[1]:
-            return m.ev_cont[t] == m.ev_cont[t - 1] + m.ev_power[t] * p2e * ev_eta - m.ev_consm[t]
+            return m.ev_cont[t] == m.ev_cont[t - 1] + m.ev_power[t] * p2e * ev_eta - m.ev_consm[t] - m.ev_var_pow[t]
         else:
             return m.ev_cont[t] == m.ev_sto_cap * ev_soc_init[0] / 100 + m.ev_power[t] * p2e * ev_eta - m.ev_consm[t]
 
     m.ev_cont_def = pyen.Constraint(m.t, rule=ev_cont_def_rule, doc='EV_balance')
 
-    def EV_soc_rule(m, t):
-        return m.ev_cont[t] >= m.ev_sto_cap * ev_soc_check[t] / 100
+    def EV_end_soc_rule(m, t):
+        return m.ev_cont[t] >= m.ev_sto_cap * ev_end_soc_check[t] / 100
 
-    m.EV_soc_def = pyen.Constraint(m.t, rule=EV_soc_rule)
+    m.EV_end_soc_def = pyen.Constraint(m.t, rule=EV_end_soc_rule)
+
+    def EV_init_soc_rule(m, t):
+        return m.ev_cont[t] <= m.ev_sto_cap * ev_init_soc_check[t] / 100
+
+    m.EV_init_soc_def = pyen.Constraint(m.t, rule=EV_init_soc_rule)
 
 
     def EV_aval_rule(m, t):
