@@ -51,7 +51,7 @@ my_ems['devices']['pv']['maxpow'] = 5
 my_ems['devices']['bat']['stocap'] = 10
 my_ems['devices']['bat']['maxpow'] = 10
 my_ems['devices'].update(devices(device_name='ev', minpow=0, maxpow=8, stocap=40, init_soc=[20, 35, 30],
-                                 end_soc=[50, 50, 20], eta=0.98,
+                                 end_soc=[50, 50, 40], eta=0.98,
                                  ev_aval=["2019-12-18 4:00", "2019-12-18 9:00",
                                           "2019-12-18 13:45", "2019-12-18 18:15",
                                           "2019-12-19 9:30", "2019-12-19 11:15"],
@@ -66,7 +66,7 @@ my_ems['devices'].update(devices(device_name='ev', minpow=0, maxpow=8, stocap=40
 # device_write(my_ems, 'ev', '../ems/devices/ev_test.txt')
 
 # calculate the timetable for all the devices
-# my_ems['optplan'] = opt(my_ems, plot_fig=True, result_folder='data/')
+my_ems['optplan'] = opt(my_ems, plot_fig=True, result_folder='data/')
 
 # calculate the flexibility of one device
 # my_ems['flexopts']['hp'] = calc_flex_hp(my_ems)
