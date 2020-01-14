@@ -25,36 +25,36 @@ def plot_flex(my_ems, device):
     theta = 0
     cum_data = [0] * (nsteps + 1)
     for i in range(nsteps):
-        cum_data[i + 1] = theta + dat1.iloc[i, 0] /ntsteps
+        cum_data[i + 1] = theta + dat1['Sch_P'][i] / ntsteps
         theta = cum_data[i + 1]
     p1 = plt_cum.plot(cum_data, linewidth=2, color='k')
 
     for x in range(nsteps):
         # Negative flexibility plots
-        if dat1.iloc[x, 3] < 0:
+        if dat1['Neg_E'][x] < 0:
             neg_leg = 1
             theta = cum_data[x]
 
-            slots = int(round(ntsteps * dat1.iloc[x, 3] / dat1.iloc[x, 1]))
+            slots = int(round(ntsteps * dat1['Neg_E'][x] / dat1['Neg_P'][x]))
 
-            slot_flex = dat1.iloc[x, 3] / slots
+            slot_flex = dat1['Neg_E'][x] / slots
             for y in range(1, slots + 1):
                 p2 = plt_cum.plot([x + y - 1, x + y], [theta, cum_data[x + y] + (slot_flex * y)], color='b')
                 theta = cum_data[x + y] + (slot_flex * y)
-            p4 = plt_pow.bar(x, dat1.iloc[x, 1], color='b', width=1.0, align='edge')
-            p6 = plt_prc.bar(x, dat1.iloc[x, 5], color='b', width=1.0, align='edge')
+            p4 = plt_pow.bar(x, dat1['Neg_P'][x], color='b', width=1.0, align='edge')
+            p6 = plt_prc.bar(x, dat1['Neg_Pr'][x], color='b', width=1.0, align='edge')
 
         # Positive flexibility plots
-        if dat1.iloc[x, 4] > 0:
+        if dat1['Pos_E'][x] > 0:
             pos_leg = 1
             theta = cum_data[x]
-            slots = int(round(ntsteps * dat1.iloc[x, 4] / dat1.iloc[x, 2]))
-            slot_flex = dat1.iloc[x, 4] / slots
+            slots = int(round(ntsteps * dat1['Pos_E'][x] / dat1['Pos_P'][x]))
+            slot_flex = dat1['Pos_E'][x] / slots
             for y in range(1, slots + 1):
                 p3 = plt_cum.plot([x + y - 1, x + y], [theta, cum_data[x + y] + (slot_flex * y)], color='r')
                 theta = cum_data[x + y] + (slot_flex * y)
-            p5 = plt_pow.bar(x, dat1.iloc[x, 2], color='r', width=1.0, align='edge')
-            p7 = plt_prc.bar(x, dat1.iloc[x, 6], color='r', width=1.0, align='edge')
+            p5 = plt_pow.bar(x, dat1['Pos_P'][x], color='r', width=1.0, align='edge')
+            p7 = plt_prc.bar(x, dat1['Pos_Pr'][x], color='r', width=1.0, align='edge')
 
     # Legend
     if neg_leg == 1 and pos_leg == 1:
@@ -92,13 +92,13 @@ def plot_flex(my_ems, device):
     plt_prc.grid(True)
 
     # limits
-    lim_a = abs(1.1 * dat1.iloc[:, 1].min())
-    lim_b = abs(1.1 * dat1.iloc[:, 2].max())
+    lim_a = abs(1.1 * dat1['Neg_P'].min())
+    lim_b = abs(1.1 * dat1['Pos_P'].max())
     lim_ends = max(lim_a, lim_b)
     if lim_ends != 0:
         plt_pow.set_ylim(-lim_ends, lim_ends)
-    lim_a = abs(1.1 * dat1.iloc[:, 5].min())
-    lim_b = abs(1.1 * dat1.iloc[:, 6].max())
+    lim_a = abs(1.1 * dat1['Neg_Pr'].min())
+    lim_b = abs(1.1 * dat1['Pos_Pr'].max())
     lim_ends = max(lim_a, lim_b)
     if lim_ends != 0:
         plt_prc.set_ylim(-lim_ends, lim_ends)
@@ -107,3 +107,4 @@ def plot_flex(my_ems, device):
 
 def save_results(dat1, save_path, nsteps = 24):
     dat1.to_csv(save_path, index=False, sep=';')
+
