@@ -29,7 +29,16 @@ def run_hp_opt(ems_local, plot_fig=True, result_folder='C:'):
     #    input_file = 'C:\Optimierung\Eingangsdaten_hp.xlsx'
     #    data = read_xlsdata(input_file);
 
+
     prob, timesteps = run_hp(ems_local)
+
+    # chece if the results have been initialized
+    try:
+         value(prob.ev_power[0])
+    except ValueError as error:
+        print(error)
+        raise ImportError('the solver can not find a solution, try to change the device parameters to fulfill the requirements')
+
     length = len(timesteps)
 
     print('Load Results ...\n')
@@ -65,7 +74,7 @@ def run_hp_opt(ems_local, plot_fig=True, result_folder='C:'):
         # electricity balance
 
         ev_pow[i] = value(prob.ev_power[idx])
-        ev_soc[i] = value(prob.ev_cont[idx])/value(prob.ev_sto_cap)
+        ev_soc[i] = value(prob.ev_cont[idx])/value(prob.ev_sto_cap) if value(prob.ev_sto_cap) > 0 else 0
         elec_import[i] = value(prob.elec_import[idx])
         elec_export[i] = value(prob.elec_export[idx])
         lastprofil_elec[i] = value(prob.lastprofil_elec[idx])

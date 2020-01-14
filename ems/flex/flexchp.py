@@ -124,13 +124,13 @@ def calc_flex_chp(ems):  # datafram open and break it down
 
     # 'times': pd.date_range(start="00:00", end="23:59", freq='15min').strftime('%H:%M')
     data = {# 'time': pd.date_range(start="00:00", end="23:59", freq='15min').strftime('%H:%M'),
-            'pow_schedual': pow_schedual,
-            'pow_neg': pow_neg,
-            'pow_pos': pow_pos,
-            'ergy_neg': energy_neg,
-            'ergy_pos': energy_pos,
-            'price_neg': cost_diff_neg,
-            'price_pos': cost_diff_pos
+            'Sch_P': pow_schedual,
+            'Neg_P': pow_neg,
+            'Pos_P': pow_pos,
+            'Neg_E': energy_neg,
+            'Pos_E': energy_pos,
+            'Neg_Pr': cost_diff_neg,
+            'Pos_Pr': cost_diff_pos
             }
     flexopts = pd.DataFrame(data)
 
