@@ -35,7 +35,6 @@ def PVflex(my_ems):
     return PV_flex
 
 if __name__ == '__main__':
-
     my_ems = ems_loc(initialize=True, path='C:/Users/ge57vam/emsflex/ems/test_chp.txt')
     my_ems['fcst'] =  input_data(my_ems)
     # my_ems['flexopts']['pv'] = PVflex(my_ems)
