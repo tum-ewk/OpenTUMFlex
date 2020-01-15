@@ -21,7 +21,8 @@ def calc_flex_hp(ems):  # datafram open and break it down
 
     optm_df = pd.DataFrame.from_dict(ems['optplan'])
     timesteps = len(optm_df['HP_operation'])
-    pow2energy = 24 / timesteps
+    ntsteps = ems['time_data']['ntsteps']
+    pow2energy = 1 / ntsteps
     # get the values from hp dataframe
 
     hp_operation = optm_df['HP_operation']
@@ -122,18 +123,19 @@ def calc_flex_hp(ems):  # datafram open and break it down
                 cost_elec_input[i:dur_max[i] + 1]) * 0.5) * (1 - idx_no_flex[i])
 
     # write the results in data
-
+    timeslots = list(ems['time_data']['time_slots'])
     # 'times': pd.date_range(start="00:00", end="23:59", freq='15min').strftime('%H:%M')
-    data = {  # 'time': pd.date_range(start="00:00", end="23:59", freq='15min').strftime('%H:%M'),
-        'pow_schedual': pow_schedual,
-        'pow_neg': pow_neg,
-        'pow_pos': pow_pos,
-        'ergy_neg': energy_neg,
-        'ergy_pos': energy_pos,
-        'price_neg': cost_diff_neg,
-        'price_pos': cost_diff_pos
-    }
+    data = {'time': timeslots,
+            'Sch_P': pow_schedual,
+            'Neg_P': pow_neg,
+            'Pos_P': pow_pos,
+            'Neg_E': energy_neg,
+            'Pos_E': energy_pos,
+            'Neg_Pr': cost_diff_neg,
+            'Pos_Pr': cost_diff_pos,
+            }
     flexopts = pd.DataFrame(data)
+    # flexopts.set_index('Sch_P')
 
     return flexopts
 

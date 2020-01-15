@@ -80,7 +80,8 @@ def devices(device_name, minpow=0, maxpow=0, stocap=None, eta=None, init_soc=Non
             ntsteps = timesetting['ntsteps']
             nsteps = timesetting['nsteps']
             aval = np.zeros(_timesteps)
-            soc_check = np.zeros(_timesteps)
+            init_soc_check = np.zeros(_timesteps) + 100
+            end_soc_check = np.zeros(_timesteps)
             consum = np.zeros(_timesteps)
             node = np.zeros((_points - 1) * 2)
             start_time = datetime.datetime.strptime(timesetting['start_time'], '%Y-%m-%d %H:%M')
@@ -98,7 +99,10 @@ def devices(device_name, minpow=0, maxpow=0, stocap=None, eta=None, init_soc=Non
                                  (_ev_aval[idx + 1].hour - hour_start) +
                                  (_ev_aval[idx + 1].minute - min_start) / 60) * ntsteps - 1)
                 aval[_aval_start:_aval_end + 1] = 1
-                soc_check[_aval_end] = end_soc[i]
+                init_soc_check[_aval_start] = init_soc[i]
+                end_soc_check[_aval_end] = end_soc[i]
+                if i == _points - 1:
+                    end_soc_check[_aval_end:] = end_soc[i]
                 idx = idx + 2
 
             idx = 0
@@ -119,7 +123,8 @@ def devices(device_name, minpow=0, maxpow=0, stocap=None, eta=None, init_soc=Non
 
             unit.update({'endSOC': end_soc, 'aval': list(aval), 'aval_init': list(aval_time_init),
                          'aval_end': list(aval_time_end),
-                         'consm': list(consum), 'soc_check': list(soc_check), 'node': list(node)})
+                         'consm': list(consum), 'init_soc_check': list(init_soc_check),
+                         'end_soc_check': list(end_soc_check), 'node': list(node)})
             df_unit_ev = unit
             dict_unit_ev = {device_name: df_unit_ev}
 
