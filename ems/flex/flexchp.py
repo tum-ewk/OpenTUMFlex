@@ -17,7 +17,8 @@ def calc_flex_chp(ems):  # datafram open and break it down
 
     optm_df = pd.DataFrame.from_dict(ems['optplan'])
     timesteps = len(optm_df['CHP_operation'])
-    pow2energy = 24 / timesteps
+    ntsteps = ems['time_data']['ntsteps']
+    pow2energy = 1 / ntsteps
     # get the values from hp dataframe
 
     chp_operation = optm_df['CHP_operation']
