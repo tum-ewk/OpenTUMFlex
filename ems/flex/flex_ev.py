@@ -93,7 +93,14 @@ def calc_flex_ev(my_ems):
 
             # Negative flex offers
             if ev_flex_temp[p_neg].iat[i] > 0:
-                idx_p_neg_max = int(((ev_flex_temp[p_neg].iloc[i:] < ev_flex_temp[p_neg].iloc[i]).idxmax() - ev_flex_temp.index[i]).seconds / 3600 * n_time_steps_phour)
+                # Calculate for how many time steps negative flex can be offered
+                # check whether power is not available anymore
+                if (ev_flex_temp[p_neg].iloc[i:] < ev_flex_temp[p_neg].iloc[i]).any():
+                    idx_p_neg_max = int(((ev_flex_temp[p_neg].iloc[i:] < ev_flex_temp[p_neg].iloc[i]).idxmax() -
+                                         ev_flex_temp.index[i]).seconds / 3600 * n_time_steps_phour)
+                # power is available for entire time period
+                else:
+                    idx_p_neg_max = len(ev_flex_temp[p_neg].iloc[i:])
                 # Offers with maximum negative power
                 if ev_flex_temp[p_neg].iat[i] == my_ems['devices']['ev']['maxpow']:
                     if ev_flex_temp[e_neg].iat[i] > ev_flex_temp[e_remain].iat[i]:
