@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 import multiprocessing
 import matplotlib.pyplot as plt
+from joblib import Parallel, delayed
 
 from ems.ems_mod import ems as ems_loc
 from ems.ems_mod import ems_write
@@ -63,47 +64,125 @@ def run_hems(ev_cap=60, p_max=20, p_min=0, init_soc=[10], end_soc=[80], eta=0.98
 
         success = True
 
-        plot(my_ems, "ev")
+        #plot(my_ems, "ev")
 
     except Exception as e:
         print(e)
-        print('--- EV capacity =', c, 'kWh')
-        print('--- P_max =', p, 'kW')
-        print('--- T_start, T_end =', ev_availability)
-        print('--- SOC start =', soc_s)
-        print('--- SOC end =', soc_e)
-        if (soc_e-soc_s)*c/100 > p*((pd.to_datetime(ev_availability[1]) - pd.to_datetime(ev_availability[0])).seconds/3600):
-            print('Desired charging of', str((soc_e-soc_s)*c/100), 'is not possible in given time. Max charging is', str(p*((pd.to_datetime(ev_availability[1]) - pd.to_datetime(ev_availability[0])).seconds/3600)))
+        print('--- EV capacity =', ev_cap, 'kWh')
+        print('--- P_max =', p_max, 'kW')
+        print('--- T_start, T_end =', ev_aval)
+        print('--- SOC start =', init_soc)
+        print('--- SOC end =', end_soc)
+        if (end_soc-init_soc)*ev_cap/100 > p_max*((pd.to_datetime(ev_aval[1]) - pd.to_datetime(ev_aval[0])).seconds/3600):
+            print('Desired charging of', str((end_soc-init_soc)*ev_cap/100),
+                  'is not possible in given time. Max charging is',
+                  str(p_max*((pd.to_datetime(ev_aval[1]) - pd.to_datetime(ev_aval[0])).seconds/3600)))
         pass
 
     return my_ems, success
 
 
+def run_hems_samples(sample):
+    # load the predefined ems data, initialization by user input is also possible:
+    my_ems = ems_loc(initialize=True, path='data/test_Nr_01.txt')
+
+    # change the time interval
+    my_ems['time_data']['t_inval'] = 15
+    my_ems['time_data']['d_inval'] = 15
+    my_ems['time_data']['start_time'] = '2020-1-1 00:00'
+    my_ems['time_data']['end_time'] = '2020-1-1 23:59'
+    my_ems['time_data']['days'] = 1
+    my_ems.update(update_time_data(my_ems))
+
+    # load the weather and price data
+    my_ems['fcst'] = load_data(my_ems)
+    my_ems['devices'].update(devices(device_name='hp', minpow=0, maxpow=2))
+    my_ems['devices']['sto']['stocap'] = 0
+    my_ems['devices']['boiler']['maxpow'] = 20
+    my_ems['devices']['chp']['maxpow'] = 5
+    my_ems['devices']['pv']['maxpow'] = 0
+    my_ems['devices']['bat']['stocap'] = 0
+    my_ems['devices']['bat']['maxpow'] = 0
+    my_ems['devices'].update(devices(device_name='ev', stocap=sample[0], maxpow=sample[1], minpow=0,
+                                     end_soc=sample[3], init_soc=sample[4], ev_aval=sample[5], eta=sample[6],
+                                     timesetting=my_ems['time_data']))
+
+    # Optimize device schedules
+    my_ems['optplan'] = opt(my_ems, plot_fig=False, result_folder='data/')
+
+    # Calculate ev flexibility
+    my_ems['flexopts']['ev'] = calc_flex_ev(my_ems)
+
+    success = True
+
+    return my_ems, success
+
+
+def plot_results(ems_results):
+    # Plot flexibility results
+    for i in range(len(ems_results)):
+        plot(ems_results[i], 'ev')
+
+
+def random_ev_sample_generator(n_samples=1):
+    samples = list()
+
+    ev_cap_range = np.arange(start=10, stop=100, step=10)         # ev capacity range
+    p_ev_max_range = np.arange(start=5, stop=30, step=5)          # ev maximal charging power range
+    p_ev_min_range = np.arange(start=1, stop=10, step=1)          # ev minimal charging power range
+    soc_end_range = np.arange(start=50, stop=100, step=5)         # ev desired end soc range
+    soc_start_range = np.arange(start=0, stop=50, step=5)         # ev initial soc range
+    t_plugin_range = pd.date_range(start='2020-1-1 00:00', end='2020-1-1 9:00', freq='30Min')   # initial plug-in time range
+    t_plugout_range = pd.date_range(start='2020-1-1 15:00', end='2020-1-1 23:59', freq='30Min')    # final plug-out time range
+    eff_range = np.arange(start=95, stop=100, step=1) / 100
+
+    while len(samples) < n_samples:
+        ev_cap = np.random.choice(ev_cap_range)
+        p_ev_max = np.random.choice(p_ev_max_range)
+        p_ev_min = np.random.choice(p_ev_min_range)
+        soc_end = np.random.choice(soc_end_range)
+        soc_start = np.random.choice(soc_start_range)
+        eff = np.random.choice(eff_range)
+        ev_availability = [t_plugin_range[round(np.random.random()*len(t_plugin_range))-1].strftime('%Y-%m-%d %H:%M'),
+                           t_plugout_range[round(np.random.random()*len(t_plugout_range))-1].strftime('%Y-%m-%d %H:%M')]
+
+        # Check whether desired energy can be charged in given time period
+        if (soc_end - soc_start) * ev_cap / 100 > p_ev_max * (
+                (pd.to_datetime(ev_availability[1]) - pd.to_datetime(ev_availability[0])).seconds / 3600):
+            # print('Charging not possible in given time. Reduce desired charging energy.')
+            pass
+        else:
+            samples.append([ev_cap, p_ev_max, p_ev_min, [soc_end], [soc_start], ev_availability, eff])
+
+    return samples
+
+
 if __name__ == '__main__':
-
-    cap_ev = np.arange(start=10, stop=100, step=10)
-    p_max = np.arange(start=1, stop=10, step=1)
-    soc_end = np.arange(start=50, stop=100, step=5)
-    soc_start = np.arange(start=0, stop=50, step=5)
-    date_start = pd.date_range(start='2020-1-1 00:00', end='2020-1-1 9:00', freq='30Min')
-    date_end = pd.date_range(start='2020-1-1 15:00', end='2020-1-1 23:59', freq='30Min')
-
     results = list()
 
-    for i in range(25):
-        n_ev_avail = 1
-        t_end = date_end
-        t_start = np.random.choice(date_start)
-        c = np.random.choice(cap_ev)
-        p = np.random.choice(p_max)
-        soc_e = np.random.choice(soc_end)
-        soc_s = np.random.choice(soc_start)
-        ev_availability = [date_start[round(np.random.random()*len(date_start))-1].strftime('%Y-%m-%d %H:%M'),
-                           date_end[round(np.random.random()*len(date_end))-1].strftime('%Y-%m-%d %H:%M')]
+    # Create sample results
+    ev_samples = random_ev_sample_generator(n_samples=20)
 
-        my_ems, success = run_hems(ev_cap=c, p_max=p, ev_aval=ev_availability, end_soc=[soc_e], init_soc=[soc_s])
-        # my_ems, success = run_hems()
-        if success:
-            results.append(my_ems)
+    # # Run hems with multiple ev_samples
+    # for i in range(len(ev_samples)):
+    #     print('###########################  HEMS iteration #', i, '  ###########################')
+    #     my_ems, success = run_hems_samples(ev_samples[i])
+    #     if success:
+    #         print('Successful HEMS Operation')
+    #         results.append(my_ems)
+
+    # Run hems on multiple cores
+    results_multi = Parallel(n_jobs=multiprocessing.cpu_count())(delayed(run_hems_samples)(i) for i in ev_samples)
+    # Extract multiprocessing results
+    for i in range(len(results_multi)):
+        results.append(results_multi[i][0])
+
+    # # Run hems manually
+    # my_ems, success = run_hems(ev_cap=50, p_max=5, p_min=0, ev_aval=["2020-1-1 4:00", "2020-1-1 18:00"], end_soc=[80], init_soc=[40])
+    # #my_ems, success = run_hems()
+
+
+    # # Plot results
+    # plot_results(results)
 
 
