@@ -161,7 +161,7 @@ if __name__ == '__main__':
     results = list()
 
     # Create sample results
-    ev_samples = random_ev_sample_generator(n_samples=20)
+    ev_samples = random_ev_sample_generator(n_samples=50)
 
     # # Run hems with multiple ev_samples
     # for i in range(len(ev_samples)):
