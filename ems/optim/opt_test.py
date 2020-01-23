@@ -138,6 +138,7 @@ def run_hp_opt(ems_local, plot_fig=True, result_folder='C:'):
     ### plot elec balance
     N = len(timesteps)
     ind = np.arange(N)  # the x locations for the groups
+    # ind = ems_local['time_data']['time_slots'].tolist()
     width = 1  # the width of the bars: can also be len(x) sequence
 
     print('Results Loaded.')
@@ -175,17 +176,25 @@ def run_hp_opt(ems_local, plot_fig=True, result_folder='C:'):
         p7 = plt.step(ind, lastprofil_elec, linewidth=2, where='mid', color='k')
         p8 = plt.bar(ind, -ev_pow, width, bottom=bat_power_neg - elec_export, color='pink')
         p9 = plt.bar(ind, -HP_ele_cap, width, bottom=bat_power_neg - elec_export - ev_pow, color='#a79b94')
-
-        plt.xlabel('time [h]', fontsize=25)
-        plt.ylabel('power und ele. demand [kW]', fontsize=25)
-        plt.title('electricity balance', fontsize=30)
+        for tick in ax1.xaxis.get_major_ticks():
+            tick.label.set_fontsize(14)
+        for tick in ax1.yaxis.get_major_ticks():
+            tick.label.set_fontsize(14)
+        plt.xlabel('Time [h]', fontsize=16)
+        plt.ylabel('Electrical demand [kW]', fontsize=16)
+        # plt.title('Cost optimal plan', fontsize=20)
         idx_plt = np.arange(0, len(timesteps), int(len(timesteps) / 5))
         plt.xticks(ind[idx_plt], timesteps[idx_plt])
         ax1.set_xlim(0, len(timesteps) - 1)
         # plt.yticks(np.arange(-10, 10, 2))
-        plt.legend((p1[0], p2[0], p3[0], p5[0], p6[0], p7[0], p8[0], p9[0]),
-                   ('CHP', 'PV', 'battery', 'import', 'export', 'ele. demand', 'EV charge', 'HP'), prop={'size': 20},
-                   loc='lower left')
+        plt.legend((p1[0], p2[0], p3[0], p4[0], p5[0], p6[0], p7[0], p8[0], p9[0]),
+                   ('CHP', 'PV', 'Bat_Discharge', 'Bat_Charge', 'Import', 'Export', 'E_Demand', 'EV_charge', 'HP'),
+                   prop={'size': 14}, bbox_to_anchor=(1.01, 0), loc="lower left")
+        plt.grid(color='lightgrey', linewidth=0.75)
+        plt.rc('font', family='serif')
+        plt.tick_params(axis="x", labelsize=16)
+        plt.tick_params(axis="y", labelsize=16)
+
         fig1 = plt.figure()
         ax2 = plt.subplot()
         # p8 = plt.plot(ind, bat_cont/bat_max_cont*100,linewidth=1,color='red')

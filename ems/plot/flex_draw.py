@@ -8,7 +8,6 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib import gridspec
 
-
 def plot_flex(my_ems, device):
     nsteps = my_ems['time_data']['nsteps']
     ntsteps = my_ems['time_data']['ntsteps']
@@ -26,7 +25,8 @@ def plot_flex(my_ems, device):
     # Plotting cummulative energy exchange
     theta = 0
     # cum_data = pd.DataFrame(
-    #     index=pd.date_range(start="00:00", end="23:59", freq=str(t_intval) + 'min').strftime('%H:%M'), columns={'cumm'})
+    #     index=pd.date_range(start="00:00", end="23:59",
+    #     freq=str(t_intval) + 'min').strftime('%H:%M'), columns={'cumm'})
     cum_data = pd.DataFrame(
              index=my_ems['time_data']['time_slots'], columns={'cumm'})
     cum_data.iloc[0, 0] = 0
@@ -65,41 +65,41 @@ def plot_flex(my_ems, device):
     # Legend
     if neg_leg == 1 and pos_leg == 1:
         plt_cum.legend((p1[0], p2[0], p3[0]), ('Cummulative', 'Neg_flex', 'Pos_flex'),
-                       prop={'size': 20}, bbox_to_anchor=(1.01, 0), loc="lower left")
+                       prop={'size': 16}, bbox_to_anchor=(1.01, 0), loc="lower left")
         plt_pow.legend((p4, p5), ('$P_{Neg\_flex}}$', '$P_{Pos\_flex}}$'),
-                       prop={'size': 22}, bbox_to_anchor=(1.01, 0), loc="lower left")
+                       prop={'size': 18}, bbox_to_anchor=(1.01, 0), loc="lower left")
         plt_prc.legend((p6, p7), ('$C_{Neg\_flex}}$', '$C_{Pos\_flex}}$'),
-                       prop={'size': 22}, bbox_to_anchor=(1.01, 0), loc="lower left")
+                       prop={'size': 18}, bbox_to_anchor=(1.01, 0), loc="lower left")
     elif neg_leg == 1:
         plt_cum.legend((p1[0], p2[0]), ('Cummulative', 'Neg_flex'),
-                       prop={'size': 20}, bbox_to_anchor=(1.01, 0), loc="lower left")
+                       prop={'size': 16}, bbox_to_anchor=(1.01, 0), loc="lower left")
         plt_pow.legend(p4, ['$P_{Neg\_flex}}$'],
-                       prop={'size': 22}, bbox_to_anchor=(1.01, 0), loc="lower left")
+                       prop={'size': 18}, bbox_to_anchor=(1.01, 0), loc="lower left")
         plt_prc.legend(p6, ['$C_{Neg\_flex}}$'],
                        prop={'size': 18}, bbox_to_anchor=(1.01, 0), loc="lower left")
     elif pos_leg == 1:
         plt_cum.legend((p1[0], p3[0]), ('Cummulative', 'Pos_flex'),
-                       prop={'size': 20}, bbox_to_anchor=(1.01, 0), loc="lower left")
+                       prop={'size': 16}, bbox_to_anchor=(1.01, 0), loc="lower left")
         plt_pow.legend((p5), ['$P_{Pos\_flex}}$'],
-                       prop={'size': 22}, bbox_to_anchor=(1.01, 0), loc="lower left")
+                       prop={'size': 18}, bbox_to_anchor=(1.01, 0), loc="lower left")
         plt_prc.legend((p7), ['$C_{Pos\_flex}}$'],
-                       prop={'size': 22}, bbox_to_anchor=(1.01, 0), loc="lower left")
+                       prop={'size': 18}, bbox_to_anchor=(1.01, 0), loc="lower left")
     else:
         plt_cum.legend((p1[0]), ('Cummulative'),
-                       prop={'size': 20}, bbox_to_anchor=(1.01, 0), loc="lower left")
+                       prop={'size': 16}, bbox_to_anchor=(1.01, 0), loc="lower left")
 
     # Labels            
-    # plt_cum.set_title('Flexibility plots', fontsize=24, pad=20)
-    plt_cum.set_ylabel('$CE\ [kWh]$', fontsize=20)
+    # plt_cum.set_title('Flexibility plots', fontsize=16, pad=20)
+    plt_cum.set_ylabel('$CE\ [kWh]$', fontsize=18)
     plt_cum.tick_params(axis="x", labelsize=16, labelbottom=False)
     plt_cum.tick_params(axis="y", labelsize=16)
     plt_cum.grid(color='lightgrey', linewidth=0.75)
-    plt_pow.set_ylabel('$Power\ [kWh]$)', fontsize=20)
+    plt_pow.set_ylabel('$Power\ [kWh]$)', fontsize=18)
     plt_pow.tick_params(axis="x", labelsize=16, labelbottom=False)
     plt_pow.tick_params(axis="y", labelsize=16)
     plt_pow.grid(color='lightgrey', linewidth=0.75, zorder=0)
-    plt_prc.set_xlabel('Time', fontsize=20, labelpad=3)
-    plt_prc.set_ylabel('$Price\ [€/kWh]$', fontsize=20)
+    plt_prc.set_xlabel('Time', fontsize=16, labelpad=3)
+    plt_prc.set_ylabel('$Price\ [€/kWh]$', fontsize=18)
     plt_prc.tick_params(axis="x", labelsize=16, pad=5)
     plt_prc.tick_params(axis="y", labelsize=16)
     plt_prc.grid(color='lightgrey', linewidth=0.75, zorder=0)
@@ -123,7 +123,8 @@ def plot_flex(my_ems, device):
     plt_prc.axhline(y=0, linewidth=2, color='k')
 
     # Change xtick intervals    
-    plt_prc.set_xticks(plt_prc.get_xticks()[::8])
+    plt_prc.set_xticks(plt_prc.get_xticks()[::int(round(nsteps/12))])
+    plt_prc.set_xticklabels(ts[::int(round(nsteps/12))], rotation=45)
 
     # Settings
     plt.rc('font', family='serif')
