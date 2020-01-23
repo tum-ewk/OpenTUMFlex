@@ -76,8 +76,9 @@ my_ems['flexopts']['hp'] = calc_flex_hp(my_ems)
 # my_ems['flexopts']['pv'] = PVflex(my_ems)
 
 # plot the results#
-
 plot(my_ems, "hp")
+# plot(my_ems, "pv")
+# plot(my_ems, "bat")
 
 # store the data of the whole ems for reuse
 # ems_write(my_ems, path='data/test_Nr_02.txt')
