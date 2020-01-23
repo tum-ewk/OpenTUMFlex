@@ -89,7 +89,7 @@ def plot_flex(my_ems, device):
                        prop={'size': 20}, bbox_to_anchor=(1.01, 0), loc="lower left")
 
     # Labels            
-    plt_cum.set_title('Flexibility plots', fontsize=24, pad=20)
+    # plt_cum.set_title('Flexibility plots', fontsize=24, pad=20)
     plt_cum.set_ylabel('$CE\ [kWh]$', fontsize=20)
     plt_cum.tick_params(axis="x", labelsize=16, labelbottom=False)
     plt_cum.tick_params(axis="y", labelsize=16)
