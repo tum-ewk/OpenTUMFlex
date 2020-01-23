@@ -40,7 +40,6 @@ def PVflex(my_ems):
                 if abs(PV_flex.iloc[i + j, 1]) > dat1[i + j]:
                     net_payable = net_payable + (abs(PV_flex.iloc[i + j, 1]) - dat1[i + j]) * \
                                   my_ems['fcst']['ele_price_in'][i + j] / ntsteps
-            # print(i, net_income, net_payable)
             PV_flex.iloc[i, 5] = net_income + net_payable / PV_flex.iloc[i, 3]
     return PV_flex
 
