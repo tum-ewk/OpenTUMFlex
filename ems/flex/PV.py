@@ -29,7 +29,7 @@ def PVflex(my_ems):
             PV_flex.iloc[i, 1] = -1 * dat2[i]
             PV_flex.iloc[i, 3] = PV_flex.iloc[i, 1] * (j - i) / ntsteps
 
-    # PV negative flexibility pricing
+    # PV negative flexibility pricing updated
     for i in range(nsteps):
         if PV_flex.iloc[i, 1] < 0:
             flex_steps = int(round(ntsteps * PV_flex.iloc[i, 3] / PV_flex.iloc[i, 1]))
