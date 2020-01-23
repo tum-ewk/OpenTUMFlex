@@ -8,6 +8,7 @@ import pandas as pd
 import math
 import statistics
 
+
 def Batflex(my_ems):
     nsteps = my_ems['time_data']['nsteps']
     ntsteps = my_ems['time_data']['ntsteps']
@@ -64,13 +65,12 @@ def Batflex(my_ems):
     # Pricing
     for i in range(nsteps):
         if Bat_flex.iloc[i, 1] < 0 and i < nsteps-1:
-            max_val = my_ems['optplan']['elec_supply_price']
+            max_val = my_ems['fcst']['ele_price_in']
             max_val = statistics.mean(max_val[i:nsteps])
             Bat_flex.iloc[i, 5] = -1*max_val
         elif Bat_flex.iloc[i, 1] < 0 and i == nsteps-1:
-            Bat_flex.iloc[i, 5] = -1*my_ems['optplan']['elec_supply_price'][i]
-                    
-    
+            Bat_flex.iloc[i, 5] = -1*my_ems['fcst']['ele_price_in'][i]
+
     # Battery positive flexibility
     # Feeding into the grid
     for i in range(nsteps):
@@ -124,11 +124,10 @@ def Batflex(my_ems):
     # Pricing
     for i in range(nsteps):
         if Bat_flex.iloc[i, 2] > 0 and i < nsteps-1:
-            min_val = my_ems['optplan']['elec_supply_price']
+            min_val = my_ems['fcst']['ele_price_in']
             min_val = statistics.mean(min_val[i:nsteps])
             Bat_flex.iloc[i, 6] = 1*min_val        
         elif Bat_flex.iloc[i, 2] > 0 and i == nsteps-1:
-            Bat_flex.iloc[i, 6] = my_ems['optplan']['elec_supply_price'][i]
+            Bat_flex.iloc[i, 6] = my_ems['fcst']['ele_price_in'][i]
              
     return Bat_flex
-                   
