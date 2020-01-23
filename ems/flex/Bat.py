@@ -19,7 +19,7 @@ def Batflex(my_ems):
             'col3': my_ems['optplan']['bat_output_power'],
             'col4': my_ems['optplan']['bat_SOC']}
     dat1 = pd.DataFrame(data=dat1)
-    Bat_flex.iloc[:, 0] = my_ems['optplan']['bat_grid2bat'] 
+    # Bat_flex.iloc[:, 0] = my_ems['optplan']['bat_grid2bat']
     Bat_maxP = my_ems['devices']['bat']['maxpow']
     Bat_minP = 0.3
     Bat_maxE = 7.5
@@ -27,6 +27,7 @@ def Batflex(my_ems):
 
     # Battery negative flexibility
     for i in range(nsteps):
+        Bat_flex.iloc[i, 0] = dat1.iloc[i, 0] + dat1.iloc[i, 1] - dat1.iloc[i, 2]
         nflex_P = Bat_maxP-dat1.iloc[i, 1]+dat1.iloc[i, 2]
         if (dat1.iloc[i, 3]*3/100 < Bat_maxE) and (nflex_P > 0): 
             req_steps = int(math.floor(ntsteps*(Bat_maxE-dat1.iloc[i, 3]*3/100)/nflex_P))
@@ -34,7 +35,7 @@ def Batflex(my_ems):
                 req_steps = 0
             elif (req_steps != 0) and (req_steps + i <= nsteps-1): 
                 req_steps = req_steps + i
-            elif (req_steps != 0):
+            elif req_steps != 0:
                 req_steps = nsteps - 1
     
             if req_steps > 0:                                
