@@ -130,9 +130,12 @@ def plot_flex(my_ems, device):
     plt.margins(x=0)
     plt.show()
 
+    return
+
 
 def save_results(dat1, nsteps, save_path):
     dat1.to_excel("output.xlsx", sheet_name='flex_results')
+
 
 # from ems.plot.flex_draw1 import plot_flex as plot
 # if __name__ == "__main__":

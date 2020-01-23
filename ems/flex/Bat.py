@@ -70,12 +70,8 @@ def Batflex(my_ems):
             Bat_flex.iloc[i, 5] = -1*max_val
         elif Bat_flex.iloc[i, 1] < 0 and i == nsteps-1:
             Bat_flex.iloc[i, 5] = -1*my_ems['fcst']['ele_price_in'][i]
-<<<<<<< HEAD
-                    
-    
-=======
 
->>>>>>> PV_Bat_Intergration
+# PV_Bat_Integration
     # Battery positive flexibility
     # Feeding into the grid
     for i in range(nsteps):
@@ -88,13 +84,13 @@ def Batflex(my_ems):
                     ava_steps = 0
                 elif (ava_steps != 0) and (ava_steps + i <= nsteps-1):
                     ava_steps = ava_steps + i
-                elif (ava_steps != 0):
+                elif ava_steps != 0:
                     ava_steps = nsteps-1  
             
             if ava_steps > 0:
                 j = i
-                while (j < nsteps) and (j < ava_steps) and \
-                pflex_P <= (Bat_maxP-dat1.iloc[j, 2]):    
+                while (j < nsteps) and (j < ava_steps) and  \
+                        pflex_P <= (Bat_maxP-dat1.iloc[j, 2]):
                     # Add minimum pos flex power in the previous line
                     j = j+1
                 Bat_flex.iloc[i, 2] = (Bat_maxP-dat1.iloc[i, 2])
