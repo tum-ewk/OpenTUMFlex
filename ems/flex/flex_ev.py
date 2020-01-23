@@ -130,7 +130,8 @@ def calc_flex_ev(my_ems):
                         if idx_p_neg_max <= idx_allowed:
                             pass
                         else:
-                            ev_flex_temp[e_neg].iat[i] = ev_flex_temp[e_remain].iat[i + idx_allowed + 1]
+                            # Flexible energy is the sum of energy for maximal power
+                            ev_flex_temp[e_neg].iat[i] = temp_flex_df['E_flex'][:idx_allowed].sum()
 
         # # Calculating Flex Prices ###########################################################################
         for i in range(len(ev_flex_temp)):
