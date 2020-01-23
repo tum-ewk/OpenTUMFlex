@@ -161,10 +161,11 @@ def run_hp_opt(ems_local, plot_fig=True, result_folder='C:'):
         13: 'darkgreen'}
 
     if plot_fig is True:
-        fig = plt.figure()
+        fig = plt.figure(figsize=(8, 6),)
         ax1 = fig.add_subplot(111)
         p1 = plt.bar(ind, CHP_cap, width, bottom=bat_power_pos, color='skyblue')
         ax1.axhline(linewidth=2, color="black")
+        font_size = 16
 
         p2 = plt.bar(ind, pv_power, width,
                      bottom=bat_power_pos + CHP_cap, color='wheat')
@@ -177,11 +178,11 @@ def run_hp_opt(ems_local, plot_fig=True, result_folder='C:'):
         p8 = plt.bar(ind, -ev_pow, width, bottom=bat_power_neg - elec_export, color='pink')
         p9 = plt.bar(ind, -HP_ele_cap, width, bottom=bat_power_neg - elec_export - ev_pow, color='#a79b94')
         for tick in ax1.xaxis.get_major_ticks():
-            tick.label.set_fontsize(14)
+            tick.label.set_fontsize(font_size)
         for tick in ax1.yaxis.get_major_ticks():
-            tick.label.set_fontsize(14)
-        plt.xlabel('Time [h]', fontsize=16)
-        plt.ylabel('Electrical demand [kW]', fontsize=16)
+            tick.label.set_fontsize(font_size)
+        plt.xlabel('Time [h]', fontsize=font_size)
+        plt.ylabel('Electrical demand [kW]', fontsize=font_size)
         # plt.title('Cost optimal plan', fontsize=20)
         idx_plt = np.arange(0, len(timesteps), int(len(timesteps) / 5))
         plt.xticks(ind[idx_plt], timesteps[idx_plt])
@@ -189,20 +190,20 @@ def run_hp_opt(ems_local, plot_fig=True, result_folder='C:'):
         # plt.yticks(np.arange(-10, 10, 2))
         plt.legend((p1[0], p2[0], p3[0], p4[0], p5[0], p6[0], p7[0], p8[0], p9[0]),
                    ('CHP', 'PV', 'Bat_Discharge', 'Bat_Charge', 'Import', 'Export', 'E_Demand', 'EV_charge', 'HP'),
-                   prop={'size': 14}, bbox_to_anchor=(1.01, 0), loc="lower left")
+                   prop={'size': font_size}, bbox_to_anchor=(1.01, 0), loc="lower left")
         plt.grid(color='lightgrey', linewidth=0.75)
         plt.rc('font', family='serif')
-        plt.tick_params(axis="x", labelsize=16)
-        plt.tick_params(axis="y", labelsize=16)
+        plt.tick_params(axis="x", labelsize=font_size)
+        plt.tick_params(axis="y", labelsize=font_size)
 
         fig1 = plt.figure()
         ax2 = plt.subplot()
         # p8 = plt.plot(ind, bat_cont/bat_max_cont*100,linewidth=1,color='red')
 
         p8 = plt.step(ind, SOC_elec, linewidth=1, color='red', where='mid')
-        plt.xlabel('time [h]', fontsize=25)
-        plt.ylabel('SOC [%]', fontsize=25)
-        plt.title('SOC of Battery', fontsize=30)
+        plt.xlabel('time [h]', fontsize=font_size)
+        plt.ylabel('SOC [%]', fontsize=font_size)
+        # plt.title('SOC of Battery', fontsize=font_size)
         plt.xticks(ind[idx_plt], timesteps[idx_plt])
         ax2.set_xlim(0, len(timesteps) - 1)
         plt.show()
@@ -213,9 +214,9 @@ def run_hp_opt(ems_local, plot_fig=True, result_folder='C:'):
         # p8 = plt.plot(ind, bat_cont/bat_max_cont*100,linewidth=1,color='red')
 
         p8 = plt.step(ind, ev_soc, linewidth=1, color='red', where='mid')
-        plt.xlabel('time [h]', fontsize=25)
-        plt.ylabel('SOC [%]', fontsize=25)
-        plt.title('SOC of EV', fontsize=30)
+        plt.xlabel('time [h]', fontsize=font_size)
+        plt.ylabel('SOC [%]', fontsize=font_size)
+        # plt.title('SOC of EV', fontsize=font_size)
         plt.xticks(ind[idx_plt], timesteps[idx_plt])
         ax2.set_xlim(0, len(timesteps) - 1)
         for i in np.arange(0, len(ev_node), 2):
@@ -236,26 +237,26 @@ def run_hp_opt(ems_local, plot_fig=True, result_folder='C:'):
         p5 = plt.bar(ind, sto_e_pow_neg, width, color='#ff5a60')
         p6 = plt.step(ind, lastprofil_heat, linewidth=2, where='mid', color='k')
 
-        plt.xlabel('time [1/4 h]', fontsize=25)
-        plt.ylabel('power and heat load [kW]', fontsize=25)
-        plt.title('heat balance', fontsize=30)
-        plt.xticks([0, 24, 2, 2], fontsize=30)
-        plt.yticks(fontsize=30)
+        plt.xlabel('time [1/4 h]', fontsize=font_size)
+        plt.ylabel('power and heat load [kW]', fontsize=font_size)
+        # plt.title('heat balance', fontsize=font_size)
+        plt.xticks([0, 24, 2, 2], fontsize=font_size)
+        plt.yticks(fontsize=font_size)
         idx_plt = np.arange(0, len(timesteps), int(len(timesteps) / 5))
         plt.xticks(ind[idx_plt], timesteps[idx_plt])
         ax1.set_xlim(0, len(timesteps) - 1)
         # plt.yticks(np.arange(-10, 10, 2))
         plt.legend((p1[0], p2[0], p3[0], p4[0], p6[0]), ('boiler', 'CHP', 'HP', 'heat storage', 'heat demand'),
-                   prop={'size': 20}, loc='lower left')
+                   prop={'size': font_size}, loc='lower left')
         fig1 = plt.figure()
         ax2 = plt.subplot()
 
         p7 = plt.step(ind, SOC_heat, linewidth=1, where='mid', color='red')
-        plt.xlabel('time [h]', fontsize=25)
-        plt.ylabel('SOC [%]', fontsize=25)
+        plt.xlabel('time [h]', fontsize=font_size)
+        plt.ylabel('SOC [%]', fontsize=font_size)
         plt.xticks(ind[idx_plt], timesteps[idx_plt])
         ax2.set_xlim(0, len(timesteps) - 1)
-        plt.title('SOC of heat storage', fontsize=30)
+        # plt.title('SOC of heat storage', fontsize=font_size)
         plt.show()
 
         # save the data
