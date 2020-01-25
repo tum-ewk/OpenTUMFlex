@@ -3,7 +3,7 @@ import math
 
 
 def calc_flex_ev(my_ems):
-    print('\nEV Flex Calculation ...')
+    print('EV Flex Calculation ...')
     # Time Data ###########################
     n_time_steps = my_ems['time_data']['nsteps']
     temp_res = my_ems['time_data']['t_inval']
@@ -69,11 +69,12 @@ def calc_flex_ev(my_ems):
 
         # Calculation of flex energy ###################
         for i in range(len(ev_flex_temp)):
+            # Calculate how many hours flexible power is available
             t_neg_flex_avail = ((ev_flex_temp[p_neg].iloc[i:] < ev_flex_temp[p_neg].iat[i]).idxmax()
                                 - ev_flex_temp.index[i]) / pd.Timedelta('1 hour')
             t_pos_flex_avail = ((ev_flex_temp[p_pos].iloc[i:] < ev_flex_temp[p_pos].iat[i]).idxmax()
                                 - ev_flex_temp.index[i]) / pd.Timedelta('1 hour')
-
+            # Calculate flexible energy
             ev_flex_temp[e_neg][i] = ev_flex_temp[p_neg].iat[i] * t_neg_flex_avail
             ev_flex_temp[e_pos][i] = ev_flex_temp[p_pos].iat[i] * t_pos_flex_avail
 
@@ -87,43 +88,56 @@ def calc_flex_ev(my_ems):
                 idx_required = math.ceil(ev_flex_temp[e_pos].iat[i] /
                                          (my_ems['devices']['ev']['maxpow'] / n_time_steps_phour))
                 if idx_remaining < idx_required:
-                    ev_flex_temp[e_pos].iat[i] = idx_remaining / n_time_steps_phour \
-                                                              * my_ems['devices']['ev']['maxpow']
+                    e_max = idx_remaining / n_time_steps_phour * my_ems['devices']['ev']['maxpow']
+                    ev_flex_temp[e_pos].iat[i] = math.floor(e_max / ev_flex_temp[p_pos].iat[i] * n_time_steps_phour) * ev_flex_temp[p_pos].iat[i] / n_time_steps_phour
 
             # Negative flex offers
             if ev_flex_temp[p_neg].iat[i] > 0:
-                if ev_flex_temp[e_neg].iat[i] > ev_flex_temp[e_remain].iat[i]:
-                    ev_flex_temp[e_neg].iat[i] = ev_flex_temp[e_remain].iat[i]
-                if ev_flex_temp[e_neg].iat[i] <= 0:
-                    ev_flex_temp[p_neg].iat[i] = 0
+                # Calculate for how many time steps negative flex can be offered
+                # check whether power is not available anymore
+                if (ev_flex_temp[p_neg].iloc[i:] < ev_flex_temp[p_neg].iloc[i]).any():
+                    idx_p_neg_max = int(((ev_flex_temp[p_neg].iloc[i:] < ev_flex_temp[p_neg].iloc[i]).idxmax() -
+                                         ev_flex_temp.index[i]).seconds / 3600 * n_time_steps_phour)
+                # power is available for entire time period
+                else:
+                    idx_p_neg_max = len(ev_flex_temp[p_neg].iloc[i:])
+                # Offers with maximum negative power
+                if ev_flex_temp[p_neg].iat[i] == my_ems['devices']['ev']['maxpow']:
+                    if ev_flex_temp[e_neg].iat[i] > ev_flex_temp[e_remain].iat[i]:
+                        ev_flex_temp[e_neg].iat[i] = ev_flex_temp[e_remain].iat[i]
+                        ev_flex_temp[p_neg].iat[i] = ev_flex_temp[e_neg].iat[i] * n_time_steps_phour / \
+                                                     math.ceil(ev_flex_temp[e_neg].iat[i] / my_ems['devices']['ev']['maxpow'] * n_time_steps_phour)
+                    if ev_flex_temp[e_neg].iat[i] <= 0:
+                        ev_flex_temp[p_neg].iat[i] = 0
+                # Offers with modulated power
+                elif ev_flex_temp[p_neg].iat[i] < my_ems['devices']['ev']['maxpow']:
+                    # Calculate the cumulated sum of flex and optimal charging schedule
+                    temp_flex_df = pd.DataFrame(0, columns={'E_opt', 'E_flex', 'E_opt_cumsum', 'E_flex_cumsum', 'E_flex_opt_cumsum'},
+                                                 index=ev_flex_temp.index[i:i + idx_p_neg_max])
+                    temp_flex_df['E_opt'] = (ev_flex_temp[p_opt].iloc[i:i+idx_p_neg_max] / n_time_steps_phour)
+                    temp_flex_df['E_flex'] = (ev_flex_temp[p_neg].iat[i] / n_time_steps_phour)
+                    temp_flex_df['E_opt_cumsum'] = temp_flex_df['E_opt'].cumsum()
+                    temp_flex_df['E_flex_cumsum'] = temp_flex_df['E_flex'].cumsum()
+                    temp_flex_df['E_flex_opt_cumsum'] = (temp_flex_df['E_opt'] + temp_flex_df['E_flex']).cumsum()
+                    # Check whether maximal possible energy is more than remaining energy
+                    if max(temp_flex_df['E_flex_opt_cumsum']) < ev_flex_temp[e_remain].iat[i]:
+                        pass
+                    else:
+                        # Find number of time steps until remaining energy has been charged
+                        idx_allowed = int((temp_flex_df['E_flex_opt_cumsum'][temp_flex_df['E_flex_opt_cumsum'] > ev_flex_temp[e_remain].iat[i]].index[0] - ev_flex_temp.index[i]).seconds / 3600 * n_time_steps_phour)
+                        # Calculate maximal available time steps negative flex can be offered
+                        # if number of available time steps is lower do not change offered energy
+                        if idx_p_neg_max <= idx_allowed:
+                            pass
+                        else:
+                            # Flexible energy is the sum of energy for maximal power
+                            ev_flex_temp[e_neg].iat[i] = temp_flex_df['E_flex'][:idx_allowed].sum()
 
         # # Calculating Flex Prices ###########################################################################
         for i in range(len(ev_flex_temp)):
-            # # Positive flexibility
-            # if ev_flex_temp[e_pos].iat[i] > 0:
-            #     # Calculate number of time steps for flex offer
-            #     n_flex_delivery_tsteps = math.ceil(ev_flex_temp[e_pos].iat[i] / \
-            #                                        ev_flex_temp[p_pos].iat[i] * n_time_steps_phour)
-            #     # Create pricing df
-            #     pricing = pd.DataFrame(0, columns={'P_avail', 'C_fcst', 'E_charge', 'E_cumsum', 'C_energy'},
-            #                            index=ev_flex_temp.index[i+n_flex_delivery_tsteps:])
-            #     pricing.C_fcst = ev_flex_temp[pr_fcst]
-            #     # Calculate remaining charging power besides optimal plan (considers also modulated charging power)
-            #     pricing.P_avail = my_ems['devices']['ev']['maxpow'] - ev_flex_temp.Opt_Power
-            #     pricing = pricing.sort_values(by=['C_fcst'])
-            #     pricing.E_charge = pricing.P_avail / n_time_steps_phour
-            #     pricing.E_cumsum = pricing.E_charge.cumsum()
-            #     pricing.C_energy = pricing.C_fcst * pricing.E_charge
-            #     print(str(i), ' = i ', str(j), ' = j')
-            #     # Get index at which energy is caught up (considers modulated charging power)
-            #     idx_pricing_caught_up = pricing.index[pricing['E_cumsum'] >= ev_flex_temp[e_pos].iat[i]][0]
-            #     # Calculate pos flex price by taking cheapest remaining t-steps and taking average of energy costs
-            #     ev_flex_temp[pr_pos].iat[i] = pricing.C_energy.loc[:idx_pricing_caught_up].sum()\
-            #                                          * (1 + risk_margin) \
-            #                                          / pricing.E_cumsum.loc[idx_pricing_caught_up]
 
             # Positive flexibility
-            if ev_flex_temp[e_pos].iat[i] > 0:
+            if ev_flex_temp[e_pos].iat[i] > 0 and ev_flex_temp[p_pos].iat[i] > 0:
                 idx_required = math.ceil(ev_flex_temp[e_pos].iat[i] / my_ems['devices']['ev']['maxpow']
                                          / n_time_steps_phour)
                 idx_flex = math.ceil(ev_flex_temp[e_pos].iat[i] / ev_flex_temp[p_pos].iat[i]
@@ -131,7 +145,7 @@ def calc_flex_ev(my_ems):
                 ev_flex_temp[pr_pos].iat[i] = ev_flex_temp[pr_fcst][i + idx_flex - 1:].nsmallest(idx_required).mean()\
                                                      * (1 + risk_margin)
             # Negative flexibility
-            if ev_flex_temp[e_neg].iat[i] > 0:
+            if ev_flex_temp[e_neg].iat[i] > 0 and ev_flex_temp[p_neg].iat[i] > 0:
                 idx_flex = math.ceil(ev_flex_temp[e_neg].iat[i] / \
                                                    ev_flex_temp[p_neg].iat[i] * n_time_steps_phour)
                 ev_flex_temp[pr_neg].iat[i] = ev_flex_temp[pr_fcst][i + idx_flex - 1:].nlargest(idx_flex).mean()\
@@ -144,7 +158,7 @@ def calc_flex_ev(my_ems):
         # Copy temporary data frame to overall dataframe
         ev_flex[my_ems['devices']['ev']['aval_init'][j]:my_ems['devices']['ev']['aval_end'][j]] = ev_flex_temp
 
-    print('\nEV Flex Calculation completed!')
+    print('EV Flex Calculation completed!')
     ev_flex[p_opt] = -ev_flex[p_opt]
     ev_flex[p_neg] = -ev_flex[p_neg]
     ev_flex[e_neg] = -ev_flex[e_neg]
