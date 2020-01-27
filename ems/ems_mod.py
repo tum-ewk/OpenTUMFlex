@@ -61,7 +61,7 @@ def ems(emsid=000000, userpref=None, flexprodtype=None, timeintervall=15, days=1
 
         with open(path) as f:
             dic_ems = js.load(f)
-
+            dic_ems['time_data']['time_slots'] = pd.Index(dic_ems['time_data']['time_slots'])
             for key in dic_ems['flexopts']:
                 dic_ems['flexopts'][key] = pd.DataFrame.from_dict(dic_ems['flexopts'][key])
 
@@ -81,9 +81,11 @@ def ems_write(dict_ems, path):
     # dict_ems['optplan'] = dict_ems['optplan'].to_dict('dict')
     # dict_ems['flexopts'][] = dict_ems['flexopts'].to_dict('dict')
 
+    dict_ems['time_data']['time_slots'] = list(dict_ems['time_data']['time_slots'])
     with open(path, 'w') as f:
         for key in dict_ems['flexopts']:
-            dict_ems['flexopts'][key] = dict_ems['flexopts'][key].to_dict('dict')
+            if not isinstance(dict_ems['flexopts'][key], dict):
+                dict_ems['flexopts'][key] = dict_ems['flexopts'][key].to_dict('dict')
         js.dump(dict_ems, f)
 
 
