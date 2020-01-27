@@ -82,15 +82,12 @@ def ems_write(dict_ems, path):
     # dict_ems['fcst'] = dict_ems['fcst'].to_dict('dict')
     # dict_ems['optplan'] = dict_ems['optplan'].to_dict('dict')
     # dict_ems['flexopts'][] = dict_ems['flexopts'].to_dict('dict')
-    def myconverter(o):
-        if isinstance(o, datetime.datetime):
-            return o.__str__()
     dict_ems['time_data']['time_slots'] = list(dict_ems['time_data']['time_slots'])
     with open(path, 'w') as f:
         for key in dict_ems['flexopts']:
             if not isinstance(dict_ems['flexopts'][key], dict):
                 dict_ems['flexopts'][key] = dict_ems['flexopts'][key].to_dict('dict')
-        js.dump(dict_ems, f, default=myconverter)
+        js.dump(dict_ems, f)
     print('complete saving EMS_data!!! ')
 
 
