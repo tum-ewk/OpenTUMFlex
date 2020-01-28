@@ -148,7 +148,7 @@ def random_ev_sample_generator(n_samples=1):
 
         # Check whether desired energy can be charged in given time period
         if (soc_end - soc_start) * ev_cap / 100 > p_ev_max * (
-                (pd.to_datetime(ev_availability[1]) - pd.to_datetime(ev_availability[0])).seconds / 3600):
+                (pd.to_datetime(ev_availability[1]) - pd.to_datetime(ev_availability[0])).seconds / 3600) * eff:
             # print('Charging not possible in given time. Reduce desired charging energy.')
             pass
         else:
