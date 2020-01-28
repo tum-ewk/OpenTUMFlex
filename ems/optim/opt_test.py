@@ -168,17 +168,19 @@ def run_hp_opt(ems_local, plot_fig=True, result_folder='C:'):
         plt.rc('font', family='serif')
         font_size = 16
         # plots
-        p1 = plt.bar(ind, CHP_cap, width, bottom=bat_power_pos, color='skyblue')
+        p1 = plt.bar(ind, CHP_cap, width, bottom=bat_power_pos, color='skyblue', align='edge')
         p2 = plt.bar(ind, pv_power, width,
-                     bottom=bat_power_pos + CHP_cap, color='wheat')
-        p3 = plt.bar(ind, bat_power_pos, width, color='#ff5a60')
-        p4 = plt.bar(ind, bat_power_neg, width, color='#ff5a60')
-        p5 = plt.bar(ind, elec_import, width, bottom=bat_power_pos + CHP_cap + pv_power, color='#689eb8')
-        p6 = plt.bar(ind, -elec_export, width, bottom=bat_power_neg, color='black')
-        # p7 = plt.plot(ind, lastprofil_elec,linewidth=3,color='k')
-        p7 = plt.step(ind, lastprofil_elec, linewidth=2, where='mid', color='k')
-        p8 = plt.bar(ind, -ev_pow, width, bottom=bat_power_neg - elec_export, color='pink')
-        p9 = plt.bar(ind, -HP_ele_cap, width, bottom=bat_power_neg - elec_export - ev_pow, color='#a79b94')
+                     bottom=bat_power_pos + CHP_cap, color='goldenrod', align='edge')
+        p3 = plt.bar(ind, bat_power_pos, width, color='indianred', align='edge')
+        p4 = plt.bar(ind, bat_power_neg, width, color='indianred', align='edge')
+        p5 = plt.bar(ind, elec_import, width, bottom=bat_power_pos +
+                     CHP_cap + pv_power, color='grey', align='edge')
+        p6 = plt.bar(ind, -elec_export, width, bottom=bat_power_neg, color='darkseagreen', align='edge')
+        # p7 = plt.plot(ind, lastprofil_elec,linewidth=3,color='k', align='edge')
+        p7 = plt.step(ind, lastprofil_elec, linewidth=2, where='post', color='k')
+        p8 = plt.bar(ind, -ev_pow, width, bottom=bat_power_neg - elec_export, color='plum', align='edge')
+        p9 = plt.bar(ind, -HP_ele_cap, width, bottom=bat_power_neg -
+                     elec_export - ev_pow, color='wheat', align='edge')
         # xticks
         ax = plt.gca()
         ax.axhline(linewidth=2, color="black")
@@ -198,6 +200,7 @@ def run_hp_opt(ems_local, plot_fig=True, result_folder='C:'):
         # plot properties
         plt.grid(color='lightgrey', linewidth=0.75)
         plt.tight_layout(rect=[0, 0, 1, 1])
+        plt.margins(x=0)
 
         fig1 = plt.figure()
         ax2 = plt.subplot()
