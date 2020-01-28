@@ -9,7 +9,7 @@ import math
 import statistics
 
 
-def Batflex(my_ems):
+def calc_flex_bat(my_ems):
     nsteps = my_ems['time_data']['nsteps']
     ntsteps = my_ems['time_data']['ntsteps']
     Bat_flex = pd.DataFrame(0, index=range(nsteps), columns=range(7))

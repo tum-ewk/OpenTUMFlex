@@ -7,11 +7,11 @@ Created on Tue Oct 29 17:08:47 2019
 from ems.ems_mod import ems as ems_loc
 # from ems.flex.flex_draw import plot_flex as plot_flex
 from ems.optim.opt_test import run_hp_opt as opt
-from ems.flex.Bat import Batflex
+from ems.flex.Bat import calc_flex_bat
 import pandas as pd
 
 
-def PVflex(my_ems):
+def calc_flex_pv(my_ems):
     nsteps = my_ems['time_data']['nsteps']
     ntsteps = my_ems['time_data']['ntsteps']
     PV_flex = pd.DataFrame(0, index=range(nsteps), columns=range(7))
