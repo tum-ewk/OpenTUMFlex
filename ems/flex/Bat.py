@@ -30,7 +30,7 @@ def calc_flex_bat(my_ems):
         Bat_flex.iloc[i, 0] = dat1.iloc[i, 2]  - dat1.iloc[i, 1]
         nflex_P = Bat_maxP-dat1.iloc[i, 1]+dat1.iloc[i, 2]
         if (dat1.iloc[i, 3]*Bat_maxE/100 < Bat_maxE) and (nflex_P > 0):
-            req_steps = int(math.floor(ntsteps*(Bat_maxE-dat1.iloc[i, 3]*Bat_maxE/100)/nflex_P))
+            req_steps = int(round(ntsteps*(Bat_maxE-dat1.iloc[i, 3]*Bat_maxE/100)/nflex_P))
             if nflex_P < Bat_minP:
                 req_steps = 0
             elif (req_steps != 0) and (req_steps + i <= nsteps-1): 
@@ -60,14 +60,21 @@ def calc_flex_bat(my_ems):
                     Bat_flex.iloc[i, 3] = Bat_flex.iloc[i, 1]*(j-i)/ntsteps
                 if j <= i:
                     Bat_flex.iloc[i, 1] = 0
-                    Bat_flex.iloc[i, 3] = 0      
+                    Bat_flex.iloc[i, 3] = 0                                     
                     
     # Pricing
     for i in range(nsteps):
         if Bat_flex.iloc[i, 1] < 0 and i < nsteps-1:
-            max_val = my_ems['fcst']['ele_price_in']
-            max_val = statistics.mean(max_val[i:nsteps])
-            Bat_flex.iloc[i, 5] = -1*max_val
+            req_steps = int(round(Bat_flex.iloc[i, 3]*ntsteps/Bat_flex.iloc[i, 1]))
+            bch_index = [k+i+req_steps for k, l in enumerate(my_ems['optplan']['bat_input_power'][i+req_steps:nsteps]) if l > 0]
+            pow_ch = []
+            price_ch = []
+            for k in range(0, len(bch_index)):
+                pow_ch.append(my_ems['optplan']['bat_input_power'][bch_index[k]])
+                price_ch.append(my_ems['fcst']['ele_price_in'][bch_index[k]])            
+            bat_ch = pd.DataFrame({'slots':bch_index, 'Bat_in':pow_ch, 'price':price_ch})
+            bat_ch = bat_ch.sort_values(by=['Bat_in'], ascending=False)            
+            Bat_flex.iloc[i, 5] = -1*bat_ch.iloc[0,2]
         elif Bat_flex.iloc[i, 1] < 0 and i == nsteps-1:
             Bat_flex.iloc[i, 5] = -1*my_ems['fcst']['ele_price_in'][i]
 
@@ -79,7 +86,7 @@ def calc_flex_bat(my_ems):
         if ava_ebatout > 0:
             pflex_P = Bat_maxP - dat1.iloc[i, 0] + dat1.iloc[i, 1] - dat1.iloc[i, 2]
             if pflex_P > 0:
-                ava_steps = int(math.floor(ntsteps*ava_ebatout/pflex_P))
+                ava_steps = int(round(ntsteps*ava_ebatout/pflex_P))
                 if (Bat_maxP - dat1.iloc[i, 2]) < Bat_minP:
                     ava_steps = 0
                 elif (ava_steps != 0) and (ava_steps + i <= nsteps-1):
