@@ -5,7 +5,6 @@ Created on Mon Nov  4 10:14:14 2019
 """
 
 import pandas as pd
-import math
 import statistics
 
 
@@ -73,8 +72,17 @@ def calc_flex_bat(my_ems):
                 pow_ch.append(my_ems['optplan']['bat_input_power'][bch_index[k]])
                 price_ch.append(my_ems['fcst']['ele_price_in'][bch_index[k]])            
             bat_ch = pd.DataFrame({'slots':bch_index, 'Bat_in':pow_ch, 'price':price_ch})
-            bat_ch = bat_ch.sort_values(by=['Bat_in'], ascending=False)            
-            Bat_flex.iloc[i, 5] = -1*bat_ch.iloc[0,2]
+            bat_ch = bat_ch.sort_values(by=['price'], ascending=False)    
+            e_bal = abs(Bat_flex.iloc[i, 3])
+            e_prc = 0
+            for k in range(0, len(bch_index)):
+                if e_bal - bat_ch.iloc[k,1]/ntsteps >= 0:
+                    e_bal = e_bal - bat_ch.iloc[k,1]/ntsteps
+                    e_prc = e_prc + bat_ch.iloc[k,2]*bat_ch.iloc[k,1]/ntsteps                    
+                elif (e_bal - bat_ch.iloc[k,1]/ntsteps < 0) and (e_bal > 0):
+                    e_prc = e_prc + bat_ch.iloc[k,2]*e_bal
+                    e_bal = 0
+            Bat_flex.iloc[i, 5] = e_prc/Bat_flex.iloc[i, 3]
         elif Bat_flex.iloc[i, 1] < 0 and i == nsteps-1:
             Bat_flex.iloc[i, 5] = -1*my_ems['fcst']['ele_price_in'][i]
 

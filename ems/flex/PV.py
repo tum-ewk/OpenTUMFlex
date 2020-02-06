@@ -35,10 +35,10 @@ def calc_flex_pv(my_ems):
             net_payable = 0
             for j in range(flex_steps):
                 net_income = net_income + dat1[i + j] * my_ems['fcst']['ele_price_out'][i + j] / ntsteps
-                if abs(PV_flex.iloc[i + j, 1]) > dat1[i + j]:
-                    net_payable = net_payable + (abs(PV_flex.iloc[i + j, 1]) - dat1[i + j]) * \
-                                  my_ems['fcst']['ele_price_in'][i + j] / ntsteps
-            PV_flex.iloc[i, 5] = net_income + net_payable / PV_flex.iloc[i, 3]
+                # if abs(PV_flex.iloc[i + j, 1]) > dat1[i + j]:
+                #     net_payable = net_payable + (abs(PV_flex.iloc[i + j, 1]) - dat1[i + j]) * \
+                #                   my_ems['fcst']['ele_price_in'][i + j] / ntsteps
+            PV_flex.iloc[i, 5] = (net_income + net_payable) / PV_flex.iloc[i, 3]
     return PV_flex
 
 
