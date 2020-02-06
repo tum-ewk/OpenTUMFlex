@@ -21,8 +21,8 @@ from ems.optim.opt_test import run_hp_opt as opt
 from ems.flex.flexhp import calc_flex_hp
 from ems.flex.flexchp import calc_flex_chp
 from ems.flex.flex_ev import calc_flex_ev
-from ems.flex.Bat import Batflex
-from ems.flex.PV import PVflex
+from ems.flex.Bat import calc_flex_bat
+from ems.flex.PV import calc_flex_pv
 
 # import plot module
 from ems.plot.flex_draw import plot_flex as plot
@@ -161,7 +161,7 @@ if __name__ == '__main__':
     results = list()
 
     # Create sample results
-    ev_samples = random_ev_sample_generator(n_samples=50)
+    ev_samples = random_ev_sample_generator(n_samples=5)
 
     # # Run hems with multiple ev_samples
     # for i in range(len(ev_samples)):
