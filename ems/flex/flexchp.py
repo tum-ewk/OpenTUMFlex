@@ -17,7 +17,8 @@ def calc_flex_chp(ems):  # datafram open and break it down
 
     optm_df = pd.DataFrame.from_dict(ems['optplan'])
     timesteps = len(optm_df['CHP_operation'])
-    pow2energy = 24 / timesteps
+    ntsteps = ems['time_data']['ntsteps']
+    pow2energy = 1 / ntsteps
     # get the values from hp dataframe
 
     chp_operation = optm_df['CHP_operation']
@@ -54,16 +55,16 @@ def calc_flex_chp(ems):  # datafram open and break it down
     for i in range(timesteps):
         if chp_operation[i] > 0:
             # dur_max_reg[i] = i + sum(1-chp_operation[i:]) - 1
-            dur_max_reg[i] = min(i + sum(1 - chp_operation[i:]) - 1 + 2, timesteps - 3)
+            dur_max_reg[i] = min(i + sum(1 - chp_operation[i:]) - 1, timesteps)
         else:
             # dur_max_reg[i] = i + sum(chp_operation[i:]) - 1
-            dur_max_reg[i] = min(i + sum(chp_operation[i:]) - 1 + 2, timesteps - 3)
+            dur_max_reg[i] = min(i + sum(chp_operation[i:]) - 1, timesteps)
     # max duration from storage capacity
     dur_max_sto = np.zeros(timesteps)
 
     # on/off states to soc change
 
-    soc_change = chp_heat_ifrun / hs_cap * (0.5 - chp_operation) * 2 * 100
+    soc_change = chp_heat_ifrun * pow2energy / hs_cap * (0.5 - chp_operation) * 2 * 100
     for i in range(timesteps):
         soc = soc_heat[i]
         idx = i
@@ -98,27 +99,32 @@ def calc_flex_chp(ems):  # datafram open and break it down
 
     # get the price
 
-    # cost_elec_input = list(map(float, list(ems['fcst']['ele_price_in'])))
+    cost_elec_input = list(map(float, list(ems['fcst']['ele_price_in'])))
+    cost_elec_output = list(map(float, list(ems['fcst']['ele_price_out'])))
     # cost_gas_input = pd.DataFrame.from_dict(ems['fcst']['gas'], orient='index')[0]
     cost_gas_input = list(ems['fcst']['gas'])
-    cost_elec_input = ems['optplan']['elec_supply_price']
+    # cost_elec_input = ems['optplan']['elec_supply_price']
     cost_diff_pos = np.zeros(timesteps)
     cost_diff_neg = np.zeros(timesteps)
     for i in range(timesteps):
         count_flex_ts = dur_max[i] - i + 1
         if chp_operation[i] > 0:
-            cost_modified = list(map(float, cost_gas_input[dur_max[i] + 1:])) + chp_operation[dur_max[i] + 1:] * 0.05
-            cost_elec_modified = list(map(float, cost_elec_input[dur_max[i] + 1:])) + (1 - chp_operation[dur_max[i] + 1:]) * 0.1
-            cost_orig = sum(cost_gas_input[i:dur_max[i] + 1]) + sum(heapq.nsmallest(count_flex_ts, cost_elec_modified))
-            cost_new = sum(heapq.nsmallest(count_flex_ts, cost_modified)) + sum(cost_elec_input[i:dur_max[i] + 1])
-            cost_diff_neg[i] = ((cost_new * 1.1 - cost_orig) / count_flex_ts - np.mean(cost_elec_input[i:dur_max[i] + 1])) * (1-idx_no_flex[i])
+            cost_modified = list(map(float, cost_elec_input[dur_max[i] + 1:])) + chp_operation[dur_max[i] + 1:] * (-100)
+            # cost_elec_modified = list(map(float, cost_elec_input[dur_max[i] + 1:])) + \
+            #                     (1 - chp_operation[dur_max[i] + 1:]) * 0.1
+            # cost_orig = sum(cost_gas_input[i:dur_max[i] + 1])
+            #                 + sum(heapq.nsmallest(count_flex_ts, cost_elec_modified))
+            # cost_new = sum(heapq.nsmallest(count_flex_ts, cost_modified)) + sum(cost_elec_input[i:dur_max[i] + 1])
+            cost_new = sum(heapq.nlargest(count_flex_ts, cost_modified))
+            cost_diff_neg[i] = (-cost_new / count_flex_ts) * 0.85 * (1-idx_no_flex[i])
         else:
-            cost_modified = (chp_operation[dur_max[i] + 1:] - 1) * 100 + \
-                            list(map(float, cost_gas_input[dur_max[i] + 1:])) + (chp_operation[dur_max[i] + 1:] - 1) * 0.05
-            cost_elec_modified = list(map(float, cost_elec_input[dur_max[i] + 1:]))
-            cost_orig = sum(heapq.nlargest(count_flex_ts, cost_modified)) + sum(cost_elec_input[i:dur_max[i] + 1])
-            cost_new = sum(cost_gas_input[i:dur_max[i] + 1]) + sum(heapq.nlargest(count_flex_ts, cost_elec_modified))
-            cost_diff_pos[i] = ((cost_new * 1.1 - cost_orig) / count_flex_ts + 0.1)* (1-idx_no_flex[i])
+            cost_modified = (-chp_operation[dur_max[i] + 1:] + 1) * 100 + \
+                            list(map(float, cost_elec_input[dur_max[i] + 1:]))
+            # cost_elec_modified = list(map(float, cost_elec_input[dur_max[i] + 1:]))
+            # cost_orig = sum(heapq.nsmallest(count_flex_ts, cost_modified)) + sum(cost_elec_input[i:dur_max[i] + 1])
+            # cost_new = sum(cost_gas_input[i:dur_max[i] + 1]) + sum(heapq.nlargest(count_flex_ts, cost_elec_modified))
+            cost_new = sum(heapq.nsmallest(count_flex_ts, cost_modified))
+            cost_diff_pos[i] = (cost_new / count_flex_ts) * 1.15 * (1-idx_no_flex[i])
 
     # write the results in data
 
