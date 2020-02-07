@@ -123,31 +123,27 @@ def run_hems_samples(sample):
 
 
 def run_hems_SA(ems, sample):
-    # Check whether p_max * t_avail * eta is smaller or equal to desired energy
+    # Set ev variables with sample data
+    ems['devices'].update(devices(device_name='ev', stocap=sample[2], maxpow=sample[1], minpow=0,
+                                  end_soc=[100], init_soc=[0], timesetting=ems['time_data'],
+                                  ev_aval=[ems['time_data']['time_slots'][0],
+                                           ems['time_data']['time_slots'][
+                                               int(round(sample[0] * ems['time_data']['ntsteps']))]], eta=sample[3]
+                                  )
+                          )
+
+    # Optimize device schedules
+    ems['optplan'] = opt(ems, plot_fig=False, result_folder='data/')
+
+    # Check whether flexibility can be offered at all by checking p_max * t_avail * eta <= desired energy
     if sample[0] * sample[1] * sample[3] < sample[2]:
         # Flexibility cannot be offered
         ems['flexopts']['ev'] = []
     else:
-        ems['devices'].update(devices(device_name='ev', stocap=sample[2], maxpow=sample[1], minpow=0,
-                                      end_soc=[100], init_soc=[0], timesetting=ems['time_data'],
-                                      ev_aval=[ems['time_data']['time_slots'][0],
-                                               ems['time_data']['time_slots'][int(round(sample[0]*ems['time_data']['ntsteps']))]], eta=sample[3]
-                                      )
-                              )
-        # Optimize device schedules
-        ems['optplan'] = opt(ems, plot_fig=False, result_folder='data/')
-
         # Calculate ev flexibility
         ems['flexopts']['ev'] = calc_flex_ev(ems)
 
     return ems
-
-
-def prepare_SA():
-    # load the predefined ems data, initialization by user input is also possible:
-    my_ems = ems_loc(initialize=True, path='data/ev_ems_test.txt')
-
-    return my_ems
 
 
 def plot_results(ems_results):
@@ -226,20 +222,44 @@ if __name__ == '__main__':
 
     # Create a sample set
     param_values = saltelli.sample(problem, 10)
-    output = np.zeros([param_values.shape[0]])
+
+    # Create numpy arrays for storing flex offers, that shall be analyzed
+    p_pos_avg = np.zeros([param_values.shape[0]])       # average power in kW for positive flex offers
+    p_neg_avg = np.zeros([param_values.shape[0]])       # average power in kW for negative flex offers
+    p_pos_peak1_avg = np.zeros([param_values.shape[0]]) # average power in kW for peak time 1 (11-15 o'clock) for pos
+    p_neg_peak1_avg = np.zeros([param_values.shape[0]]) # average power in kW for peak time 1 (11-15 o'clock) for neg
+    p_pos_peak2_avg = np.zeros([param_values.shape[0]]) # average power in kW for peak time 1 (17-20 o'clock) for pos
+    p_neg_peak2_avg = np.zeros([param_values.shape[0]]) # average power in kW for peak time 1 (17-20 o'clock) for neg
+    n_pos_flex = np.zeros([param_values.shape[0]])      # number of positive flex offers
+    n_neg_flex = np.zeros([param_values.shape[0]])      # number of negative flex offers
+    e_sum_pos = np.zeros([param_values.shape[0]])       # sum of offered positive flexible energy in kWh
+    e_sum_neg = np.zeros([param_values.shape[0]])       # sum of offered negative flexible energy in kWh
 
     # Prepare ems for sensitivity analysis
-    ems = ems_loc(initialize=True, path='data/ev_ems_test.txt')
+    ems = ems_loc(initialize=True, path='data/ev_ems_sa_constant_price_incl_error.txt')
 
-    # # Save results to file
-    # ems_write(my_ems, path='data/ev_ems_01.txt')
+    # Run model with sample data and append output lists
+    for i in range(len(param_values)):
+        result_ems = run_hems_SA(ems, param_values[i, :])
+        # Save HEMS results to file
+        ems_write(result_ems, path='data/complete_ems/ev_ems_' + str(i) + '.txt')
+        # Save outputs for SA
+        p_pos_avg[i] = ems['flexopts']['ev']['Pos_P'][ems['flexopts']['ev']['Pos_P'] > 0].mean()
+        p_neg_avg[i] = ems['flexopts']['ev']['Neg_P'][ems['flexopts']['ev']['Neg_P'] < 0].mean()
+        p_neg_peak1_avg[i] = ems['flexopts']['ev']['Neg_P'].loc['2020-01-01 11:00':'2020-01-01 15:00'].mean()
+        p_pos_peak1_avg[i] = ems['flexopts']['ev']['Pos_P'].loc['2020-01-01 11:00':'2020-01-01 15:00'].mean()
+        p_neg_peak2_avg[i] = ems['flexopts']['ev']['Neg_P'].loc['2020-01-01 17:00':'2020-01-01 20:00'].mean()
+        p_pos_peak2_avg[i] = ems['flexopts']['ev']['Pos_P'].loc['2020-01-01 17:00':'2020-01-01 20:00'].mean()
+        n_neg_flex[i] = ems['flexopts']['ev']['Neg_P'][ems['flexopts']['ev']['Neg_P'] < 0].shape[0]
+        n_pos_flex[i] = ems['flexopts']['ev']['Pos_P'][ems['flexopts']['ev']['Pos_P'] < 0].shape[0]
+        e_sum_neg[i] = ems['flexopts']['ev']['Pos_E'][ems['flexopts']['ev']['Pos_E'] > 0].sum()
+        e_sum_pos[i] = ems['flexopts']['ev']['Neg_E'][ems['flexopts']['ev']['Neg_E'] < 0].sum()
 
-    # # Run model with sample data and append output list
-    # for i in range(len(param_values)):
-    #     output[i] = run_hems_SA(param_values[i, :])
-    #
-    # # Analyze model output
-    # Si = sobol.analyze(problem, output, print_to_console=True)
+
+    # Analyze model output
+    Si = sobol.analyze(problem, p_pos_avg, print_to_console=True)
+    # Analyze model output
+    Si = sobol.analyze(problem, p_neg_avg, print_to_console=True)
 
     # # Plot results
     # plot_results(results)
