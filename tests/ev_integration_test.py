@@ -240,10 +240,8 @@ if __name__ == '__main__':
     ems = ems_loc(initialize=True, path='data/ev_ems_sa_constant_price_incl_error.txt')
 
     # Run model with sample data and append output lists
-    for i in range(2):
+    for i in range(len(param_values)):
         result_ems = run_hems_SA(ems, param_values[i, :])
-        # Save HEMS results to file
-        ems_write(result_ems, path='data/complete_ems/ev_ems_' + str(i) + '.txt')
         if result_ems['flexopts'] == {}:
             # Save outputs for SA
             p_pos_avg[i] = 0
@@ -258,16 +256,19 @@ if __name__ == '__main__':
             e_sum_pos[i] = 0
         else:
             # Save outputs for SA
-            p_pos_avg[i] = ems['flexopts']['ev']['Pos_P'][ems['flexopts']['ev']['Pos_P'] > 0].mean()
-            p_neg_avg[i] = ems['flexopts']['ev']['Neg_P'][ems['flexopts']['ev']['Neg_P'] < 0].mean()
-            p_neg_peak1_avg[i] = ems['flexopts']['ev']['Neg_P'].loc['2020-01-01 11:00':'2020-01-01 15:00'].mean()
-            p_pos_peak1_avg[i] = ems['flexopts']['ev']['Pos_P'].loc['2020-01-01 11:00':'2020-01-01 15:00'].mean()
-            p_neg_peak2_avg[i] = ems['flexopts']['ev']['Neg_P'].loc['2020-01-01 17:00':'2020-01-01 20:00'].mean()
-            p_pos_peak2_avg[i] = ems['flexopts']['ev']['Pos_P'].loc['2020-01-01 17:00':'2020-01-01 20:00'].mean()
-            n_neg_flex[i] = ems['flexopts']['ev']['Neg_P'][ems['flexopts']['ev']['Neg_P'] < 0].shape[0]
-            n_pos_flex[i] = ems['flexopts']['ev']['Pos_P'][ems['flexopts']['ev']['Pos_P'] < 0].shape[0]
-            e_sum_neg[i] = ems['flexopts']['ev']['Pos_E'][ems['flexopts']['ev']['Pos_E'] > 0].sum()
-            e_sum_pos[i] = ems['flexopts']['ev']['Neg_E'][ems['flexopts']['ev']['Neg_E'] < 0].sum()
+            p_pos_avg[i] = result_ems['flexopts']['ev']['Pos_P'][result_ems['flexopts']['ev']['Pos_P'] > 0].mean()
+            p_neg_avg[i] = result_ems['flexopts']['ev']['Neg_P'][result_ems['flexopts']['ev']['Neg_P'] < 0].mean()
+            p_neg_peak1_avg[i] = result_ems['flexopts']['ev']['Neg_P'].loc['2020-01-01 11:00':'2020-01-01 15:00'].mean()
+            p_pos_peak1_avg[i] = result_ems['flexopts']['ev']['Pos_P'].loc['2020-01-01 11:00':'2020-01-01 15:00'].mean()
+            p_neg_peak2_avg[i] = result_ems['flexopts']['ev']['Neg_P'].loc['2020-01-01 17:00':'2020-01-01 20:00'].mean()
+            p_pos_peak2_avg[i] = result_ems['flexopts']['ev']['Pos_P'].loc['2020-01-01 17:00':'2020-01-01 20:00'].mean()
+            n_neg_flex[i] = result_ems['flexopts']['ev']['Neg_P'][result_ems['flexopts']['ev']['Neg_P'] < 0].shape[0]
+            n_pos_flex[i] = result_ems['flexopts']['ev']['Pos_P'][result_ems['flexopts']['ev']['Pos_P'] < 0].shape[0]
+            e_sum_neg[i] = result_ems['flexopts']['ev']['Pos_E'][result_ems['flexopts']['ev']['Pos_E'] > 0].sum()
+            e_sum_pos[i] = result_ems['flexopts']['ev']['Neg_E'][result_ems['flexopts']['ev']['Neg_E'] < 0].sum()
+
+            # # Save HEMS results to file
+            # ems_write(result_ems, path='data/complete_ems/ev_ems_' + str(i) + '.txt')
 
 
     # Analyze model output
