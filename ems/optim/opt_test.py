@@ -138,7 +138,8 @@ def run_hp_opt(ems_local, plot_fig=True, result_folder='C:'):
     # plot electricity balance
     N = len(timesteps)
     ind = np.arange(N)  # the x locations for the groups
-    ts = ems_local['time_data']['time_slots'].tolist()
+    #ts = ems_local['time_data']['time_slots'].tolist()
+    ts = ems_local['time_data']['time_slots']
     ts = np.asarray(ts)
     # ind = ems_local['time_data']['time_slots'].tolist()
     width = 1  # the width of the bars: can also be len(x) sequence

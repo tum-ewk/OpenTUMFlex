@@ -28,6 +28,10 @@ from ems.flex.PV import calc_flex_pv
 from ems.plot.flex_draw import plot_flex as plot
 from ems.plot.flex_draw import save_results
 
+from SALib.sample import saltelli
+from SALib.analyze import sobol
+from SALib.test_functions import Ishigami
+
 
 def run_hems(ev_cap=60, p_max=20, p_min=0, init_soc=[10], end_soc=[80], eta=0.98, ev_aval=["2020-1-1 4:00", "2020-1-1 18:00"]):
     # load the predefined ems data, initialization by user input is also possible:
@@ -45,8 +49,8 @@ def run_hems(ev_cap=60, p_max=20, p_min=0, init_soc=[10], end_soc=[80], eta=0.98
     my_ems['fcst'] = load_data(my_ems)
     my_ems['devices'].update(devices(device_name='hp', minpow=0, maxpow=0))
     my_ems['devices']['sto']['stocap'] = 0
-    my_ems['devices']['boiler']['maxpow'] = 20
-    my_ems['devices']['chp']['maxpow'] = 5
+    my_ems['devices']['boiler']['maxpow'] = 0
+    my_ems['devices']['chp']['maxpow'] = 0
     my_ems['devices']['pv']['maxpow'] = 0
     my_ems['devices']['bat']['stocap'] = 0
     my_ems['devices']['bat']['maxpow'] = 0
@@ -96,10 +100,10 @@ def run_hems_samples(sample):
 
     # load the weather and price data
     my_ems['fcst'] = load_data(my_ems)
-    my_ems['devices'].update(devices(device_name='hp', minpow=0, maxpow=2))
+    my_ems['devices'].update(devices(device_name='hp', minpow=0, maxpow=0))
     my_ems['devices']['sto']['stocap'] = 0
     my_ems['devices']['boiler']['maxpow'] = 20
-    my_ems['devices']['chp']['maxpow'] = 5
+    my_ems['devices']['chp']['maxpow'] = 0
     my_ems['devices']['pv']['maxpow'] = 0
     my_ems['devices']['bat']['stocap'] = 0
     my_ems['devices']['bat']['maxpow'] = 0
@@ -116,6 +120,34 @@ def run_hems_samples(sample):
     success = True
 
     return my_ems, success
+
+
+def run_hems_SA(ems, sample):
+    # Check whether p_max * t_avail * eta is smaller or equal to desired energy
+    if sample[0] * sample[1] * sample[3] < sample[2]:
+        # Flexibility cannot be offered
+        ems['flexopts']['ev'] = []
+    else:
+        ems['devices'].update(devices(device_name='ev', stocap=sample[2], maxpow=sample[1], minpow=0,
+                                      end_soc=[100], init_soc=[0], timesetting=ems['time_data'],
+                                      ev_aval=[ems['time_data']['time_slots'][0],
+                                               ems['time_data']['time_slots'][int(round(sample[0]*ems['time_data']['ntsteps']))]], eta=sample[3]
+                                      )
+                              )
+        # Optimize device schedules
+        ems['optplan'] = opt(ems, plot_fig=False, result_folder='data/')
+
+        # Calculate ev flexibility
+        ems['flexopts']['ev'] = calc_flex_ev(ems)
+
+    return ems
+
+
+def prepare_SA():
+    # load the predefined ems data, initialization by user input is also possible:
+    my_ems = ems_loc(initialize=True, path='data/ev_ems_test.txt')
+
+    return my_ems
 
 
 def plot_results(ems_results):
@@ -160,8 +192,8 @@ def random_ev_sample_generator(n_samples=1):
 if __name__ == '__main__':
     results = list()
 
-    # Create sample results
-    ev_samples = random_ev_sample_generator(n_samples=5)
+    # # Create sample results
+    # ev_samples = random_ev_sample_generator(n_samples=5)
 
     # # Run hems with multiple ev_samples
     # for i in range(len(ev_samples)):
@@ -171,16 +203,43 @@ if __name__ == '__main__':
     #         print('Successful HEMS Operation')
     #         results.append(my_ems)
 
-    # Run hems on multiple cores
-    results_multi = Parallel(n_jobs=multiprocessing.cpu_count())(delayed(run_hems_samples)(i) for i in ev_samples)
-    # Extract multiprocessing results
-    for i in range(len(results_multi)):
-        results.append(results_multi[i][0])
+    # # Run hems on multiple cores
+    # results_multi = Parallel(n_jobs=multiprocessing.cpu_count())(delayed(run_hems_samples)(i) for i in ev_samples)
+    # # Extract multiprocessing results
+    # for i in range(len(results_multi)):
+    #     results.append(results_multi[i][0])
 
     # # Run hems manually
     # my_ems, success = run_hems(ev_cap=50, p_max=5, p_min=0, ev_aval=["2020-1-1 4:00", "2020-1-1 18:00"], end_soc=[80], init_soc=[40])
     # #my_ems, success = run_hems()
 
+    ################### Sensitivity Analysis
+    # Define model inputs
+    problem = {'num_vars': 4,
+               'names': ['t_avail', 'p_max', 'e_req', 'eta'],
+               'bounds': [
+                   [0, 24],
+                   [1, 200],
+                   [1, 200],
+                   [0.8, 1]
+               ]}
+
+    # Create a sample set
+    param_values = saltelli.sample(problem, 10)
+    output = np.zeros([param_values.shape[0]])
+
+    # Prepare ems for sensitivity analysis
+    ems = ems_loc(initialize=True, path='data/ev_ems_test.txt')
+
+    # # Save results to file
+    # ems_write(my_ems, path='data/ev_ems_01.txt')
+
+    # # Run model with sample data and append output list
+    # for i in range(len(param_values)):
+    #     output[i] = run_hems_SA(param_values[i, :])
+    #
+    # # Analyze model output
+    # Si = sobol.analyze(problem, output, print_to_console=True)
 
     # # Plot results
     # plot_results(results)
