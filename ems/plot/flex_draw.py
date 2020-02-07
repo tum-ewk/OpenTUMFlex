@@ -15,7 +15,7 @@ def plot_flex(my_ems, device):
     dat1 = pd.DataFrame.from_dict(my_ems['flexopts'][device])
     neg_leg = 0
     pos_leg = 0
-    font_size = 16
+    font_size = 24
     fig = plt.figure(constrained_layout=True, figsize=(16, 12), dpi=80)
     spec = gridspec.GridSpec(ncols=1, nrows=4, figure=fig)
     plt_prc = fig.add_subplot(spec[3, 0])

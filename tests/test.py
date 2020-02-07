@@ -77,9 +77,11 @@ my_ems['flexopts']['hp'] = calc_flex_hp(my_ems)
 # my_ems['flexopts']['bat'] = Batflex(my_ems)
 # my_ems['flexopts']['pv'] = PVflex(my_ems)
 # my_ems['flexopts']['ev'] = calc_flex_ev(my_ems)
-
+data = pd.read_csv("result_figure_44.csv")
+my_ems['flexopts']['ev'] = data
 # plot the results#
 plot(my_ems, "hp")
+plot(my_ems, "ev")
 # plot(my_ems, "pv")
 # plot(my_ems, "bat")
 
