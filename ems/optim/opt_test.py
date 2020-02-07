@@ -29,15 +29,15 @@ def run_hp_opt(ems_local, plot_fig=True, result_folder='C:'):
     #    input_file = 'C:\Optimierung\Eingangsdaten_hp.xlsx'
     #    data = read_xlsdata(input_file);
 
-
     prob, timesteps = run_hp(ems_local)
 
     # chece if the results have been initialized
     try:
-         value(prob.ev_power[0])
+        value(prob.ev_power[0])
     except ValueError as error:
         print(error)
-        raise ImportError('the solver can not find a solution, try to change the device parameters to fulfill the requirements')
+        raise ImportError(
+            'the solver can not find a solution, try to change the device parameters to fulfill the requirements')
 
     length = len(timesteps)
 
@@ -74,7 +74,7 @@ def run_hp_opt(ems_local, plot_fig=True, result_folder='C:'):
         # electricity balance
 
         ev_pow[i] = value(prob.ev_power[idx])
-        ev_soc[i] = value(prob.ev_cont[idx])/value(prob.ev_sto_cap) if value(prob.ev_sto_cap) > 0 else 0
+        ev_soc[i] = value(prob.ev_cont[idx]) / value(prob.ev_sto_cap) * 100 if value(prob.ev_sto_cap) > 0 else 0
         elec_import[i] = value(prob.elec_import[idx])
         elec_export[i] = value(prob.elec_export[idx])
         lastprofil_elec[i] = value(prob.lastprofil_elec[idx])
@@ -108,7 +108,7 @@ def run_hp_opt(ems_local, plot_fig=True, result_folder='C:'):
 
         elec_supply_price[i] = (elec_import[i] * value(prob.ele_price_in[idx]) + pv_power[i] * value(
             prob.ele_price_out[idx]) + CHP_gas_run[i] * CHP_operation[i] * value(prob.gas_price[idx]) + 0.000011) / \
-                               (elec_import[i] + pv_power[i] + CHP_cap[i]+0.0001)
+                               (elec_import[i] + pv_power[i] + CHP_cap[i] + 0.0001)
 
         lastprofil_heat[i] = value(prob.lastprofil_heat[idx])
         sto_e_pow[i] = value(prob.sto_e_pow[idx])
@@ -119,8 +119,8 @@ def run_hp_opt(ems_local, plot_fig=True, result_folder='C:'):
 
         i += 1
 
-    SOC_heat = sto_e_cont / sto_cont_max * 100 if sto_cont_max > 0 else 0*sto_e_cont
-    SOC_elec = bat_cont / bat_max_cont * 100 if bat_max_cont > 0 else 0*bat_cont
+    SOC_heat = sto_e_cont / sto_cont_max * 100 if sto_cont_max > 0 else 0 * sto_e_cont
+    SOC_elec = bat_cont / bat_max_cont * 100 if bat_max_cont > 0 else 0 * bat_cont
     # battery_power
 
     # heat storage power
@@ -138,7 +138,7 @@ def run_hp_opt(ems_local, plot_fig=True, result_folder='C:'):
     # plot electricity balance
     N = len(timesteps)
     ind = np.arange(N)  # the x locations for the groups
-    #ts = ems_local['time_data']['time_slots'].tolist()
+    # ts = ems_local['time_data']['time_slots'].tolist()
     ts = ems_local['time_data']['time_slots']
     ts = np.asarray(ts)
     # ind = ems_local['time_data']['time_slots'].tolist()
@@ -165,7 +165,7 @@ def run_hp_opt(ems_local, plot_fig=True, result_folder='C:'):
 
     if plot_fig is True:
         # figure properties
-        fig = plt.figure(figsize=(10,6))
+        fig = plt.figure(figsize=(10, 6))
         plt.rc('font', family='serif')
         font_size = 16
         # plots
@@ -175,20 +175,20 @@ def run_hp_opt(ems_local, plot_fig=True, result_folder='C:'):
         p3 = plt.bar(ind, bat_power_pos, width, color='indianred', align='edge')
         p4 = plt.bar(ind, bat_power_neg, width, color='indianred', align='edge')
         p5 = plt.bar(ind, elec_import, width, bottom=bat_power_pos +
-                     CHP_cap + pv_power, color='grey', align='edge')
+                                                     CHP_cap + pv_power, color='grey', align='edge')
         p6 = plt.bar(ind, -elec_export, width, bottom=bat_power_neg, color='darkseagreen', align='edge')
         # p7 = plt.plot(ind, lastprofil_elec,linewidth=3,color='k', align='edge')
         p7 = plt.step(ind, lastprofil_elec, linewidth=2, where='post', color='k')
         p8 = plt.bar(ind, -ev_pow, width, bottom=bat_power_neg - elec_export, color='plum', align='edge')
         p9 = plt.bar(ind, -HP_ele_cap, width, bottom=bat_power_neg -
-                     elec_export - ev_pow, color='wheat', align='edge')
+                                                     elec_export - ev_pow, color='wheat', align='edge')
         # xticks
         ax = plt.gca()
         ax.axhline(linewidth=2, color="black")
         idx_plt = np.arange(0, len(timesteps), int(len(timesteps) / 5))
         plt.xticks(ind[idx_plt], ts[idx_plt], rotation=20)
-        plt.tick_params(axis="x", labelsize=font_size-2)
-        plt.tick_params(axis="y", labelsize=font_size-2)
+        plt.tick_params(axis="x", labelsize=font_size - 2)
+        plt.tick_params(axis="y", labelsize=font_size - 2)
         # plt.yticks(np.arange(-10, 10, 2))
         # ax1.set_xlim(0, len(timesteps) - 1)
         # labels
@@ -197,7 +197,7 @@ def run_hp_opt(ems_local, plot_fig=True, result_folder='C:'):
         # plt.title('Cost optimal plan', fontsize=20)
         plt.legend((p1[0], p2[0], p3[0], p4[0], p5[0], p6[0], p7[0], p8[0], p9[0]),
                    ('CHP', 'PV', 'Bat_Discharge', 'Bat_Charge', 'Import', 'Export', 'E_Demand', 'EV_charge', 'HP'),
-                   prop={'size': font_size-2}, bbox_to_anchor=(1.01, 0), loc="lower left")
+                   prop={'size': font_size - 2}, bbox_to_anchor=(1.01, 0), loc="lower left")
         # plot properties
         plt.grid(color='lightgrey', linewidth=0.75)
         plt.tight_layout(rect=[0, 0, 1, 1])
@@ -227,7 +227,7 @@ def run_hp_opt(ems_local, plot_fig=True, result_folder='C:'):
         plt.xticks(ind[idx_plt], timesteps[idx_plt])
         ax2.set_xlim(0, len(timesteps) - 1)
         for i in np.arange(0, len(ev_node), 2):
-            plt.axvspan(ev_node[i], ev_node[i+1], facecolor='#b9ebeb', alpha=0.5)
+            plt.axvspan(ev_node[i], ev_node[i + 1], facecolor='#b9ebeb', alpha=0.5)
         plt.show()
 
     #  plot heat balance
@@ -498,13 +498,11 @@ def run_hp(ems_local):
 
     m.ev_power = pyen.Var(m.t, within=pyen.NonNegativeReals, bounds=(ev_min_power, ev_max_power),
                           doc='power of the EV')
-    m.boiler_cap, m.PV_cap, m.elec_import, m.elec_export, m.bat_cont, m.sto_e_cont, m.bat_pow_pos, m.bat_pow_neg,\
-        m.ev_cont, m.ev_var_pow = (pyen.Var(m.t, within=pyen.NonNegativeReals) for i in range(10))
+    m.boiler_cap, m.PV_cap, m.elec_import, m.elec_export, m.bat_cont, m.sto_e_cont, m.bat_pow_pos, m.bat_pow_neg, \
+    m.ev_cont, m.ev_var_pow, m.soc_diff = (pyen.Var(m.t, within=pyen.NonNegativeReals) for i in range(11))
     m.sto_e_pow, m.costs = (pyen.Var(m.t, within=pyen.Reals) for i in range(2))
 
     # Constrains
-
-
 
     # heat_storage
     def sto_e_cont_def_rule(m, t):
@@ -549,7 +547,7 @@ def run_hp(ems_local):
         return m.costs[t] == p2e * (m.boiler_cap[t] / m.boiler_eff * m.gas_price[t]
                                     + m.CHP_run[t] * m.chp_gas_run[t] * m.gas_price[t] +
                                     m.elec_import[t] * m.ele_price_in[t]
-                                    - m.elec_export[t] * m.ele_price_out[t])
+                                    - m.elec_export[t] * m.ele_price_out[t]) + m.soc_diff[t] * 1000
 
     m.cost_sum = pyen.Constraint(m.t,
                                  rule=cost_sum_rule)
@@ -585,7 +583,7 @@ def run_hp(ems_local):
     m.ev_cont_def = pyen.Constraint(m.t, rule=ev_cont_def_rule, doc='EV_balance')
 
     def EV_end_soc_rule(m, t):
-        return m.ev_cont[t] >= m.ev_sto_cap * ev_end_soc_check[t] / 100
+        return m.ev_cont[t] >= m.ev_sto_cap * ev_end_soc_check[t] / 100 - m.soc_diff[t]
 
     m.EV_end_soc_def = pyen.Constraint(m.t, rule=EV_end_soc_rule)
 
@@ -593,7 +591,6 @@ def run_hp(ems_local):
         return m.ev_cont[t] <= m.ev_sto_cap * ev_init_soc_check[t] / 100
 
     m.EV_init_soc_def = pyen.Constraint(m.t, rule=EV_init_soc_rule)
-
 
     def EV_aval_rule(m, t):
         return m.ev_power[t] <= m.ev_aval[t] * m.ev_max_pow
@@ -614,7 +611,7 @@ def run_hp(ems_local):
                 m.hp_run[t] + m.hp_run[t + 1])
 
     # m.hp_min_still_t_def = pyen.Constraint(m.t_DN,
-      #                                     rule=hp_min_still_t_rule)
+    #                                     rule=hp_min_still_t_rule)
 
     def hp_min_lauf_t_rule(m, t):
 
@@ -624,7 +621,7 @@ def run_hp(ems_local):
 
     #  return (m.hp_run[t]-m.hp_run[t-1])*m.t_up[t] <= m.t_up[t]; m.hp_run[k]
     # m.hp_min_lauf_t_def = pyen.Constraint(m.t_UP,
-                          #                rule=hp_min_lauf_t_rule)
+    #                rule=hp_min_lauf_t_rule)
 
     def chp_min_still_t_rule(m, t):
         return (m.CHP_run[t - 1] - m.CHP_run[t]) * m.T_DN <= m.T_DN - (
@@ -632,8 +629,8 @@ def run_hp(ems_local):
         # + m.CHP_cap[t + 2] + m.CHP_cap[t + 3] + m.CHP_cap[t + 4] +
         # m.CHP_cap[t + 5]);
 
-   # m.chp_min_still_t_def = pyen.Constraint(m.t_DN,
-                #                            rule=chp_min_still_t_rule)
+    # m.chp_min_still_t_def = pyen.Constraint(m.t_DN,
+    #                            rule=chp_min_still_t_rule)
 
     def chp_min_lauf_t_rule(m, t):
 
@@ -642,8 +639,8 @@ def run_hp(ems_local):
         # m.CHP_cap[t + 3] + m.CHP_cap[t + 4] + m.CHP_cap[t + 5];
 
     #  return (m.hp_run[t]-m.hp_run[t-1])*m.t_up[t] <= m.t_up[t]; m.hp_run[k]
-   # m.chp_min_lauf_t_def = pyen.Constraint(m.t_UP,
-                          #                 rule=chp_min_lauf_t_rule)
+    # m.chp_min_lauf_t_def = pyen.Constraint(m.t_UP,
+    #                 rule=chp_min_lauf_t_rule)
 
     # boiler
     def boiler_max_cap_rule(m, t):
