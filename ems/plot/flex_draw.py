@@ -15,12 +15,10 @@ def plot_flex(my_ems, device):
     dat1 = pd.DataFrame.from_dict(my_ems['flexopts'][device])
     neg_leg = 0
     pos_leg = 0
-<<<<<<< HEAD
-    fig = plt.figure(constrained_layout=True, figsize=(16, 12), dpi=100)
-=======
+
     font_size = 16
     fig = plt.figure(constrained_layout=True, figsize=(16, 12), dpi=80)
->>>>>>> 488f422e8c7ed67d14cf64a669d02b1419a846a1
+
     spec = gridspec.GridSpec(ncols=1, nrows=4, figure=fig)
     plt_prc = fig.add_subplot(spec[3, 0])
     plt_pow = fig.add_subplot(spec[2, 0], sharex=plt_prc)
@@ -70,45 +68,6 @@ def plot_flex(my_ems, device):
     # Legend
     if neg_leg == 1 and pos_leg == 1:
         plt_cum.legend((p1[0], p2[0], p3[0]), ('Cummulative', 'Neg_flex', 'Pos_flex'),
-<<<<<<< HEAD
-                       prop={'size': 30}, bbox_to_anchor=(1.01, 0), loc="lower left")
-        plt_pow.legend((p4, p5), ('$P_{Neg\_flex}}$', '$P_{Pos\_flex}}$'),
-                       prop={'size': 33}, bbox_to_anchor=(1.01, 0), loc="lower left")
-        plt_prc.legend((p6, p7), ('$C_{Neg\_flex}}$', '$C_{Pos\_flex}}$'),
-                       prop={'size': 33}, bbox_to_anchor=(1.01, 0), loc="lower left")
-    elif neg_leg == 1:
-        plt_cum.legend((p1[0], p2[0]), ('Cummulative', 'Neg_flex'),
-                       prop={'size': 30}, bbox_to_anchor=(1.01, 0), loc="lower left")
-        plt_pow.legend(p4, ['$P_{Neg\_flex}}$'],
-                       prop={'size': 33}, bbox_to_anchor=(1.01, 0), loc="lower left")
-        plt_prc.legend(p6, ['$C_{Neg\_flex}}$'],
-                       prop={'size': 27}, bbox_to_anchor=(1.01, 0), loc="lower left")
-    elif pos_leg == 1:
-        plt_cum.legend((p1[0], p3[0]), ('Cummulative', 'Pos_flex'),
-                       prop={'size': 30}, bbox_to_anchor=(1.01, 0), loc="lower left")
-        plt_pow.legend((p5), ['$P_{Pos\_flex}}$'],
-                       prop={'size': 33}, bbox_to_anchor=(1.01, 0), loc="lower left")
-        plt_prc.legend((p7), ['$C_{Pos\_flex}}$'],
-                       prop={'size': 33}, bbox_to_anchor=(1.01, 0), loc="lower left")
-    else:
-        plt_cum.legend((p1[0]), ('Cummulative'),
-                       prop={'size': 30}, bbox_to_anchor=(1.01, 0), loc="lower left")
-
-    # Labels            
-    plt_cum.set_title('Flexibility plots', fontsize=36, pad=20)
-    plt_cum.set_ylabel('$CE\ [kWh]$', fontsize=30)
-    plt_cum.tick_params(axis="x", labelsize=24, labelbottom=False)
-    plt_cum.tick_params(axis="y", labelsize=24)
-    plt_cum.grid(color='lightgrey', linewidth=0.75)
-    plt_pow.set_ylabel('$Power\ [kWh]$)', fontsize=30)
-    plt_pow.tick_params(axis="x", labelsize=24, labelbottom=False)
-    plt_pow.tick_params(axis="y", labelsize=24)
-    plt_pow.grid(color='lightgrey', linewidth=0.75, zorder=0)
-    plt_prc.set_xlabel('Time', fontsize=30, labelpad=3)
-    plt_prc.set_ylabel('$Price\ [€/kWh]$', fontsize=30)
-    plt_prc.tick_params(axis="x", labelsize=18, pad=5)
-    plt_prc.tick_params(axis="y", labelsize=24)
-=======
                        prop={'size': font_size}, bbox_to_anchor=(1.01, 0), loc="lower left")
         plt_pow.legend((p4, p5), ('$P_{Neg\_flex}}$', '$P_{Pos\_flex}}$'),
                        prop={'size': font_size+2}, bbox_to_anchor=(1.01, 0), loc="lower left")
@@ -146,7 +105,6 @@ def plot_flex(my_ems, device):
     plt_prc.set_ylabel('$Price\ [€/kWh]$', fontsize=font_size+2)
     plt_prc.tick_params(axis="x", labelsize=font_size, pad=5)
     plt_prc.tick_params(axis="y", labelsize=font_size)
->>>>>>> 488f422e8c7ed67d14cf64a669d02b1419a846a1
     plt_prc.grid(color='lightgrey', linewidth=0.75, zorder=0)
     fig.align_labels()
 

@@ -138,7 +138,8 @@ def run_hems_SA(ems, sample):
     # Check whether flexibility can be offered at all by checking p_max * t_avail * eta <= desired energy
     if sample[0] * sample[1] * sample[3] < sample[2]:
         # Flexibility cannot be offered
-        ems['flexopts']['ev'] = []
+        #ems['flexopts']['ev'] = []
+        pass
     else:
         # Calculate ev flexibility
         ems['flexopts']['ev'] = calc_flex_ev(ems)
@@ -239,21 +240,34 @@ if __name__ == '__main__':
     ems = ems_loc(initialize=True, path='data/ev_ems_sa_constant_price_incl_error.txt')
 
     # Run model with sample data and append output lists
-    for i in range(len(param_values)):
+    for i in range(2):
         result_ems = run_hems_SA(ems, param_values[i, :])
         # Save HEMS results to file
         ems_write(result_ems, path='data/complete_ems/ev_ems_' + str(i) + '.txt')
-        # Save outputs for SA
-        p_pos_avg[i] = ems['flexopts']['ev']['Pos_P'][ems['flexopts']['ev']['Pos_P'] > 0].mean()
-        p_neg_avg[i] = ems['flexopts']['ev']['Neg_P'][ems['flexopts']['ev']['Neg_P'] < 0].mean()
-        p_neg_peak1_avg[i] = ems['flexopts']['ev']['Neg_P'].loc['2020-01-01 11:00':'2020-01-01 15:00'].mean()
-        p_pos_peak1_avg[i] = ems['flexopts']['ev']['Pos_P'].loc['2020-01-01 11:00':'2020-01-01 15:00'].mean()
-        p_neg_peak2_avg[i] = ems['flexopts']['ev']['Neg_P'].loc['2020-01-01 17:00':'2020-01-01 20:00'].mean()
-        p_pos_peak2_avg[i] = ems['flexopts']['ev']['Pos_P'].loc['2020-01-01 17:00':'2020-01-01 20:00'].mean()
-        n_neg_flex[i] = ems['flexopts']['ev']['Neg_P'][ems['flexopts']['ev']['Neg_P'] < 0].shape[0]
-        n_pos_flex[i] = ems['flexopts']['ev']['Pos_P'][ems['flexopts']['ev']['Pos_P'] < 0].shape[0]
-        e_sum_neg[i] = ems['flexopts']['ev']['Pos_E'][ems['flexopts']['ev']['Pos_E'] > 0].sum()
-        e_sum_pos[i] = ems['flexopts']['ev']['Neg_E'][ems['flexopts']['ev']['Neg_E'] < 0].sum()
+        if result_ems['flexopts'] == {}:
+            # Save outputs for SA
+            p_pos_avg[i] = 0
+            p_neg_avg[i] = 0
+            p_neg_peak1_avg[i] = 0
+            p_pos_peak1_avg[i] = 0
+            p_neg_peak2_avg[i] = 0
+            p_pos_peak2_avg[i] = 0
+            n_neg_flex[i] = 0
+            n_pos_flex[i] = 0
+            e_sum_neg[i] = 0
+            e_sum_pos[i] = 0
+        else:
+            # Save outputs for SA
+            p_pos_avg[i] = ems['flexopts']['ev']['Pos_P'][ems['flexopts']['ev']['Pos_P'] > 0].mean()
+            p_neg_avg[i] = ems['flexopts']['ev']['Neg_P'][ems['flexopts']['ev']['Neg_P'] < 0].mean()
+            p_neg_peak1_avg[i] = ems['flexopts']['ev']['Neg_P'].loc['2020-01-01 11:00':'2020-01-01 15:00'].mean()
+            p_pos_peak1_avg[i] = ems['flexopts']['ev']['Pos_P'].loc['2020-01-01 11:00':'2020-01-01 15:00'].mean()
+            p_neg_peak2_avg[i] = ems['flexopts']['ev']['Neg_P'].loc['2020-01-01 17:00':'2020-01-01 20:00'].mean()
+            p_pos_peak2_avg[i] = ems['flexopts']['ev']['Pos_P'].loc['2020-01-01 17:00':'2020-01-01 20:00'].mean()
+            n_neg_flex[i] = ems['flexopts']['ev']['Neg_P'][ems['flexopts']['ev']['Neg_P'] < 0].shape[0]
+            n_pos_flex[i] = ems['flexopts']['ev']['Pos_P'][ems['flexopts']['ev']['Pos_P'] < 0].shape[0]
+            e_sum_neg[i] = ems['flexopts']['ev']['Pos_E'][ems['flexopts']['ev']['Pos_E'] > 0].sum()
+            e_sum_pos[i] = ems['flexopts']['ev']['Neg_E'][ems['flexopts']['ev']['Neg_E'] < 0].sum()
 
 
     # Analyze model output
