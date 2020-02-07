@@ -26,9 +26,7 @@ def calc_flex_ev(my_ems):
 
     # Flexibility Table for entire time period #############################################
     ev_flex = pd.DataFrame(0, columns={p_pos, p_neg, e_pos, e_neg, pr_pos, pr_neg, pr_fcst, p_opt},
-                           index=pd.date_range(start=my_ems['time_data']['start_time'],
-                                               end=my_ems['time_data']['end_time'],
-                                               freq=str(my_ems['time_data']['t_inval']) + 'Min'))
+                           index=my_ems['time_data']['time_slots'])
     # Fixing column order
     ev_flex = ev_flex[[p_pos, p_neg, e_pos, e_neg, pr_pos, pr_neg, pr_fcst, p_opt]]
 
