@@ -19,8 +19,9 @@ from ems.optim.opt_test import run_hp_opt as opt
 # import flex devices modules
 from ems.flex.flexhp import calc_flex_hp
 from ems.flex.flexchp import calc_flex_chp
-from ems.flex.Bat import Batflex
-from ems.flex.PV import PVflex
+from ems.flex.Bat import calc_flex_bat
+from ems.flex.PV import calc_flex_pv
+from ems.flex.flex_ev import  calc_flex_ev
 
 # import plot module
 from ems.plot.flex_draw import plot_flex as plot
@@ -48,13 +49,13 @@ my_ems['devices']['sto']['stocap'] = 15
 my_ems['devices']['boiler']['maxpow'] = 2
 my_ems['devices']['chp']['maxpow'] = 0
 my_ems['devices']['pv']['maxpow'] = 5
-my_ems['devices']['bat']['stocap'] = 10
-my_ems['devices']['bat']['maxpow'] = 10
+my_ems['devices']['bat']['stocap'] = 5
+my_ems['devices']['bat']['maxpow'] = 3
 my_ems['devices'].update(devices(device_name='ev', minpow=0, maxpow=0, stocap=0, init_soc=[20, 35, 30],
                                  end_soc=[50, 50, 40], eta=0.98,
-                                 ev_aval=["2019-12-18 4:00", "2019-12-18 9:00",
-                                          "2019-12-18 13:45", "2019-12-18 18:15",
-                                          "2019-12-19 9:30", "2019-12-19 11:15"],
+                                 ev_aval=["2019-12-18 04:00", "2019-12-18 09:00",
+                                          "2019-12-19 09:30", "2019-12-19 11:15",
+                                          "2019-12-18 13:45", "2019-12-18 18:15"],
                                  # ev_aval=["2019-12-18 4:00", "2019-12-18 9:00"],
                                  timesetting=my_ems['time_data']))
 
@@ -72,13 +73,14 @@ my_ems['optplan'] = opt(my_ems, plot_fig=True, result_folder='data/')
 # calculate the flexibility of one device
 my_ems['flexopts']['hp'] = calc_flex_hp(my_ems)
 # my_ems['flexopts']['chp'] = calc_flex_chp(my_ems)
-# my_ems['flexopts']['bat'] = Batflex(my_ems)
-# my_ems['flexopts']['pv'] = PVflex(my_ems)
+my_ems['flexopts']['bat'] = calc_flex_bat(my_ems)
+my_ems['flexopts']['pv'] = calc_flex_pv(my_ems)
+# my_ems['flexopts']['ev'] = calc_flex_ev(my_ems)
 
 # plot the results#
 plot(my_ems, "hp")
-# plot(my_ems, "pv")
-# plot(my_ems, "bat")
+plot(my_ems, "pv")
+plot(my_ems, "bat")
 
 # store the data of the whole ems for reuse
-# ems_write(my_ems, path='data/test_Nr_02.txt')
+# ems_write(my_ems, path='data/test_Nr_01.txt')

@@ -7,6 +7,7 @@ overview and quick search of the needed data.
 
 import pandas as pd
 import json as js
+import datetime
 
 
 # from ems.optim.opt_test import run_hp_opt as opt
@@ -41,8 +42,8 @@ def ems(emsid=000000, userpref=None, flexprodtype=None, timeintervall=15, days=1
                      'ntsteps': int(60 / timeintervall),
                      't_inval': timeintervall,
                      'd_inval': dataintervall,
-                     'start_time': '2019-12-18 00:00',
-                     'end_time': '2019-12-19 12:00',
+                     'start_time': '12-18 00:00',
+                     'end_time': '12-19 12:00',
                      'days': days}
 
         dic_ems = {'ID': emsid,
@@ -61,7 +62,7 @@ def ems(emsid=000000, userpref=None, flexprodtype=None, timeintervall=15, days=1
 
         with open(path) as f:
             dic_ems = js.load(f)
-
+            # dic_ems['time_data']['time_slots'] = pd.Index(dic_ems['time_data']['time_slots'])
             for key in dic_ems['flexopts']:
                 dic_ems['flexopts'][key] = pd.DataFrame.from_dict(dic_ems['flexopts'][key])
 
@@ -76,21 +77,24 @@ def ems(emsid=000000, userpref=None, flexprodtype=None, timeintervall=15, days=1
     return dic_ems
 
 
+
 def ems_write(dict_ems, path):
     # dict_ems['fcst'] = dict_ems['fcst'].to_dict('dict')
     # dict_ems['optplan'] = dict_ems['optplan'].to_dict('dict')
     # dict_ems['flexopts'][] = dict_ems['flexopts'].to_dict('dict')
-
+    dict_ems['time_data']['time_slots'] = list(dict_ems['time_data']['time_slots'])
     with open(path, 'w') as f:
         for key in dict_ems['flexopts']:
-            dict_ems['flexopts'][key] = dict_ems['flexopts'][key].to_dict('dict')
+            if not isinstance(dict_ems['flexopts'][key], dict):
+                dict_ems['flexopts'][key] = dict_ems['flexopts'][key].to_dict('dict')
         js.dump(dict_ems, f)
+    print('complete saving EMS_data!!! ')
 
 
 def update_time_data(dict_ems):
     dict_time = dict_ems['time_data']
     dict_time['time_slots'] = pd.date_range(start=dict_time['start_time'], end=dict_time['end_time'],
-                                            freq=str(dict_time['t_inval']) + 'min').strftime('%m-%d %H:%M').tolist()
+                                            freq=str(dict_time['t_inval']) + 'min').strftime('%Y-%m-%d %H:%M')
 
     dict_time['nsteps'] = len(dict_time['time_slots'])
     dict_time['ntsteps'] = int(60 / dict_ems['time_data']['t_inval'])

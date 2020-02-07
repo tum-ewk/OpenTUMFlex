@@ -6,12 +6,10 @@ Created on Tue Oct 29 17:08:47 2019
 
 from ems.ems_mod import ems as ems_loc
 # from ems.flex.flex_draw import plot_flex as plot_flex
-from ems.optim.opt_test import run_hp_opt as opt
-from ems.flex.Bat import Batflex
 import pandas as pd
 
 
-def PVflex(my_ems):
+def calc_flex_pv(my_ems):
     nsteps = my_ems['time_data']['nsteps']
     ntsteps = my_ems['time_data']['ntsteps']
     PV_flex = pd.DataFrame(0, index=range(nsteps), columns=range(7))
@@ -29,7 +27,7 @@ def PVflex(my_ems):
             PV_flex.iloc[i, 1] = -1 * dat2[i]
             PV_flex.iloc[i, 3] = PV_flex.iloc[i, 1] * (j - i) / ntsteps
 
-    # PV negative flexibility pricing updated
+    # PV negative flexibility pricing
     for i in range(nsteps):
         if PV_flex.iloc[i, 1] < 0:
             flex_steps = int(round(ntsteps * PV_flex.iloc[i, 3] / PV_flex.iloc[i, 1]))
@@ -37,16 +35,16 @@ def PVflex(my_ems):
             net_payable = 0
             for j in range(flex_steps):
                 net_income = net_income + dat1[i + j] * my_ems['fcst']['ele_price_out'][i + j] / ntsteps
-                if abs(PV_flex.iloc[i + j, 1]) > dat1[i + j]:
-                    net_payable = net_payable + (abs(PV_flex.iloc[i + j, 1]) - dat1[i + j]) * \
-                                  my_ems['fcst']['ele_price_in'][i + j] / ntsteps
-            PV_flex.iloc[i, 5] = net_income + net_payable / PV_flex.iloc[i, 3]
+                # if abs(PV_flex.iloc[i + j, 1]) > dat1[i + j]:
+                #     net_payable = net_payable + (abs(PV_flex.iloc[i + j, 1]) - dat1[i + j]) * \
+                #                   my_ems['fcst']['ele_price_in'][i + j] / ntsteps
+            PV_flex.iloc[i, 5] = (net_income + net_payable) / PV_flex.iloc[i, 3]
     return PV_flex
 
 
 if __name__ == '__main__':
     my_ems = ems_loc(initialize=True, path='C:/Users/ge57vam/emsflex/ems/test_chp.txt')
-    my_ems['fcst'] = input_data(my_ems)
+    # my_ems['fcst'] = ems(my_ems)
     # my_ems['flexopts']['pv'] = PVflex(my_ems)
     # my_ems['time_data']['nsteps'] = 24
     # my_ems['time_data']['ntsteps'] = 1
