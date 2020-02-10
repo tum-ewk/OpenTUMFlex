@@ -1,6 +1,7 @@
 
 import pandas as pd
 import numpy as np
+import copy
 import multiprocessing
 import matplotlib.pyplot as plt
 from joblib import Parallel, delayed
@@ -123,28 +124,28 @@ def run_hems_samples(sample):
 
 
 def run_hems_SA(ems, sample):
+    ems_copy = copy.deepcopy(ems)
     # Set ev variables with sample data
-    ems['devices'].update(devices(device_name='ev', stocap=sample[2], maxpow=sample[1], minpow=0,
-                                  end_soc=[100], init_soc=[0], timesetting=ems['time_data'],
-                                  ev_aval=[ems['time_data']['time_slots'][0],
-                                           ems['time_data']['time_slots'][
-                                               int(round(sample[0] * ems['time_data']['ntsteps']))]], eta=sample[3]
+    ems_copy['devices'].update(devices(device_name='ev', stocap=sample[2], maxpow=sample[1], minpow=0,
+                                  end_soc=[100], init_soc=[0], timesetting=ems_copy['time_data'],
+                                  ev_aval=[ems_copy['time_data']['time_slots'][0],
+                                           ems_copy['time_data']['time_slots'][
+                                               int(round(sample[0] * ems_copy['time_data']['ntsteps']))]], eta=sample[3]
                                   )
                           )
 
     # Optimize device schedules
-    ems['optplan'] = opt(ems, plot_fig=False, result_folder='data/')
+    ems_copy['optplan'] = opt(ems_copy, plot_fig=False, result_folder='data/')
 
     # Check whether flexibility can be offered at all by checking p_max * t_avail * eta <= desired energy
     if sample[0] * sample[1] * sample[3] < sample[2]:
         # Flexibility cannot be offered
-        #ems['flexopts']['ev'] = []
         pass
     else:
         # Calculate ev flexibility
-        ems['flexopts']['ev'] = calc_flex_ev(ems)
+        ems_copy['flexopts']['ev'] = calc_flex_ev(ems_copy)
 
-    return ems
+    return ems_copy
 
 
 def plot_results(ems_results):
@@ -237,11 +238,11 @@ if __name__ == '__main__':
     e_sum_neg = np.zeros([param_values.shape[0]])       # sum of offered negative flexible energy in kWh
 
     # Prepare ems for sensitivity analysis
-    ems = ems_loc(initialize=True, path='data/ev_ems_sa_constant_price_incl_error.txt')
+    ems_sa = ems_loc(initialize=True, path='data/ev_ems_sa_constant_price_incl_error.txt')
 
     # Run model with sample data and append output lists
     for i in range(len(param_values)):
-        result_ems = run_hems_SA(ems, param_values[i, :])
+        result_ems = run_hems_SA(ems_sa, param_values[i, :])
         if result_ems['flexopts'] == {}:
             # Save outputs for SA
             p_pos_avg[i] = 0
@@ -267,8 +268,8 @@ if __name__ == '__main__':
             e_sum_neg[i] = result_ems['flexopts']['ev']['Pos_E'][result_ems['flexopts']['ev']['Pos_E'] > 0].sum()
             e_sum_pos[i] = result_ems['flexopts']['ev']['Neg_E'][result_ems['flexopts']['ev']['Neg_E'] < 0].sum()
 
-            # # Save HEMS results to file
-            # ems_write(result_ems, path='data/complete_ems/ev_ems_' + str(i) + '.txt')
+        # Save HEMS results to file
+        ems_write(result_ems, path='data/complete_ems/ev_ems_' + str(i) + '.txt')
 
 
     # Analyze model output
