@@ -378,7 +378,6 @@ def run_hp(ems_local):
     ev_eta = ev_param['eta']
     ev_soc_end = ev_param['endSOC']
     ev_aval = ev_param['aval']
-    ev_consm = ev_param['consm']
     ev_init_soc_check = ev_param['init_soc_check']
     ev_end_soc_check = ev_param['end_soc_check']
     # CHP
@@ -439,7 +438,6 @@ def run_hp(ems_local):
     # m.ev_soc_end = pyen.Param(m.aval_block, initialize=ev_soc_end)
     m.ev_aval = pyen.Param(m.t, initialize=1, mutable=True)
     m.ev_charg_amount = ev_sto_cap * (ev_soc_end[-1] - ev_soc_init[0]) / 100
-    m.ev_consm = pyen.Param(m.t, initialize=1, mutable=True)
 
     # boilder
     m.boiler_max_cap = pyen.Param(initialize=boil_cap)
@@ -475,7 +473,6 @@ def run_hp(ems_local):
         m.solar[t] = time_series.loc[t]['solar']
         # fill the ev availability
         m.ev_aval[t] = ev_aval[t]
-        m.ev_consm[t] = ev_consm[t]
         # calculate the spline function for thermal power of heat pump
         spl_ther_pow = UnivariateSpline(list(map(float, hp_ther_cap.columns.values)), list(hp_ther_cap.iloc[0, :]))
         m.hp_ther_pow[t] = spl_ther_pow(time_series.loc[t]['temp'] + 273.15).item(0)
@@ -576,9 +573,9 @@ def run_hp(ems_local):
     # ev battery balance
     def ev_cont_def_rule(m, t):
         if t > m.t[1]:
-            return m.ev_cont[t] == m.ev_cont[t - 1] + m.ev_power[t] * p2e * ev_eta - m.ev_consm[t] - m.ev_var_pow[t]
+            return m.ev_cont[t] == m.ev_cont[t - 1] + m.ev_power[t] * p2e * ev_eta - m.ev_var_pow[t]
         else:
-            return m.ev_cont[t] == m.ev_sto_cap * ev_soc_init[0] / 100 + m.ev_power[t] * p2e * ev_eta - m.ev_consm[t]
+            return m.ev_cont[t] == m.ev_sto_cap * ev_soc_init[0] / 100 + m.ev_power[t] * p2e * ev_eta
 
     m.ev_cont_def = pyen.Constraint(m.t, rule=ev_cont_def_rule, doc='EV_balance')
 

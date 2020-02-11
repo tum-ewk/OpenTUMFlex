@@ -99,7 +99,10 @@ def devices(device_name, minpow=0, maxpow=0, stocap=None, eta=None, init_soc=Non
                                  (_ev_aval[idx + 1].hour - hour_start) +
                                  (_ev_aval[idx + 1].minute - min_start) / 60) * ntsteps - 1)
                 aval[_aval_start:_aval_end + 1] = 1
-                init_soc_check[_aval_start] = init_soc[i]
+                if _aval_start == 0:
+                    pass
+                else:
+                    init_soc_check[_aval_start-1] = init_soc[i]
                 end_soc_check[_aval_end] = end_soc[i]
                 if i == _points - 1:
                     end_soc_check[_aval_end:] = end_soc[i]
@@ -107,14 +110,14 @@ def devices(device_name, minpow=0, maxpow=0, stocap=None, eta=None, init_soc=Non
 
             idx = 0
             for j in range(_points - 1):
-                #_aval_end = int(_ev_aval[idx + 1].hour * 4 + _ev_aval[idx + 1].minute / 15)
+                # _aval_end = int(_ev_aval[idx + 1].hour * 4 + _ev_aval[idx + 1].minute / 15)
                 _aval_end = int(((_ev_aval[idx + 1].day - day_start) * 24 +
                                  (_ev_aval[idx + 1].hour - hour_start) +
                                  (_ev_aval[idx + 1].minute - min_start) / 60) * ntsteps)
-                #_aval_start = int(_ev_aval[idx + 2].hour * 4 + _ev_aval[idx + 2].minute / 15)
+                # _aval_start = int(_ev_aval[idx + 2].hour * 4 + _ev_aval[idx + 2].minute / 15)
                 _aval_start = int(((_ev_aval[idx + 2].day - day_start) * 24 +
-                                 (_ev_aval[idx + 2].hour - hour_start) +
-                                 (_ev_aval[idx + 2].minute - min_start) / 60) * ntsteps)
+                                   (_ev_aval[idx + 2].hour - hour_start) +
+                                   (_ev_aval[idx + 2].minute - min_start) / 60) * ntsteps)
                 node[idx] = _aval_end
                 node[idx + 1] = _aval_start - 1
                 consum[_aval_end:_aval_start] = (end_soc[j] - init_soc[j + 1]) / 100 * stocap / \
@@ -123,7 +126,7 @@ def devices(device_name, minpow=0, maxpow=0, stocap=None, eta=None, init_soc=Non
 
             unit.update({'endSOC': end_soc, 'aval': list(aval), 'aval_init': list(aval_time_init),
                          'aval_end': list(aval_time_end),
-                         'consm': list(consum), 'init_soc_check': list(init_soc_check),
+                         'init_soc_check': list(init_soc_check),
                          'end_soc_check': list(end_soc_check), 'node': list(node)})
             df_unit_ev = unit
             dict_unit_ev = {device_name: df_unit_ev}
