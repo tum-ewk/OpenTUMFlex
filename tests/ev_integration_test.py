@@ -1,6 +1,7 @@
 
 import pandas as pd
 import numpy as np
+from numpy import savetxt
 import copy
 import multiprocessing
 import matplotlib.pyplot as plt
@@ -229,17 +230,10 @@ if __name__ == '__main__':
     # Create numpy arrays for storing flex offers, that shall be analyzed
     p_pos_avg = np.zeros([param_values.shape[0]])       # average power in kW for positive flex offers
     p_neg_avg = np.zeros([param_values.shape[0]])       # average power in kW for negative flex offers
-    p_pos_peak1_avg = np.zeros([param_values.shape[0]]) # average power in kW for peak time 1 (11-15 o'clock) for pos
-    p_neg_peak1_avg = np.zeros([param_values.shape[0]]) # average power in kW for peak time 1 (11-15 o'clock) for neg
-    p_pos_peak2_avg = np.zeros([param_values.shape[0]]) # average power in kW for peak time 1 (17-20 o'clock) for pos
-    p_neg_peak2_avg = np.zeros([param_values.shape[0]]) # average power in kW for peak time 1 (17-20 o'clock) for neg
-    n_pos_flex = np.zeros([param_values.shape[0]])      # number of positive flex offers
-    n_neg_flex = np.zeros([param_values.shape[0]])      # number of negative flex offers
-    e_sum_pos = np.zeros([param_values.shape[0]])       # sum of offered positive flexible energy in kWh
-    e_sum_neg = np.zeros([param_values.shape[0]])       # sum of offered negative flexible energy in kWh
 
     # Prepare ems for sensitivity analysis
     ems_sa = ems_loc(initialize=True, path='data/ev_ems_sa_constant_price_incl_error.txt')
+    #ems_sa['fcst']['ele_price_in'] = list(0.28 + np.linspace(0, 1, 96)*0.0001)
 
     # Run model with sample data and append output lists
     for i in range(len(param_values)):
@@ -248,35 +242,29 @@ if __name__ == '__main__':
             # Save outputs for SA
             p_pos_avg[i] = 0
             p_neg_avg[i] = 0
-            p_neg_peak1_avg[i] = 0
-            p_pos_peak1_avg[i] = 0
-            p_neg_peak2_avg[i] = 0
-            p_pos_peak2_avg[i] = 0
-            n_neg_flex[i] = 0
-            n_pos_flex[i] = 0
-            e_sum_neg[i] = 0
-            e_sum_pos[i] = 0
         else:
             # Save outputs for SA
-            p_pos_avg[i] = result_ems['flexopts']['ev']['Pos_P'][result_ems['flexopts']['ev']['Pos_P'] > 0].mean()
-            p_neg_avg[i] = result_ems['flexopts']['ev']['Neg_P'][result_ems['flexopts']['ev']['Neg_P'] < 0].mean()
-            p_neg_peak1_avg[i] = result_ems['flexopts']['ev']['Neg_P'].loc['2020-01-01 11:00':'2020-01-01 15:00'].mean()
-            p_pos_peak1_avg[i] = result_ems['flexopts']['ev']['Pos_P'].loc['2020-01-01 11:00':'2020-01-01 15:00'].mean()
-            p_neg_peak2_avg[i] = result_ems['flexopts']['ev']['Neg_P'].loc['2020-01-01 17:00':'2020-01-01 20:00'].mean()
-            p_pos_peak2_avg[i] = result_ems['flexopts']['ev']['Pos_P'].loc['2020-01-01 17:00':'2020-01-01 20:00'].mean()
-            n_neg_flex[i] = result_ems['flexopts']['ev']['Neg_P'][result_ems['flexopts']['ev']['Neg_P'] < 0].shape[0]
-            n_pos_flex[i] = result_ems['flexopts']['ev']['Pos_P'][result_ems['flexopts']['ev']['Pos_P'] < 0].shape[0]
-            e_sum_neg[i] = result_ems['flexopts']['ev']['Pos_E'][result_ems['flexopts']['ev']['Pos_E'] > 0].sum()
-            e_sum_pos[i] = result_ems['flexopts']['ev']['Neg_E'][result_ems['flexopts']['ev']['Neg_E'] < 0].sum()
+            if result_ems['flexopts']['ev']['Pos_P'][result_ems['flexopts']['ev']['Pos_P'] > 0].empty:
+                p_pos_avg[i] = 0
+            else:
+                p_pos_avg[i] = result_ems['flexopts']['ev']['Pos_P'][result_ems['flexopts']['ev']['Pos_P'] > 0].mean()
+            if result_ems['flexopts']['ev']['Neg_P'][result_ems['flexopts']['ev']['Neg_P'] < 0].empty:
+                p_neg_avg[i] = 0
+            else:
+                p_neg_avg[i] = -result_ems['flexopts']['ev']['Neg_P'][result_ems['flexopts']['ev']['Neg_P'] < 0].mean()
 
         # Save HEMS results to file
-        ems_write(result_ems, path='data/complete_ems/ev_ems_' + str(i) + '.txt')
+        ems_write(result_ems, path='results/SA_ems_results/ev_ems_' + str(i) + '.txt')
 
 
     # Analyze model output
-    Si = sobol.analyze(problem, p_pos_avg, print_to_console=True)
-    # Analyze model output
-    Si = sobol.analyze(problem, p_neg_avg, print_to_console=True)
+    print('Si_p_pos')
+    Si_p_pos = sobol.analyze(problem, p_pos_avg, print_to_console=True)
+    print('Si_p_neg')
+    Si_p_neg = sobol.analyze(problem, p_neg_avg, print_to_console=True)
+
+    savetxt('results/p_pos_avg.csv', p_pos_avg)
+    savetxt('results/p_neg_avg.csv', p_neg_avg)
 
     # # Plot results
     # plot_results(results)
