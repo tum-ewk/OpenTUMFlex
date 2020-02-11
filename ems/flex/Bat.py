@@ -5,11 +5,10 @@ Created on Mon Nov  4 10:14:14 2019
 """
 
 import pandas as pd
-import math
 import statistics
 
 
-def Batflex(my_ems):
+def calc_flex_bat(my_ems):
     nsteps = my_ems['time_data']['nsteps']
     ntsteps = my_ems['time_data']['ntsteps']
     Bat_flex = pd.DataFrame(0, index=range(nsteps), columns=range(7))
@@ -21,16 +20,16 @@ def Batflex(my_ems):
     dat1 = pd.DataFrame(data=dat1)
     # Bat_flex.iloc[:, 0] = my_ems['optplan']['bat_grid2bat']
     Bat_maxP = my_ems['devices']['bat']['maxpow']
-    Bat_minP = 0.3
-    Bat_maxE = 7.5
+    Bat_minP = my_ems['devices']['bat']['minpow']
+    Bat_maxE = my_ems['devices']['bat']['stocap']
     Bat_minE = 0.500
 
     # Battery negative flexibility
     for i in range(nsteps):
-        Bat_flex.iloc[i, 0] = dat1.iloc[i, 0] + dat1.iloc[i, 1] - dat1.iloc[i, 2]
+        Bat_flex.iloc[i, 0] = dat1.iloc[i, 2]  - dat1.iloc[i, 1]
         nflex_P = Bat_maxP-dat1.iloc[i, 1]+dat1.iloc[i, 2]
-        if (dat1.iloc[i, 3]*3/100 < Bat_maxE) and (nflex_P > 0): 
-            req_steps = int(math.floor(ntsteps*(Bat_maxE-dat1.iloc[i, 3]*3/100)/nflex_P))
+        if (dat1.iloc[i, 3]*Bat_maxE/100 < Bat_maxE) and (nflex_P > 0):
+            req_steps = int(round(ntsteps*(Bat_maxE-dat1.iloc[i, 3]*Bat_maxE/100)/nflex_P))
             if nflex_P < Bat_minP:
                 req_steps = 0
             elif (req_steps != 0) and (req_steps + i <= nsteps-1): 
@@ -41,15 +40,14 @@ def Batflex(my_ems):
             if req_steps > 0:                                
                 j = i
                 while (j < nsteps) and (j < req_steps) and \
-                nflex_P <= (Bat_maxP-dat1.iloc[j, 1]+dat1.iloc[j, 2]):
-                    # Add minimum neg flex power in the previous line
+                        nflex_P <= (Bat_maxP-dat1.iloc[j, 1]+dat1.iloc[j, 2]):
                     j = j+1
                 Bat_flex.iloc[i, 1] = -1*nflex_P
                 Bat_flex.iloc[i, 3] = Bat_flex.iloc[i, 1]*(j-i)/ntsteps
     
             # Usable energy
                 cbat_E = 0
-                for k in range(j,nsteps):
+                for k in range(j, nsteps):
                     cbat_E = cbat_E + (dat1.iloc[k, 1])/ntsteps  
                 
             # Computing the exact flexibility
@@ -61,14 +59,30 @@ def Batflex(my_ems):
                     Bat_flex.iloc[i, 3] = Bat_flex.iloc[i, 1]*(j-i)/ntsteps
                 if j <= i:
                     Bat_flex.iloc[i, 1] = 0
-                    Bat_flex.iloc[i, 3] = 0      
+                    Bat_flex.iloc[i, 3] = 0                                     
                     
     # Pricing
     for i in range(nsteps):
         if Bat_flex.iloc[i, 1] < 0 and i < nsteps-1:
-            max_val = my_ems['fcst']['ele_price_in']
-            max_val = statistics.mean(max_val[i:nsteps])
-            Bat_flex.iloc[i, 5] = -1*max_val
+            req_steps = int(round(Bat_flex.iloc[i, 3]*ntsteps/Bat_flex.iloc[i, 1]))
+            bch_index = [k+i+req_steps for k, l in enumerate(my_ems['optplan']['bat_input_power'][i+req_steps:nsteps]) if l > 0]
+            pow_ch = []
+            price_ch = []
+            for k in range(0, len(bch_index)):
+                pow_ch.append(my_ems['optplan']['bat_input_power'][bch_index[k]])
+                price_ch.append(my_ems['fcst']['ele_price_in'][bch_index[k]])            
+            bat_ch = pd.DataFrame({'slots':bch_index, 'Bat_in':pow_ch, 'price':price_ch})
+            bat_ch = bat_ch.sort_values(by=['price'], ascending=False)    
+            e_bal = abs(Bat_flex.iloc[i, 3])
+            e_prc = 0
+            for k in range(0, len(bch_index)):
+                if e_bal - bat_ch.iloc[k,1]/ntsteps >= 0:
+                    e_bal = e_bal - bat_ch.iloc[k,1]/ntsteps
+                    e_prc = e_prc + bat_ch.iloc[k,2]*bat_ch.iloc[k,1]/ntsteps                    
+                elif (e_bal - bat_ch.iloc[k,1]/ntsteps < 0) and (e_bal > 0):
+                    e_prc = e_prc + bat_ch.iloc[k,2]*e_bal
+                    e_bal = 0
+            Bat_flex.iloc[i, 5] = e_prc/Bat_flex.iloc[i, 3]
         elif Bat_flex.iloc[i, 1] < 0 and i == nsteps-1:
             Bat_flex.iloc[i, 5] = -1*my_ems['fcst']['ele_price_in'][i]
 
@@ -76,11 +90,11 @@ def Batflex(my_ems):
     # Battery positive flexibility
     # Feeding into the grid
     for i in range(nsteps):
-        ava_ebatout = dat1.iloc[i, 3]*3/100 - Bat_minE
+        ava_ebatout = dat1.iloc[i, 3]*Bat_maxE/100 - Bat_minE
         if ava_ebatout > 0:
-            pflex_P = Bat_maxP-dat1.iloc[i, 2]
+            pflex_P = Bat_maxP - dat1.iloc[i, 0] + dat1.iloc[i, 1] - dat1.iloc[i, 2]
             if pflex_P > 0:
-                ava_steps = int(math.floor(4*ava_ebatout/pflex_P))
+                ava_steps = int(round(ntsteps*ava_ebatout/pflex_P))
                 if (Bat_maxP - dat1.iloc[i, 2]) < Bat_minP:
                     ava_steps = 0
                 elif (ava_steps != 0) and (ava_steps + i <= nsteps-1):
