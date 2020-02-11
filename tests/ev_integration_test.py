@@ -127,10 +127,11 @@ def run_hems_SA(ems, sample):
     ems_copy = copy.deepcopy(ems)
     # Set ev variables with sample data
     ems_copy['devices'].update(devices(device_name='ev', stocap=sample[2], maxpow=sample[1], minpow=0,
-                                  end_soc=[100], init_soc=[0], timesetting=ems_copy['time_data'],
-                                  ev_aval=[ems_copy['time_data']['time_slots'][0],
-                                           ems_copy['time_data']['time_slots'][
-                                               int(round(sample[0] * ems_copy['time_data']['ntsteps']))]], eta=sample[3]
+                                       end_soc=[100], init_soc=[0], timesetting=ems_copy['time_data'],
+                                       ev_aval=[ems_copy['time_data']['time_slots'][0],
+                                                ems_copy['time_data']['time_slots'][
+                                               int(round(sample[0] * ems_copy['time_data']['ntsteps'])) - 1]],
+                                       eta=sample[3]
                                   )
                           )
 
@@ -223,7 +224,7 @@ if __name__ == '__main__':
                ]}
 
     # Create a sample set
-    param_values = saltelli.sample(problem, 10)
+    param_values = saltelli.sample(problem, 1000)
 
     # Create numpy arrays for storing flex offers, that shall be analyzed
     p_pos_avg = np.zeros([param_values.shape[0]])       # average power in kW for positive flex offers
