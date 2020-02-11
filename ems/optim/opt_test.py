@@ -266,16 +266,16 @@ def run_hp_opt(ems_local, plot_fig=True, result_folder='C:'):
         # plt.title('SOC of heat storage', fontsize=font_size)
         plt.show()
 
-    # save the data
-    from datetime import datetime
-    print('Save Results to Reportfile...\n')
-
-    # Create Name of Resultfile
-    t0 = tm.time()
-    # inputfilename = input_file
-    now = datetime.now().strftime('%Y%m%dT%H%M')
-    resultfile = os.path.join(result_folder, 'result_optimization_{}.xlsx'.format(now))
-    writer = pd.ExcelWriter(resultfile)
+    # # save the data
+    # from datetime import datetime
+    # print('Save Results to Reportfile...\n')
+    #
+    # # Create Name of Resultfile
+    # t0 = tm.time()
+    # # inputfilename = input_file
+    # now = datetime.now().strftime('%Y%m%dT%H%M')
+    # resultfile = os.path.join(result_folder, 'result_optimization_{}.xlsx'.format(now))
+    # writer = pd.ExcelWriter(resultfile)
 
     data_input = {'HP_operation': list(HP_operation), 'HP_heat_power': list(HP_heat_cap),
                   'HP_heat_run': list(HP_heat_run),
