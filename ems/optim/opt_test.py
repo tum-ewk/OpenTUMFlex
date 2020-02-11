@@ -297,10 +297,10 @@ def run_hp_opt(ems_local, plot_fig=True, result_folder='C:'):
                   'elec_supply_price': list(elec_supply_price),
                   'min cost': list(cost_min)}
 
-    df = pd.DataFrame(data=data_input)
-    df.to_excel(writer, 'operation_plan', merge_cells=False)
-    scipy.io.savemat('data/operationalPlan.mat', {'struct1': df.to_dict("list")})
-    writer.save()  # save
+    # df = pd.DataFrame(data=data_input)
+    # df.to_excel(writer, 'operation_plan', merge_cells=False)
+    # scipy.io.savemat('data/operationalPlan.mat', {'struct1': df.to_dict("list")})
+    # writer.save()  # save
 
     # print('Results Saved. time: ' + "{:.1f}".format(tm.time() - t0) + ' s\n')
 
