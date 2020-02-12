@@ -226,7 +226,7 @@ if __name__ == '__main__':
                ]}
 
     # Create a sample set
-    param_values = saltelli.sample(problem, 1000)
+    param_values = saltelli.sample(problem, 5)
 
     # Create numpy arrays for storing flex offers, that shall be analyzed
     p_pos_avg = np.zeros([param_values.shape[0]])       # average power in kW for positive flex offers
@@ -234,7 +234,8 @@ if __name__ == '__main__':
 
     # Prepare ems for sensitivity analysis
     ems_sa = ems_loc(initialize=True, path='data/ev_ems_sa_constant_price_incl_error.txt')
-    #ems_sa['fcst']['ele_price_in'] = list(0.28 + np.linspace(0, 1, 96)*0.0001)
+    #ems_sa['fcst']['ele_price_in'] = list(0.28 + np.linspace(0, 1, 96)*0.001)
+    #ems_write(ems_sa, path='data/ev_ems_sa_constant_price_incl_error.txt')
 
     # Run model with sample data and append output lists
     for i in range(len(param_values)):
@@ -254,8 +255,12 @@ if __name__ == '__main__':
             else:
                 p_neg_avg[i] = -result_ems['flexopts']['ev']['Neg_P'][result_ems['flexopts']['ev']['Neg_P'] < 0].mean()
 
+            plot(result_ems, 'ev')
+
         # Save HEMS results to file
-        ems_write(result_ems, path='results/SA_ems_results/ev_ems_' + str(i) + '.txt')
+        results.append(result_ems)
+        #ems_write(result_ems, path='results/SA_ems_results/ev_ems_' + str(i) + '.txt')
+
 
 
     # Analyze model output
