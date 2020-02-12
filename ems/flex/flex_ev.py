@@ -131,6 +131,9 @@ def calc_flex_ev(my_ems):
                             # Flexible energy is the sum of energy for maximal power
                             ev_flex_temp[e_neg].iat[i] = temp_flex_df['E_flex'][:idx_allowed].sum()
 
+        # Reset negative power if energy has been reset as well
+        ev_flex_temp.loc[ev_flex_temp[e_neg] <= 0, p_neg] = 0
+
         # # Calculating Flex Prices ###########################################################################
         for i in range(len(ev_flex_temp)):
 
