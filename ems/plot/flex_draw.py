@@ -21,7 +21,8 @@ def plot_flex(my_ems, device):
     plt_prc = fig.add_subplot(spec[3, 0])
     plt_pow = fig.add_subplot(spec[2, 0], sharex=plt_prc)
     plt_cum = fig.add_subplot(spec[0:2, 0], sharex=plt_prc)
-    ts = my_ems['time_data']['time_slots'].tolist()
+    #ts = my_ems['time_data']['time_slots'].tolist()
+    ts = my_ems['time_data']['time_slots']
 
     # Plotting cummulative energy exchange
     theta = 0
