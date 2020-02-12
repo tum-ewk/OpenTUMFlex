@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 from numpy import savetxt
 import copy
+import json
 import multiprocessing
 import matplotlib.pyplot as plt
 from joblib import Parallel, delayed
@@ -265,6 +266,27 @@ if __name__ == '__main__':
 
     savetxt('results/p_pos_avg.csv', p_pos_avg)
     savetxt('results/p_neg_avg.csv', p_neg_avg)
+
+    # Save Sobol indices into dataframes
+    total_Si_p_neg, first_Si_p_neg, second_Si_p_neg = Si_p_neg.to_df()
+    total_Si_p_pos, first_Si_p_pos, second_Si_p_pos = Si_p_pos.to_df()
+
+    # Writing to txt files
+    total_Si_p_neg.to_csv('results/P_neg_total_Si.txt')
+    first_Si_p_neg.to_csv('results/P_neg_first_Si.txt')
+    second_Si_p_neg.to_csv('results/P_neg_second_Si.txt')
+    total_Si_p_pos.to_csv('results/P_pos_total_Si.txt')
+    first_Si_p_pos.to_csv('results/P_pos_first_Si.txt')
+    second_Si_p_pos.to_csv('results/P_pos_second_Si.txt')
+
+    # Reading from file
+    pd.read_csv('results/P_neg_total_Si.txt', index_col=0)
+
+    # Save problem definition
+    json = json.dumps(Si_p_neg.problem)
+    f = open('results/problem_definition.json', 'w')
+    f.write(json)
+    f.close()
 
     # # Plot results
     # plot_results(results)
