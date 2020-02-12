@@ -95,7 +95,7 @@ def plot_flex(my_ems, device):
     plt_cum.tick_params(axis="x", labelsize=font_size, labelbottom=False)
     plt_cum.tick_params(axis="y", labelsize=font_size)
     plt_cum.grid(color='lightgrey', linewidth=0.75)
-    plt_pow.set_ylabel('$Power\ [kW]$)', fontsize=font_size+2)
+    plt_pow.set_ylabel('$Power\ [kW]$', fontsize=font_size+2)
     plt_pow.tick_params(axis="x", labelsize=font_size, labelbottom=False)
     plt_pow.tick_params(axis="y", labelsize=font_size)
     plt_pow.grid(color='lightgrey', linewidth=0.75, zorder=0)

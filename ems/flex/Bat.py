@@ -111,6 +111,7 @@ def calc_flex_bat(my_ems):
                 Bat_flex.iloc[i, 2] = (Bat_maxP-dat1.iloc[i, 2])
                 Bat_flex.iloc[i, 4] = Bat_flex.iloc[i, 2]*(j-i)/ntsteps    
                 
+                
                 # Rechargable energy
                 cbat_E = 0
                 for k in range(j,nsteps):
@@ -130,14 +131,61 @@ def calc_flex_bat(my_ems):
     # Curtailing scheduled charging
     for i in range(nsteps):
          if dat1.iloc[i, 0] > Bat_minP:
+             feed_steps = int(round(Bat_flex.iloc[i, 4]*ntsteps/Bat_flex.iloc[i, 2]))
              j = i
              while (j < nsteps) and (dat1.iloc[i, 0] <= dat1.iloc[j, 0]):
                  j = j+1
              pflex_P = dat1.iloc[i, 0]
+             charg_steps = j-i    
+             act_steps = min(feed_steps, charg_steps)
              Bat_flex.iloc[i, 2] = Bat_flex.iloc[i, 2] + pflex_P
-             Bat_flex.iloc[i, 4] = Bat_flex.iloc[i, 4] + pflex_P*(j-i)/ntsteps  
+             Bat_flex.iloc[i, 4] = Bat_flex.iloc[i, 2]*act_steps/ntsteps  
              
-    # Pricing
+    # Pricing 
+    # for i in range(1):
+    #     if Bat_flex.iloc[i, 2] > 0 and i < nsteps-1:
+    #         req_steps = int(round(Bat_flex.iloc[i, 4]*ntsteps/Bat_flex.iloc[i, 2]))
+    #         req_energy = Bat_flex.iloc[i, 4]
+    #         bdh_index = [k+i+req_steps for k, l in enumerate(my_ems['optplan']['bat_output_power'][i+req_steps:nsteps]) if l > 0],
+    #         soc_act = []
+    #         soc_act[:] = [x*Bat_maxE/100 for x in my_ems['optplan']['bat_SOC']]              
+    #         for k in range(i+req_steps, nsteps):
+    #             soc_act[k] = soc_act[k] - Bat_flex.iloc[i, 2]/ntsteps                 
+    #         # fnd_socmin = [k for k, x in enumerate(soc_act) if x < 0.13]
+    #         # fnd_socmin = fnd_socmin[0]
+    #         pow_dh = []
+    #         steps_exp = []
+    #         price_exp = []
+    #         power_exp = []
+    #         steps_imp = []
+    #         power_imp = []
+    #         price_imp = []
+    #         for k in range(i+req_steps, nsteps):
+    #             if my_ems['optplan']['grid_export'][k] > 0:
+    #                 steps_exp.append(k) 
+    #                 price_exp.append(my_ems['fcst']['ele_price_out'][k]) 
+    #                 if (Bat_maxP - dat1.iloc[k,1] > my_ems['optplan']['grid_export'][k]):
+    #                     power_exp.append(Bat_maxP - my_ems['optplan']['grid_export'][k] - dat1.iloc[k,1])
+    #                 else:
+    #                     power_exp.append(Bat_maxP - dat1.iloc[k,1])                    
+    #             # Import to charge
+    #             price_imp.append(my_ems['fcst']['ele_price_in'][k])
+    #             power_imp.append(Bat_maxP - dat1.iloc[k,1])
+    #             steps_imp.append(k)
+    #         frame_exp = pd.DataFrame({'slots':steps_exp, 'power':power_exp, 'price':price_exp})
+    #         frame_exp = frame_exp.sort_values(by = ['price'])
+    #         frame_exp = frame_exp[frame_exp.power != 0]
+    #         frame_imp = pd.DataFrame({'slots':steps_imp, 'power':power_imp, 'price':price_imp})
+    #         frame_imp = frame_imp.sort_values(by = ['price'])
+    #         frame_imp = frame_imp[frame_imp.power != 0]
+    #         print(frame_imp)
+    #         if(frame_exp.empty == False):                
+    #             for k in range(0, len(frame_exp.index)):
+    #                 if req_energy > 0:
+    #                     req_energy = req_energy - frame_exp.power[k]/ntsteps
+    #     elif Bat_flex.iloc[i, 2] > 0 and i == nsteps-1:
+    #         Bat_flex.iloc[i, 6] = -1*my_ems['fcst']['ele_price_in'][i]         
+            
     for i in range(nsteps):
         if Bat_flex.iloc[i, 2] > 0 and i < nsteps-1:
             min_val = my_ems['fcst']['ele_price_in']
