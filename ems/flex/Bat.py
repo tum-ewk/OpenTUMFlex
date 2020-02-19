@@ -194,6 +194,7 @@ def calc_flex_bat(my_ems):
             # flex compensation
             if soc_act[i+req_steps]-Bat_minE >= dis_energy:
                 flex_comp = req_energy
+                def_comp = 0
             else: 
                 def_comp = dis_energy - (soc_act[i+req_steps] - Bat_minE) 
                 flex_comp = req_energy - def_comp             
