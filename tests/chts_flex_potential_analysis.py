@@ -51,7 +51,7 @@ for i in range(1):
     print(veh_availability['t_arrival'][i])
     # Update EV parameters
     my_ems['devices'].update(devices(device_name='ev', minpow=0, maxpow=11,
-                                     stocap=veh_availability['d_travelled']*mil2km_conversion*electr_consumption_per_km,
+                                     stocap=veh_availability['d_travelled'][i]*mil2km_conversion*electr_consumption_per_km,
                                      init_soc=[0], end_soc=[100], eta=0.98,
                                      ev_aval=[veh_availability['t_arrival'][i][:-3], veh_availability['t_departure'][i][:-3]],
                                      timesetting=my_ems['time_data']))
