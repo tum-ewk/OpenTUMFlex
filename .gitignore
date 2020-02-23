@@ -51,3 +51,4 @@ MANIFEST
 .venv*/
 venv/
 tests/data/
+tests/results/
