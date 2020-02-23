@@ -5,7 +5,7 @@ Created on Mon Nov  4 10:14:14 2019
 """
 
 import pandas as pd
-import statistics
+# import statistics
 
 
 def calc_flex_bat(my_ems):
@@ -111,6 +111,7 @@ def calc_flex_bat(my_ems):
                 Bat_flex.iloc[i, 2] = (Bat_maxP-dat1.iloc[i, 2])
                 Bat_flex.iloc[i, 4] = Bat_flex.iloc[i, 2]*(j-i)/ntsteps    
                 
+                
                 # Rechargable energy
                 cbat_E = 0
                 for k in range(j,nsteps):
@@ -130,20 +131,116 @@ def calc_flex_bat(my_ems):
     # Curtailing scheduled charging
     for i in range(nsteps):
          if dat1.iloc[i, 0] > Bat_minP:
+             feed_steps = int(round(Bat_flex.iloc[i, 4]*ntsteps/Bat_flex.iloc[i, 2]))
              j = i
              while (j < nsteps) and (dat1.iloc[i, 0] <= dat1.iloc[j, 0]):
                  j = j+1
              pflex_P = dat1.iloc[i, 0]
+             charg_steps = j-i    
+             act_steps = min(feed_steps, charg_steps)
              Bat_flex.iloc[i, 2] = Bat_flex.iloc[i, 2] + pflex_P
-             Bat_flex.iloc[i, 4] = Bat_flex.iloc[i, 4] + pflex_P*(j-i)/ntsteps  
+             Bat_flex.iloc[i, 4] = Bat_flex.iloc[i, 2]*act_steps/ntsteps  
              
-    # Pricing
+    # Pricing 
     for i in range(nsteps):
         if Bat_flex.iloc[i, 2] > 0 and i < nsteps-1:
-            min_val = my_ems['fcst']['ele_price_in']
-            min_val = statistics.mean(min_val[i:nsteps])
-            Bat_flex.iloc[i, 6] = 1*min_val        
+            req_steps = int(round(Bat_flex.iloc[i, 4]*ntsteps/Bat_flex.iloc[i, 2]))
+            req_energy = Bat_flex.iloc[i, 4]
+            
+            # Discharge energy
+            bdh_index = [k+i+req_steps for k, l in enumerate(my_ems['optplan']['bat_output_power'][i+req_steps:nsteps]) if l > 0]
+            dis_energy = 0
+            for k in range(0, len(bdh_index)):
+                dis_energy = dis_energy + my_ems['optplan']['bat_output_power'][k]/ntsteps     
+                
+            # Actual battery SOC    
+            soc_act = []
+            soc_act[:] = [x*Bat_maxE/100 for x in my_ems['optplan']['bat_SOC']]              
+            for k in range(i+req_steps, nsteps):
+                soc_act[k] = soc_act[k] - Bat_flex.iloc[i, 2]/ntsteps                
+
+            # Find possible import and export slots
+            steps_exp = []
+            price_exp = []
+            power_exp = []
+            steps_imp = []
+            power_imp = []
+            price_imp = []
+            for k in range(i+req_steps, nsteps):
+                if my_ems['optplan']['grid_export'][k] > 0:
+                    steps_exp.append(k) 
+                    price_exp.append(my_ems['fcst']['ele_price_out'][k]) 
+                    if Bat_maxP - dat1.iloc[k,1] > my_ems['optplan']['grid_export'][k]:
+                        power_exp.append(Bat_maxP - my_ems['optplan']['grid_export'][k] - dat1.iloc[k,1])
+                    else:
+                        power_exp.append(Bat_maxP - dat1.iloc[k,1])                    
+                # Import to charge
+                price_imp.append(my_ems['fcst']['ele_price_in'][k])
+                power_imp.append(Bat_maxP - dat1.iloc[k,1])
+                steps_imp.append(k)
+            
+            # Sort the possible import and export slots
+            frame_exp = pd.DataFrame({'slots':steps_exp, 'power':power_exp, 'price':price_exp})
+            frame_exp = frame_exp.sort_values(by = ['price'])
+            frame_exp = frame_exp[frame_exp.power != 0]
+            frame_exp = frame_exp.reset_index(drop=True)
+            frame_imp = pd.DataFrame({'slots':steps_imp, 'power':power_imp, 'price':price_imp})
+            frame_imp = frame_imp.sort_values(by = ['price'])
+            frame_imp = frame_imp[frame_imp.power != 0]
+            frame_imp = frame_imp.reset_index(drop=True)
+            
+            # Check whether SOC after flexibility is sufficient to satisfy 
+            # all battery discharge else create definite compensation and 
+            # flex compensation
+            if soc_act[i+req_steps]-Bat_minE >= dis_energy:
+                flex_comp = req_energy
+                def_comp = 0
+            else: 
+                def_comp = dis_energy - (soc_act[i+req_steps] - Bat_minE) 
+                flex_comp = req_energy - def_comp             
+            
+            # Use the costliest prices for definite compensation required
+            flex_price = 0    
+            for k in range(len(frame_imp)-1, -1, -1):
+                if def_comp - frame_imp.iloc[k,1]/ntsteps >= 0:
+                    def_comp = def_comp - frame_imp.iloc[k,1]/ntsteps
+                    flex_price = flex_price + frame_imp.iloc[k,2]*frame_imp.iloc[k,1]/ntsteps
+                    frame_imp.iloc[k,1] = 0
+                elif def_comp > 0 and (frame_imp.iloc[k,1]/ntsteps - def_comp)> 0:                    
+                    flex_price = flex_price + frame_imp.iloc[k,2]*def_comp      
+                    frame_imp.iloc[k,1] = frame_imp.iloc[k,1] - def_comp*ntsteps       
+                    def_comp = 0
+            
+            # Use the export prices first for flex compensation                
+            if(frame_exp.empty == False):        
+                for k in range(0, len(frame_exp.index)):
+                    if flex_comp - frame_exp.iloc[k,1]/ntsteps > 0:
+                        flex_comp = flex_comp - frame_exp.iloc[k,1]/ntsteps
+                        flex_price = flex_price + frame_exp.iloc[k,2]*frame_exp.iloc[k,1]/ntsteps
+                        frame_exp.iloc[k,1] = 0
+                        
+           # If export is used or not available use import prices  for flex compensation  
+            for k in range(0, len(frame_imp.index)):
+                if flex_comp - frame_imp.iloc[k,1]/ntsteps >= 0:
+                    flex_comp = flex_comp - frame_imp.iloc[k,1]/ntsteps
+                    flex_price = flex_price + frame_imp.iloc[k,2]*frame_imp.iloc[k,1]/ntsteps
+                    frame_imp.iloc[k,1] = 0
+                elif flex_comp > 0 and (frame_imp.iloc[k,1]/ntsteps - flex_comp)> 0:                    
+                    flex_price = flex_price + frame_imp.iloc[k,2]*flex_comp      
+                    frame_imp.iloc[k,1] = frame_imp.iloc[k,1] - flex_comp*ntsteps       
+                    flex_comp = 0            
+            Bat_flex.iloc[i, 6] = flex_price/req_energy
+        
         elif Bat_flex.iloc[i, 2] > 0 and i == nsteps-1:
             Bat_flex.iloc[i, 6] = my_ems['fcst']['ele_price_in'][i]
+    
+    # Alternate pricing method    
+    # for i in range(nsteps):
+    #     if Bat_flex.iloc[i, 2] > 0 and i < nsteps-1:
+    #         min_val = my_ems['fcst']['ele_price_in']
+    #         min_val = statistics.mean(min_val[i:nsteps])
+    #         Bat_flex.iloc[i, 6] = 1*min_val        
+    #     elif Bat_flex.iloc[i, 2] > 0 and i == nsteps-1:
+    #         Bat_flex.iloc[i, 6] = my_ems['fcst']['ele_price_in'][i]
              
     return Bat_flex
