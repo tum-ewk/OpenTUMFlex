@@ -8,6 +8,7 @@ from ems.ems_mod import update_time_data
 from ems.devices.devices import devices
 
 from forecast.fcst import load_data
+from forecast.price_fcst import get_elect_price_fcst
 
 from ems.optim.opt_test import run_hp_opt as opt
 from ems.optim.optimize_EV_charging import create_ev_model
@@ -48,6 +49,9 @@ for i in range(1):
     ### very slow!!!
     my_ems['fcst'] = load_data(my_ems)
 
+    # Get price forecast for given time period
+    price_fcst = get_elect_price_fcst(t_start=pd.Timestamp(veh_availability['t_arrival'][i], t_end=pd.Timestamp(veh_availability['t_departure'][i])))
+
     print(veh_availability['t_arrival'][i])
     # Update EV parameters
     my_ems['devices'].update(devices(device_name='ev', minpow=0, maxpow=11,
@@ -56,17 +60,18 @@ for i in range(1):
                                      ev_aval=[veh_availability['t_arrival'][i][:-3], veh_availability['t_departure'][i][:-3]],
                                      timesetting=my_ems['time_data']))
 
-    # # calculate the timetable for all the devices
-    # my_ems['optplan'] = opt(my_ems, plot_fig=True, result_folder='data/')
+    # # # calculate the timetable for all the devices
+    # # my_ems['optplan'] = opt(my_ems, plot_fig=True, result_folder='data/')
+    #
+    # ev_model = create_ev_model(init_soc_bat=0, desired_soc=100, soc_max=100, soc_min=0, p_bat_min=0, p_bat_max=11,
+    #                            price_forecast=my_ems['fcst']['ele_price_in'], battery_cap=50, efficiency=0.98,
+    #                            n_time_steps=my_ems['time_data']['nsteps'], availability=my_ems['devices']['ev']['aval'],
+    #                            total_hours=veh_availability['delta_t_sec'][i]/3600)
+    #
+    # optim = SolverFactory('glpk')
+    # result = optim.solve(ev_model)
+    # print(result)
+    #
+    # for i in range(my_ems['time_data']['nsteps']):
+    #     my_ems['optplan']['EV_power'][i] = ev_model.p_bat_charge[i].value
 
-    ev_model = create_ev_model(init_soc_bat=0, desired_soc=100, soc_max=100, soc_min=0, p_bat_min=0, p_bat_max=11,
-                               price_forecast=my_ems['fcst']['ele_price_in'], battery_cap=50, efficiency=0.98,
-                               n_time_steps=my_ems['time_data']['nsteps'], availability=my_ems['devices']['ev']['aval'],
-                               total_hours=veh_availability['delta_t_sec'][i]/3600)
-
-    optim = SolverFactory('glpk')
-    result = optim.solve(ev_model)
-    print(result)
-
-    for i in range(my_ems['time_data']['nsteps']):
-        my_ems['optplan']['EV_power'][i] = ev_model.p_bat_charge[i].value
