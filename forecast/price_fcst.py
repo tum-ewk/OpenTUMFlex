@@ -3,6 +3,10 @@ import numpy as np
 
 
 def get_elect_price_fcst(t_start=pd.Timestamp('2020-1-1 00:00'), t_end=pd.Timestamp('2020-1-1 23:45')):
+    # Check whether start time is before end time otherwise return
+    if t_start >= t_end:
+        return
+
     # Create a dataframe with placeholders
     price_fcst = pd.DataFrame(-1, columns={'Constant', 'ToU', 'EPEX', 'Random'},
                               index=pd.date_range(start=t_start, end=t_end, freq='15 Min'))
