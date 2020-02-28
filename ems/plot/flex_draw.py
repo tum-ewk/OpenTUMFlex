@@ -125,8 +125,8 @@ def plot_flex(my_ems, device):
     plt_prc.axhline(y=0, linewidth=2, color='k')
 
     # Change xtick intervals    
-    plt_prc.set_xticks(plt_prc.get_xticks()[::int(round(nsteps/12))])
-    plt_prc.set_xticklabels(ts[::int(round(nsteps/12))], rotation=45)
+    # plt_prc.set_xticks(plt_prc.get_xticks()[::int(round(nsteps/12))])
+    # plt_prc.set_xticklabels(ts[::int(round(nsteps/12))], rotation=45)
 
     # Settings
     plt.rc('font', family='serif')
