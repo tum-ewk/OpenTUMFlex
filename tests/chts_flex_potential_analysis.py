@@ -30,48 +30,63 @@ electr_consumption_per_km = 0.2     # electricity consumption per km (e.g. 0.2 e
 
 # load the predefined ems data, initialization by user input is also possible:
 my_ems = ems_loc(initialize=True, path='data/test_Nr_01.txt')
+my_ems = ems_loc(initialize=True, path='data/ev_ems_sa_constant_price_incl_error.txt')
+
+# Counter for keeping track of insufficient time differences
+t_insufficient_count = 0
+
+# Create a list of result ems
+results = list()
 
 # Go through all vehicle availabilities
-for i in range(1):
-    print(veh_availability['t_arrival'][i])
+for i in range(30, 49):
+    # Ceil arrival time to next quarter hour
+    t_arrival_ceiled = pd.Timestamp(veh_availability['t_arrival'][i]).ceil(freq='15Min')
+    # Floor departure time to previous quarter hour
+    t_departure_floored = pd.Timestamp(veh_availability['t_departure'][i]).floor(freq='15Min')
+    # Check whether time between ceiled arrival and floored departure time are at least two time steps
+    t_delta_ts = t_departure_floored - t_arrival_ceiled
 
     # change the time interval
     my_ems['time_data']['t_inval'] = 15
     my_ems['time_data']['d_inval'] = 15
-    my_ems['time_data']['start_time'] = veh_availability['t_arrival'][i][:-3]
-    my_ems['time_data']['end_time'] = veh_availability['t_departure'][i][:-3]
+    my_ems['time_data']['start_time'] = t_arrival_ceiled.strftime('%Y-%m-%d %H:%M')
+    my_ems['time_data']['end_time'] = t_departure_floored.strftime('%Y-%m-%d %H:%M')
     my_ems['time_data']['days'] = 1
-    print(veh_availability['t_arrival'][i])
     my_ems.update(update_time_data(my_ems))
-    print(veh_availability['t_arrival'][i])
-
-    # load the weather and price data
-    ### very slow!!!
-    my_ems['fcst'] = load_data(my_ems)
 
     # Get price forecast for given time period
-    price_fcst = get_elect_price_fcst(t_start=pd.Timestamp(veh_availability['t_arrival'][i], t_end=pd.Timestamp(veh_availability['t_departure'][i])))
+    price_fcst = get_elect_price_fcst(t_start=t_arrival_ceiled, t_end=t_departure_floored)
+    # Check whether price forecast is empty
+    if price_fcst is None:
+        print('### Time is not sufficient for timestep:', i, '###')
+        t_insufficient_count += 1
+        continue
+    # Update forecast data
+    my_ems['fcst']['ele_price_in'] = price_fcst['ToU'].to_list()
+    my_ems['fcst']['ele_price_out'] = len(price_fcst) * [0]
+    my_ems['fcst']['gas'] = len(price_fcst) * [0]
+    my_ems['fcst']['last_elec'] = len(price_fcst) * [0]
+    my_ems['fcst']['last_heat'] = len(price_fcst) * [0]
+    my_ems['fcst']['temp'] = len(price_fcst) * [0]
+    my_ems['fcst']['solar'] = len(price_fcst) * [0]
 
-    print(veh_availability['t_arrival'][i])
     # Update EV parameters
     my_ems['devices'].update(devices(device_name='ev', minpow=0, maxpow=11,
-                                     stocap=veh_availability['d_travelled'][i]*mil2km_conversion*electr_consumption_per_km,
+                                     stocap=round(veh_availability['d_travelled'][i]*mil2km_conversion*electr_consumption_per_km),
                                      init_soc=[0], end_soc=[100], eta=0.98,
-                                     ev_aval=[veh_availability['t_arrival'][i][:-3], veh_availability['t_departure'][i][:-3]],
+                                     ev_aval=[my_ems['time_data']['start_time'], my_ems['time_data']['end_time']],
                                      timesetting=my_ems['time_data']))
 
-    # # # calculate the timetable for all the devices
-    # # my_ems['optplan'] = opt(my_ems, plot_fig=True, result_folder='data/')
-    #
-    # ev_model = create_ev_model(init_soc_bat=0, desired_soc=100, soc_max=100, soc_min=0, p_bat_min=0, p_bat_max=11,
-    #                            price_forecast=my_ems['fcst']['ele_price_in'], battery_cap=50, efficiency=0.98,
-    #                            n_time_steps=my_ems['time_data']['nsteps'], availability=my_ems['devices']['ev']['aval'],
-    #                            total_hours=veh_availability['delta_t_sec'][i]/3600)
-    #
-    # optim = SolverFactory('glpk')
-    # result = optim.solve(ev_model)
-    # print(result)
-    #
-    # for i in range(my_ems['time_data']['nsteps']):
-    #     my_ems['optplan']['EV_power'][i] = ev_model.p_bat_charge[i].value
+    # calculate the timetable for all the devices
+    my_ems['optplan'] = opt(my_ems, plot_fig=False, result_folder='data/')
 
+    # Calculate ev flexibility
+    my_ems['flexopts']['ev'] = calc_flex_ev(my_ems)
+
+    # Plot flex result
+    # plot(my_ems, 'ev')
+
+    # Save results to files
+    results.append(my_ems)
+    ems_write(my_ems, path='results/CHTS/ToU/ev_avail_' + str(i) + '.txt')
