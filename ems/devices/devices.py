@@ -95,8 +95,10 @@ def devices(device_name, minpow=0, maxpow=0, stocap=None, eta=None, init_soc=Non
             for i in range(_points):
 
                 # obtain the start and end time step index
-                _aval_start = int((_ev_aval[idx] - start_time).seconds / 3600 * ntsteps)
-                _aval_end = int((_ev_aval[idx + 1] - start_time).seconds / 3600 * ntsteps - 1)
+                timedelta_start = _ev_aval[idx] - start_time
+                timedelta_end = _ev_aval[idx + 1] - start_time
+                _aval_start = int((timedelta_start.seconds / 3600 + timedelta_start.days * 24) * ntsteps)
+                _aval_end = int((timedelta_end.seconds / 3600 + timedelta_end.days * 24) * ntsteps - 1)
                 # change them to 1
                 aval[_aval_start:_aval_end + 1] = 1
                 # for the first time step the init_soc_check isn't needed, otherwise it should be same as init_soc[i]
@@ -117,8 +119,10 @@ def devices(device_name, minpow=0, maxpow=0, stocap=None, eta=None, init_soc=Non
 
             # some procedure to obatin the nodes for the periods when the EV is not available
             for j in range(_points - 1):
-                _aval_end = int((_ev_aval[idx + 1] - start_time).seconds / 3600 * ntsteps)
-                _aval_start = int((_ev_aval[idx + 2] - start_time).seconds / 3600 * ntsteps)
+                timedelta_end = _ev_aval[idx + 1] - start_time
+                timedelta_start = _ev_aval[idx + 2] - start_time
+                _aval_end = int((timedelta_end.seconds / 3600 + timedelta_end.days * 24) * ntsteps)
+                _aval_start = int((timedelta_start.seconds / 3600 + timedelta_start.days * 24) * ntsteps)
                 node[idx] = _aval_end
                 node[idx + 1] = _aval_start - 1
                 consum[_aval_end:_aval_start] = (end_soc[j] - init_soc[j + 1]) / 100 * stocap / \
@@ -194,8 +198,8 @@ def device_write(dict_ems, device_name, path):
 
 
 if __name__ == '__main__':
-    ev_aval_date = ["10:00", "14:00", "17:45", "19:15", "21:30", "23:15"]
-    ev_aval = [datetime.datetime.strptime(x, "%H:%M") for x in ev_aval_date]
+    ev_aval_date = ["2019-11-30 11:15", "2019-12-02 8:45"]
+    ev_aval = [datetime.datetime.strptime(x, '%Y-%m-%d %H:%M') for x in ev_aval_date]
     points = int(len(ev_aval) / 2)
     xx = ev_aval[1] - ev_aval[0]
     a = xx.seconds / 3600
