@@ -129,6 +129,8 @@ def plot_flex(my_ems, device):
     if nsteps > req_ticks:
         plt_prc.set_xticks(plt_prc.get_xticks()[::int(round(nsteps/req_ticks))])
         plt_prc.set_xticklabels(ts[::int(round(nsteps/req_ticks))], rotation=-45, ha="left")
+    else:
+        plt_prc.set_xticklabels(ts, rotation=-45, ha="left")        
 
     # Settings
     plt.rc('font', family='serif')
