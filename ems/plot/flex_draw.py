@@ -15,7 +15,7 @@ def plot_flex(my_ems, device):
     dat1 = pd.DataFrame.from_dict(my_ems['flexopts'][device])
     neg_leg = 0
     pos_leg = 0
-    font_size = 24
+    font_size = 20
     fig = plt.figure(constrained_layout=True, figsize=(16, 12), dpi=80)
     spec = gridspec.GridSpec(ncols=1, nrows=4, figure=fig)
     plt_prc = fig.add_subplot(spec[3, 0])
@@ -125,8 +125,10 @@ def plot_flex(my_ems, device):
     plt_prc.axhline(y=0, linewidth=2, color='k')
 
     # Change xtick intervals    
-    plt_prc.set_xticks(plt_prc.get_xticks()[::int(round(nsteps/12))])
-    plt_prc.set_xticklabels(ts[::int(round(nsteps/12))], rotation=45)
+    req_ticks = 12   # ticks needed
+    if nsteps > req_ticks:
+        plt_prc.set_xticks(plt_prc.get_xticks()[::int(round(nsteps/req_ticks))])
+        plt_prc.set_xticklabels(ts[::int(round(nsteps/req_ticks))], rotation=-45, ha="left")
 
     # Settings
     plt.rc('font', family='serif')
