@@ -32,27 +32,27 @@ def get_elect_price_fcst(t_start=pd.Timestamp('2020-1-1 00:00'), t_end=pd.Timest
             if price_fcst.index[i].weekday() < 5:
                 # Check on peak period(4pm - 9pm):
                 if 16 <= price_fcst.index[i].hour <= 21:
-                    price_fcst['ToU'].iloc[i] = on_peak_summer_rate
+                    price_fcst.loc[price_fcst.index[i], 'ToU'] = on_peak_summer_rate
                 # Off peak period
                 else:
-                    price_fcst['ToU'].iloc[i] = off_peak_summer_rate
+                    price_fcst.loc[price_fcst.index[i], 'ToU'] = off_peak_summer_rate
             # Weekend
             else:
                 # Check on peak period(4pm - 9pm):
                 if 16 <= price_fcst.index[i].hour <= 21:
-                    price_fcst['ToU'].iloc[i] = mid_peak_summer_rate
+                    price_fcst.loc[price_fcst.index[i], 'ToU'] = mid_peak_summer_rate
                 # Off peak period
                 else:
-                    price_fcst['ToU'].iloc[i] = off_peak_summer_rate
+                    price_fcst.loc[price_fcst.index[i], 'ToU'] = off_peak_summer_rate
         # Winter months
         else:
             # Weekdays and weekends are the same
             # Check mid peak period(4pm - 9pm):
             if 16 <= price_fcst.index[i].hour <= 21:
-                price_fcst['ToU'].iloc[i] = mid_peak_winter_rate
+                price_fcst.loc[price_fcst.index[i], 'ToU'] = mid_peak_winter_rate
             # Super off-peak period
             else:
-                price_fcst['ToU'].iloc[i] = super_off_peak_winter_rate
+                price_fcst.loc[price_fcst.index[i], 'ToU'] = super_off_peak_winter_rate
 
     # Set random and EPEX prices ##################################
     price_fcst['EPEX'] = np.random.rand(len(price_fcst))*0.1 + 0.25
