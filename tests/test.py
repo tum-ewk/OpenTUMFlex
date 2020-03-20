@@ -27,6 +27,9 @@ from ems.flex.flex_ev import  calc_flex_ev
 from ems.plot.flex_draw import plot_flex as plot
 from ems.plot.flex_draw import save_results
 
+# import offers
+from ems.offers.gen_offers import alf_markt
+
 # load the predefined ems data, initialization by user input is also possible:
 my_ems = ems_loc(initialize=True, path='data/test_Nr_01.txt')
 
@@ -81,6 +84,9 @@ my_ems['flexopts']['pv'] = calc_flex_pv(my_ems)
 plot(my_ems, "hp")
 plot(my_ems, "pv")
 plot(my_ems, "bat")
+
+# Generate offers
+# alf_markt(my_ems, "hp")
 
 # store the data of the whole ems for reuse
 # ems_write(my_ems, path='data/test_Nr_01.txt')
