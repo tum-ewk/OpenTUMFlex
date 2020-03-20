@@ -39,6 +39,10 @@ def calc_flex_pv(my_ems):
                 #     net_payable = net_payable + (abs(PV_flex.iloc[i + j, 1]) - dat1[i + j]) * \
                 #                   my_ems['fcst']['ele_price_in'][i + j] / ntsteps
             PV_flex.iloc[i, 5] = (net_income + net_payable) / PV_flex.iloc[i, 3]
+            
+    # Insert time column
+    temp = my_ems['time_data']['time_slots'][:]
+    PV_flex.insert(0,"time",temp)
     return PV_flex
 
 

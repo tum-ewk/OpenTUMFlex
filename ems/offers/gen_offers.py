@@ -25,8 +25,11 @@ def alf_markt(my_ems,device):
                 df.iloc[i][j] = round(my_ems['flexopts'][device].iloc[i][j], 5)
             else:
                 temp = my_ems['flexopts'][device].iloc[i][j]
-                datetime_object = datetime.strptime(temp, "%Y-%m-%d %H:%M")
-                df.iloc[i][j] = datetime_object.strftime("%d.%m.%Y %H:%M") + UTC
+                if isinstance(temp, str):
+                    datetime_object = datetime.strptime(temp, "%Y-%m-%d %H:%M")
+                    df.iloc[i][j] = datetime_object.strftime("%d.%m.%Y %H:%M") + UTC
+                else:
+                    print("check whether flex offer time column is available?")
      
     # Additional parameters           
     df.iloc[0,8] = "Ja"  #Teilberuf
@@ -57,7 +60,9 @@ def alf_markt(my_ems,device):
     path = os.path.join(cwd,mdir)
     if not os.path.exists(path):
         os.mkdir(path)
-    file_name = datetime_object.strftime("%Y-%m-%d")+'_Flex-Angebot.csv'
+    file_name = datetime_object.strftime("%Y-%m-%d")+ '_' + \
+        device+'_Flex-Angebot.csv'
     new_cwd = os.path.join(path,file_name)
     df.to_csv(new_cwd, sep=';', decimal=',', index=False)
+    print("CSV file generated! Available on " + new_cwd)
     

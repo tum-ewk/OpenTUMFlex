@@ -145,5 +145,9 @@ def calc_flex_bat(my_ems):
             Bat_flex.iloc[i, 6] = 1*min_val        
         elif Bat_flex.iloc[i, 2] > 0 and i == nsteps-1:
             Bat_flex.iloc[i, 6] = my_ems['fcst']['ele_price_in'][i]
-             
+    
+    # Insert time column
+    temp = my_ems['time_data']['time_slots'][:]
+    Bat_flex.insert(0,"time",temp)
+         
     return Bat_flex
