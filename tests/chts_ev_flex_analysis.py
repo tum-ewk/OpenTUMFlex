@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import os
+import seaborn as sb
 
 from ems.ems_mod import ems as ems_loc
 from forecast import price_fcst
@@ -29,7 +30,11 @@ chts_opt_sum_df = pd.DataFrame(0, index=t_range, columns={'P_ev_opt_sum_tou',
 price_forecast = price_fcst.get_elect_price_fcst(t_start=t_min, t_end=t_max)
 chts_opt_sum_df.loc[:, 'c_elect_in_tou'] = price_forecast['ToU']
 chts_opt_sum_df.loc[:, 'c_elect_in_const'] = price_forecast['Constant']
-
+# Create a daytime identifier for weekday and time for heat map
+chts_opt_sum_df['Daytime_ID'] = chts_opt_sum_df.index.weekday_name.array + \
+                                ', ' + \
+                                chts_opt_sum_df.index.strftime('%H:%M').array
+days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 
 """
 ToU Analysis
@@ -106,6 +111,45 @@ axs[2].grid()
 axs[2].legend()
 axs[2].set_xlabel('Date')
 
+# Retrieve the maximum power of each day
+max_values_per_day = chts_opt_sum_df.groupby(chts_opt_sum_df.index.floor('d')).max().reset_index()
+
+# Subplots
+fig, axs = plt.subplots(nrows=2, ncols=1, sharex=True)
+# Plot maximum power per day
+axs[0].bar(max_values_per_day['index'], max_values_per_day['P_ev_opt_sum_tou'],
+           color='green', label='ToU electricity prices', zorder=5)
+axs[0].bar(max_values_per_day['index'], max_values_per_day['P_ev_opt_sum_const'],
+           color='black', label='Constant electricity prices', zorder=0)
+axs[0].set_ylabel('Daily maximal power [kW]')
+axs[0].grid()
+axs[0].legend()
+# Plot difference in maximal power between constant and tou prices
+axs[1].bar(max_values_per_day['index'], max_values_per_day['P_ev_opt_sum_tou']-max_values_per_day['P_ev_opt_sum_const'])
+axs[1].hlines((max_values_per_day['P_ev_opt_sum_tou']-max_values_per_day['P_ev_opt_sum_const']).mean(),
+              t_min.floor('d'), t_max.floor('d'), label='Mean difference')
+axs[1].set_xlabel('Date')
+axs[1].set_ylabel('P_max_tou - P_max_const [kW]')
+axs[1].grid()
+
+# Prepare heat map for optimal charging power
+chts_opt_per_daytime = chts_opt_sum_df.groupby(by='Daytime_ID').mean()
+# prepare df for week heat map
+P_opt_sum_tou_hm = pd.DataFrame(0, index=pd.date_range(start='00:00', end='23:45', freq='15Min').strftime('%H:%M'),
+                                columns=days)
+P_opt_sum_const_hm = pd.DataFrame(0, index=pd.date_range(start='00:00', end='23:45', freq='15Min').strftime('%H:%M'),
+                                  columns=days)
+# P_opt_sum_tou_hm = P_opt_sum_tou_hm.drop(index='')     # drop first column with no index
+# P_opt_sum_const_hm = P_opt_sum_const_hm.drop(index='')     # drop first column with no index
+
+for i in range(7):
+    P_opt_sum_tou_hm[chts_opt_per_daytime.index[i*96][:3]].iloc[:] = chts_opt_per_daytime['P_ev_opt_sum_tou'].iloc[i*96:i*96+96].values
+    P_opt_sum_const_hm[chts_opt_per_daytime.index[i*96][:3]].iloc[:] = chts_opt_per_daytime['P_ev_opt_sum_const'].iloc[i*96:i*96+96].values
+
+plt.figure()
+sb.heatmap(P_opt_sum_tou_hm)
+plt.figure()
+sb.heatmap(P_opt_sum_const_hm)
 
 """
 Analysis of ev flexibility
