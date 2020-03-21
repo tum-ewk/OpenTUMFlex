@@ -31,7 +31,7 @@ def get_elect_price_fcst(t_start=pd.Timestamp('2020-1-1 00:00'), t_end=pd.Timest
             # Check weekday (0-4)
             if price_fcst.index[i].weekday() < 5:
                 # Check on peak period(4pm - 9pm):
-                if 16 <= price_fcst.index[i].hour <= 21:
+                if 16 <= price_fcst.index[i].hour < 21:
                     price_fcst.loc[price_fcst.index[i], 'ToU'] = on_peak_summer_rate
                 # Off peak period
                 else:
@@ -39,7 +39,7 @@ def get_elect_price_fcst(t_start=pd.Timestamp('2020-1-1 00:00'), t_end=pd.Timest
             # Weekend
             else:
                 # Check on peak period(4pm - 9pm):
-                if 16 <= price_fcst.index[i].hour <= 21:
+                if 16 <= price_fcst.index[i].hour < 21:
                     price_fcst.loc[price_fcst.index[i], 'ToU'] = mid_peak_summer_rate
                 # Off peak period
                 else:
@@ -48,7 +48,7 @@ def get_elect_price_fcst(t_start=pd.Timestamp('2020-1-1 00:00'), t_end=pd.Timest
         else:
             # Weekdays and weekends are the same
             # Check mid peak period(4pm - 9pm):
-            if 16 <= price_fcst.index[i].hour <= 21:
+            if 16 <= price_fcst.index[i].hour < 21:
                 price_fcst.loc[price_fcst.index[i], 'ToU'] = mid_peak_winter_rate
             # Super off-peak period
             else:
