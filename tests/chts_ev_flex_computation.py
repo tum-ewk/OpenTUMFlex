@@ -39,13 +39,13 @@ t_insufficient_count = 0
 results = list()
 
 # Go through all vehicle availabilities
-for i in range(30, 49):
+for i in range(len(veh_availability)):
     # Ceil arrival time to next quarter hour
     t_arrival_ceiled = pd.Timestamp(veh_availability['t_arrival'][i]).ceil(freq='15Min')
     # Floor departure time to previous quarter hour
     t_departure_floored = pd.Timestamp(veh_availability['t_departure'][i]).floor(freq='15Min')
     # Check whether time between ceiled arrival and floored departure time are at least two time steps
-    t_delta_ts = t_departure_floored - t_arrival_ceiled
+    # t_delta_ts = t_departure_floored - t_arrival_ceiled
 
     # change the time interval
     my_ems['time_data']['t_inval'] = 15
@@ -56,7 +56,8 @@ for i in range(30, 49):
     my_ems.update(update_time_data(my_ems))
 
     # Get price forecast for given time period
-    price_fcst = get_elect_price_fcst(t_start=t_arrival_ceiled, t_end=t_departure_floored)
+    price_fcst = get_elect_price_fcst(t_start=t_arrival_ceiled, t_end=t_departure_floored,
+                                      min_price_increment=False, pr_constant=0.19)
     # Check whether price forecast is empty
     if price_fcst is None:
         print('### Time is not sufficient for timestep:', i, '###')
@@ -89,4 +90,4 @@ for i in range(30, 49):
 
     # Save results to files
     results.append(my_ems)
-    ems_write(my_ems, path='results/CHTS/ToU/ev_avail_' + str(i) + '.txt')
+    ems_write(my_ems, path='C:/Users/ga47num/PycharmProjects/CHTS - OpenTUMFlex - EV - Results/ToU/ev_avail_' + str(i) + '.txt')
