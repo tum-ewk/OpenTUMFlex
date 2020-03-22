@@ -2,14 +2,17 @@ import pandas as pd
 import numpy as np
 
 
-def get_elect_price_fcst(t_start=pd.Timestamp('2020-1-1 00:00'), t_end=pd.Timestamp('2020-1-1 23:45'),
-                         min_price_increment=False, pr_constant=0.20):
+def get_elect_price_fcst(t_start=pd.Timestamp('2020-1-1 00:00'),
+                         t_end=pd.Timestamp('2020-1-1 23:45'),
+                         pr_constant=0.20):
     # Check whether start time is before end time otherwise return
     if t_start >= t_end:
         return
 
     # Create a dataframe with placeholders
-    price_fcst = pd.DataFrame(-1, columns={'Constant', 'ToU', 'EPEX', 'Random'},
+    price_fcst = pd.DataFrame(-1, columns={'Constant', 'ToU',
+                                           'Constant_minimally_increasing', 'ToU_minimally_increasing',
+                                           'EPEX', 'Random'},
                               index=pd.date_range(start=t_start, end=t_end, freq='15 Min'))
 
     # Set constant prices ############################################
@@ -58,16 +61,19 @@ def get_elect_price_fcst(t_start=pd.Timestamp('2020-1-1 00:00'), t_end=pd.Timest
     price_fcst['EPEX'] = np.random.rand(len(price_fcst))*0.1 + 0.25
     price_fcst['Random'] = np.random.rand(len(price_fcst)) * 0.1 + 0.25
 
-    # Add a minimal price increment for the optimizer to prefer earliest possible time of operation
-    if min_price_increment is True:
-        price_fcst['ToU'] += np.linspace(start=0.0001, stop=0.0002, num=len(price_fcst))
-        price_fcst['Constant'] += np.linspace(start=0.0001, stop=0.0002, num=len(price_fcst))
+    price_fcst['ToU_minimally_increasing'] = price_fcst['ToU'] + np.linspace(start=0.00001,
+                                                                             stop=0.00002,
+                                                                             num=len(price_fcst))
+    price_fcst['Constant_minimally_increasing'] = price_fcst['Constant'] + np.linspace(start=0.00001,
+                                                                                       stop=0.00002,
+                                                                                       num=len(price_fcst))
 
     return price_fcst
 
 
 if __name__ == '__main__':
-    price_fcst = get_elect_price_fcst(t_start=pd.Timestamp('2020-03-03 00:00'), t_end=pd.Timestamp('2020-03-03 23:00'),
-                                      min_price_increment=True, pr_constant=0.25)
+    test = get_elect_price_fcst(t_start=pd.Timestamp('2020-03-03 00:00'),
+                                t_end=pd.Timestamp('2020-03-03 23:00'),
+                                pr_constant=0.25)
 
-    price_fcst.plot()
+    test.plot()
