@@ -22,7 +22,11 @@ def alf_markt(my_ems,device):
     for i in range(0,95):
         for j in range(0,8):
             if j != 0:
-                df.iloc[i][j] = round(my_ems['flexopts'][device].iloc[i][j], 5)
+                if j==6 or j==7:
+                    # Converting to cents
+                    df.iloc[i][j] = round(my_ems['flexopts'][device].iloc[i][j]*100, 2)                     
+                else:
+                    df.iloc[i][j] = round(my_ems['flexopts'][device].iloc[i][j], 5)
             else:
                 temp = my_ems['flexopts'][device].iloc[i][j]
                 if isinstance(temp, str):
@@ -65,4 +69,6 @@ def alf_markt(my_ems,device):
     new_cwd = os.path.join(path,file_name)
     df.to_csv(new_cwd, sep=';', decimal=',', index=False)
     print("CSV file generated! Available on " + new_cwd)
+    
+    return df
     
