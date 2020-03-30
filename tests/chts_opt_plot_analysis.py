@@ -2,7 +2,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import os
 import seaborn as sb
-
+from pandas.plotting import register_matplotlib_converters
+register_matplotlib_converters()
 
 """
 ####################################################################
@@ -10,10 +11,10 @@ import seaborn as sb
 ####################################################################
 """
 chts_opt_sum_df = pd.read_hdf('C:/Users/ga47num/PycharmProjects/CHTS - OpenTUMFlex - EV - Results/Aggregated Data/chts_opt_sum_data.h5', key='df')
-chts_flex_sum_df = pd.read_hdf('C:/Users/ga47num/PycharmProjects/CHTS - OpenTUMFlex - EV - Results/Aggregated Data/chts_flex_sum_data.h5', key='df')
+# chts_flex_sum_df = pd.read_hdf('C:/Users/ga47num/PycharmProjects/CHTS - OpenTUMFlex - EV - Results/Aggregated Data/chts_flex_sum_data.h5', key='df')
 # minimal and maximal time of all files (known)
-t_min = min(chts_flex_sum_df.index)
-t_max = max(chts_flex_sum_df.index)
+t_min = min(chts_opt_sum_df.index)
+t_max = max(chts_opt_sum_df.index)
 # Date range from minimal to maximal time
 t_range = pd.date_range(start=t_min, end=t_max, freq='15Min')
 days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
