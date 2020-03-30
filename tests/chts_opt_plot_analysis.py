@@ -1,6 +1,5 @@
 import pandas as pd
 import matplotlib.pyplot as plt
-import os
 import seaborn as sb
 from pandas.plotting import register_matplotlib_converters
 register_matplotlib_converters()
@@ -10,8 +9,7 @@ register_matplotlib_converters()
 # Read data from hdf files #########################################
 ####################################################################
 """
-chts_opt_sum_df = pd.read_hdf('C:/Users/ga47num/PycharmProjects/CHTS - OpenTUMFlex - EV - Results/Aggregated Data/chts_opt_sum_data.h5', key='df')
-# chts_flex_sum_df = pd.read_hdf('C:/Users/ga47num/PycharmProjects/CHTS - OpenTUMFlex - EV - Results/Aggregated Data/chts_flex_sum_data.h5', key='df')
+chts_opt_sum_df = pd.read_hdf('C:/Users/ga47num/PycharmProjects/CHTS - OpenTUMFlex - EV/Results/Aggregated Data/chts_opt_sum_data.h5', key='df')
 # minimal and maximal time of all files (known)
 t_min = min(chts_opt_sum_df.index)
 t_max = max(chts_opt_sum_df.index)
@@ -25,46 +23,51 @@ days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 ####################################################################
 """
 # Subplots
-fig1, axs = plt.subplots(nrows=4, ncols=1, sharex=True)
+fig1, axs = plt.subplots(nrows=3, ncols=1, sharex=True)
 # number of available vehicles
 axs[0].plot(chts_opt_sum_df['n_veh_avail'], color='k')
 axs[0].set_ylabel('# of available vehicles')
 axs[0].grid()
 # Cumulated power for ev charging
-axs[1].plot(chts_opt_sum_df['P_ev_opt_sum_const'], color='k', label='Constant prices', zorder=5)
-axs[1].plot(chts_opt_sum_df['P_ev_opt_sum_tou'], color='g', label='ToU prices', zorder=0)
+axs[1].plot(chts_opt_sum_df['P_ev_opt_sum_const'], color='k', label='Constant prices', zorder=5, linestyle='solid')
+axs[1].plot(chts_opt_sum_df['P_ev_opt_sum_tou'], color='g', label='ToU prices', zorder=0, linestyle='dashed')
+axs[1].plot(chts_opt_sum_df['P_ev_opt_sum_const_mi'], color='k', label='Constant prices minimally increasing',
+            zorder=5, linestyle='dashdot')
+axs[1].plot(chts_opt_sum_df['P_ev_opt_sum_tou_mi'], color='g', label='ToU prices minimally increasing',
+            zorder=0, linestyle='dotted')
+axs[1].plot(chts_opt_sum_df['P_ev_opt_sum_rtp'], color='b', label='RTP',
+            zorder=0, linestyle='solid')
+axs[1].hlines((chts_opt_sum_df.nlargest(round(len(t_range) * 0.005), 'P_ev_opt_sum_const_mi')['P_ev_opt_sum_const_mi'] /
+               chts_opt_sum_df.nlargest(round(len(t_range) * 0.005), 'P_ev_opt_sum_const_mi')['n_veh_avail']).mean() *
+              chts_opt_sum_df['n_veh_avail'].max(),
+              t_min, t_max, color='black', linestyle='dashdot')
+axs[1].hlines((chts_opt_sum_df.nlargest(round(len(t_range) * 0.005), 'P_ev_opt_sum_tou_mi')['P_ev_opt_sum_tou_mi'] /
+               chts_opt_sum_df.nlargest(round(len(t_range) * 0.005), 'P_ev_opt_sum_tou_mi')['n_veh_avail']).mean() *
+              chts_opt_sum_df['n_veh_avail'].max(),
+              t_min, t_max, color='g', linestyle='dotted')
 axs[1].hlines((chts_opt_sum_df.nlargest(round(len(t_range) * 0.005), 'P_ev_opt_sum_const')['P_ev_opt_sum_const'] /
                chts_opt_sum_df.nlargest(round(len(t_range) * 0.005), 'P_ev_opt_sum_const')['n_veh_avail']).mean() *
               chts_opt_sum_df['n_veh_avail'].max(),
-              t_min, t_max, color='black')
+              t_min, t_max, color='black', linestyle='solid')
 axs[1].hlines((chts_opt_sum_df.nlargest(round(len(t_range) * 0.005), 'P_ev_opt_sum_tou')['P_ev_opt_sum_tou'] /
                chts_opt_sum_df.nlargest(round(len(t_range) * 0.005), 'P_ev_opt_sum_tou')['n_veh_avail']).mean() *
               chts_opt_sum_df['n_veh_avail'].max(),
-              t_min, t_max, color='g')
+              t_min, t_max, color='g', linestyle='dashed')
+axs[1].hlines((chts_opt_sum_df.nlargest(round(len(t_range) * 0.005), 'P_ev_opt_sum_rtp')['P_ev_opt_sum_rtp'] /
+               chts_opt_sum_df.nlargest(round(len(t_range) * 0.005), 'P_ev_opt_sum_rtp')['n_veh_avail']).mean() *
+              chts_opt_sum_df['n_veh_avail'].max(),
+              t_min, t_max, color='b', linestyle='solid')
 axs[1].set_ylabel('Charging power [kW]')
 axs[1].grid()
 axs[1].legend()
-# Cumulated power for ev charging with minimal price increments
-axs[2].plot(chts_opt_sum_df['P_ev_opt_sum_const_mi'], color='k', label='Constant prices minimally increasing', zorder=5)
-axs[2].plot(chts_opt_sum_df['P_ev_opt_sum_tou_mi'], color='g', label='ToU prices minimally increasing', zorder=0)
-axs[2].hlines((chts_opt_sum_df.nlargest(round(len(t_range) * 0.005), 'P_ev_opt_sum_const_mi')['P_ev_opt_sum_const_mi'] /
-               chts_opt_sum_df.nlargest(round(len(t_range) * 0.005), 'P_ev_opt_sum_const_mi')['n_veh_avail']).mean() *
-              chts_opt_sum_df['n_veh_avail'].max(),
-              t_min, t_max, color='black')
-axs[2].hlines((chts_opt_sum_df.nlargest(round(len(t_range) * 0.005), 'P_ev_opt_sum_tou_mi')['P_ev_opt_sum_tou_mi'] /
-               chts_opt_sum_df.nlargest(round(len(t_range) * 0.005), 'P_ev_opt_sum_tou_mi')['n_veh_avail']).mean() *
-              chts_opt_sum_df['n_veh_avail'].max(),
-              t_min, t_max, color='g')
-axs[2].set_ylabel('Charging power [kW]')
+# Electricity cost
+axs[2].plot(chts_opt_sum_df['c_elect_in_const'], color='k', label='Constant prices', zorder=10)
+axs[2].plot(chts_opt_sum_df['c_elect_in_tou'], color='g', label='ToU prices', zorder=5)
+axs[2].plot(chts_opt_sum_df['c_elect_in_rtp'], color='b', label='RTP', zorder=0)
+axs[2].set_ylabel('Electricity cost [$/kWh]')
 axs[2].grid()
 axs[2].legend()
-# Electricity cost
-axs[3].plot(chts_opt_sum_df['c_elect_in_const'], color='k', label='Constant prices', zorder=5)
-axs[3].plot(chts_opt_sum_df['c_elect_in_tou'], color='g', label='ToU prices', zorder=0)
-axs[3].set_ylabel('Electricity cost [$/kWh]')
-axs[3].grid()
-axs[3].legend()
-axs[3].set_xlabel('Date')
+axs[2].set_xlabel('Date')
 
 """
 ####################################################################
@@ -175,6 +178,8 @@ P_opt_sum_tou_mi_hm = pd.DataFrame(0, index=pd.date_range(start='00:00', end='23
                                    columns=days)
 P_opt_sum_const_mi_hm = pd.DataFrame(0, index=pd.date_range(start='00:00', end='23:45', freq='15Min').strftime('%H:%M'),
                                      columns=days)
+P_opt_sum_rtp_hm = pd.DataFrame(0, index=pd.date_range(start='00:00', end='23:45', freq='15Min').strftime('%H:%M'),
+                                columns=days)
 n_avail_veh_hm = pd.DataFrame(0, index=pd.date_range(start='00:00', end='23:45', freq='15Min').strftime('%H:%M'),
                               columns=days)
 
@@ -184,18 +189,22 @@ for i in range(7):
     P_opt_sum_const_hm[chts_opt_per_daytime.index[i*96][:3]].iloc[:] = chts_opt_per_daytime['P_ev_opt_sum_const'].iloc[i*96:i*96+96].values
     P_opt_sum_tou_mi_hm[chts_opt_per_daytime.index[i*96][:3]].iloc[:] = chts_opt_per_daytime['P_ev_opt_sum_tou_mi'].iloc[i*96:i*96+96].values
     P_opt_sum_const_mi_hm[chts_opt_per_daytime.index[i*96][:3]].iloc[:] = chts_opt_per_daytime['P_ev_opt_sum_const_mi'].iloc[i*96:i*96+96].values
+    P_opt_sum_rtp_hm[chts_opt_per_daytime.index[i*96][:3]].iloc[:] = chts_opt_per_daytime['P_ev_opt_sum_rtp'].iloc[i*96:i*96+96].values
     n_avail_veh_hm[chts_opt_per_daytime.index[i*96][:3]].iloc[:] = chts_opt_per_daytime['n_veh_avail'].iloc[i*96:i*96+96].values
 
 # Charging power
-fig3, axs = plt.subplots(nrows=2, ncols=2, sharex=True, sharey=True)
-sb.heatmap(P_opt_sum_tou_hm, ax=axs[0, 0], cbar_kws={'label': 'Average charging power [kW]'}, vmin=0, vmax=20)
-axs[0, 0].set_title('ToU prices')
-sb.heatmap(P_opt_sum_const_hm, ax=axs[0, 1], cbar_kws={'label': 'Average charging power [kW]'}, vmin=0, vmax=20)
-axs[0, 1].set_title('Constant prices')
-sb.heatmap(P_opt_sum_tou_mi_hm, ax=axs[1, 0], cbar_kws={'label': 'Average charging power [kW]'}, vmin=0, vmax=20)
-axs[1, 0].set_title('ToU prices minimally increasing')
-sb.heatmap(P_opt_sum_const_mi_hm, ax=axs[1, 1], cbar_kws={'label': 'Average charging power [kW]'}, vmin=0, vmax=20)
-axs[1, 1].set_title('Constant prices minimally increasing')
+fig3, axs = plt.subplots(nrows=1, ncols=5, sharex=True, sharey=True)
+pcm = axs[0].pcolormesh(P_opt_sum_tou_hm, vmin=0, vmax=20, cmap='jet')
+axs[0].set_title('ToU prices')
+sb.heatmap(P_opt_sum_const_hm, ax=axs[1], cbar=False, vmin=0, vmax=20, cmap='jet')
+axs[1].set_title('Constant prices')
+sb.heatmap(P_opt_sum_tou_mi_hm, ax=axs[2], cbar=False, vmin=0, vmax=20, cmap='jet')
+axs[2].set_title('ToU prices minimally increasing')
+sb.heatmap(P_opt_sum_const_mi_hm, ax=axs[3], cbar=False, vmin=0, vmax=20, cmap='jet')
+axs[3].set_title('Constant prices minimally increasing')
+sb.heatmap(P_opt_sum_rtp_hm, ax=axs[4], cbar=False, vmin=0, vmax=20, cmap='jet')
+axs[4].set_title('Real-time prices')
+fig3.colorbar(pcm, ax=axs[:], shrink=0.6, label='Positive flexible power [kW]', orientation='horizontal')
 
 """
 ####################################################################
