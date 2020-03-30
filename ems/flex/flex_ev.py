@@ -76,6 +76,9 @@ def calc_flex_ev(my_ems):
             ev_flex_temp[e_neg][i] = ev_flex_temp[p_neg].iat[i] * t_neg_flex_avail
             ev_flex_temp[e_pos][i] = ev_flex_temp[p_pos].iat[i] * t_pos_flex_avail
 
+        # Round entire df to three decimals
+        ev_flex_temp = round(ev_flex_temp, 3)
+
         # Check whether offered flex energy can be caught up later #######################
         for i in range(len(ev_flex_temp)):
             # Positive flex offers
