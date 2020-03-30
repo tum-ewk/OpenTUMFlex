@@ -9,6 +9,7 @@ register_matplotlib_converters()
 # Define start and end date
 t_start = '201802010000'
 t_end = '201903010000'
+avg_price_california = 0.19
 # gets all data from website
 price_data = requests.get('https://hourlypricing.comed.com/api?type=5minutefeed&datestart=' + t_start +
                           '&dateend=' + t_end)
@@ -27,7 +28,8 @@ rtp_df.insert(column='timesteps', value=timesteps, loc=0)
 # Since data is from 2013-2014 a date offset of one year and six hours is subtracted
 rtp_df['NEW_DATE'] = rtp_df['timesteps'].apply(lambda x: x - pd.DateOffset(years=6, hours=6))
 rtp_df['price_str'] = rtp_df['price']
-rtp_df['price'] = rtp_df['price'].astype(float)
+# divide by 100 to make them to dollar per kWh
+rtp_df['price'] = rtp_df['price'].astype(float) / 100
 rtp_df.index = rtp_df['NEW_DATE']
 
 # Resample data to 15 minutes
@@ -37,7 +39,7 @@ rtp_15min = rtp_df.resample('15min').mean()
 rtp_15min['price'][rtp_15min['price'].isna()] = rtp_15min['price'].mean()
 
 # Add constant value for taxes, fees, delivery services etc. (constant price of California in 2019 - average rtp)
-rtp_15min['price'] += 19 - rtp_15min['price'].mean()
+rtp_15min['price'] += avg_price_california - rtp_15min['price'].mean()
 
 # Create test plot for analysis
 fig1, axs = plt.subplots(nrows=2, ncols=1, sharex=True, sharey=True)
