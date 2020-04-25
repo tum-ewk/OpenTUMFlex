@@ -7,8 +7,8 @@ from pandas.plotting import register_matplotlib_converters
 register_matplotlib_converters()
 
 # Define start and end date
-t_start = '201802010000'
-t_end = '201903010000'
+t_start = '201701010000'
+t_end = '201801010000'
 avg_price_california = 0.19
 # gets all data from website
 price_data = requests.get('https://hourlypricing.comed.com/api?type=5minutefeed&datestart=' + t_start +
@@ -21,16 +21,17 @@ timesteps = list()
 
 # convert millisUTC to timestamp
 for i in range(len(rtp_df)):
-    timesteps.append(datetime.datetime.fromtimestamp(int(rtp_df['millisUTC'][i])/1000))
+    timesteps.append(datetime.datetime.fromtimestamp(int(rtp_df['millisUTC'][i])/1000) - pd.Timedelta('7 h'))
 
 # Insert timesteps into
 rtp_df.insert(column='timesteps', value=timesteps, loc=0)
 # Since data is from 2013-2014 a date offset of one year and six hours is subtracted
-rtp_df['NEW_DATE'] = rtp_df['timesteps'].apply(lambda x: x - pd.DateOffset(years=6, hours=6))
+# rtp_df['NEW_DATE'] = rtp_df['timesteps'].apply(lambda x: x - pd.DateOffset(years=6, hours=6))
 rtp_df['price_str'] = rtp_df['price']
 # divide by 100 to make them to dollar per kWh
 rtp_df['price'] = rtp_df['price'].astype(float) / 100
-rtp_df.index = rtp_df['NEW_DATE']
+# rtp_df.index = rtp_df['NEW_DATE']
+rtp_df.index = rtp_df['timesteps']
 
 # Resample data to 15 minutes
 rtp_15min = rtp_df.resample('15min').mean()
@@ -65,7 +66,7 @@ rtp_per_daytime['price'].plot()
 plt.grid()
 
 # Save price df in hdf files
-rtp_15min.to_hdf('C:/Users/ga47num/PycharmProjects/CHTS - OpenTUMFlex - EV - Results/RTP/rtp_15min_' +
+rtp_15min.to_hdf('C:/Users/ga47num/PycharmProjects/GER MP - OpenTUMFlex - EV/Input/RTP/rtp_15min_' +
                  t_start + '-' + t_end + '.h5', mode='w', key='df')
-rtp_per_daytime.to_hdf('C:/Users/ga47num/PycharmProjects/CHTS - OpenTUMFlex - EV - Results/RTP/rtp_per_daytime_' +
+rtp_per_daytime.to_hdf('C:/Users/ga47num/PycharmProjects/GER MP - OpenTUMFlex - EV/Input/RTP/rtp_per_daytime_' +
                        t_start + '-' + t_end + '.h5', mode='w', key='df')
