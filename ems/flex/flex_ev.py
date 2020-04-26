@@ -90,7 +90,8 @@ def calc_flex_ev(my_ems):
                                          (my_ems['devices']['ev']['maxpow'] / n_time_steps_phour))
                 if idx_remaining < idx_required:
                     e_max = idx_remaining / n_time_steps_phour * my_ems['devices']['ev']['maxpow']
-                    ev_flex_temp[e_pos].iat[i] = math.floor(e_max / ev_flex_temp[p_pos].iat[i] * n_time_steps_phour) * ev_flex_temp[p_pos].iat[i] / n_time_steps_phour
+                    ev_flex_temp[e_pos].iat[i] = math.floor(e_max / ev_flex_temp[p_pos].iat[i] * n_time_steps_phour) * \
+                                                 ev_flex_temp[p_pos].iat[i] / n_time_steps_phour
 
             # Negative flex offers
             if ev_flex_temp[p_neg].iat[i] > 0:
@@ -98,7 +99,7 @@ def calc_flex_ev(my_ems):
                 # check whether power is not available anymore
                 if (ev_flex_temp[p_neg].iloc[i:] < ev_flex_temp[p_neg].iloc[i]).any():
                     idx_p_neg_max = int(((ev_flex_temp[p_neg].iloc[i:] < ev_flex_temp[p_neg].iloc[i]).idxmax() -
-                                         ev_flex_temp.index[i]).seconds / 3600 * n_time_steps_phour)
+                                         ev_flex_temp.index[i]).total_seconds() / 3600 * n_time_steps_phour)
                 # power is available for entire time period
                 else:
                     idx_p_neg_max = len(ev_flex_temp[p_neg].iloc[i:])
@@ -113,7 +114,8 @@ def calc_flex_ev(my_ems):
                 # Offers with modulated power
                 elif ev_flex_temp[p_neg].iat[i] < my_ems['devices']['ev']['maxpow']:
                     # Calculate the cumulated sum of flex and optimal charging schedule
-                    temp_flex_df = pd.DataFrame(0, columns={'E_opt', 'E_flex', 'E_opt_cumsum', 'E_flex_cumsum', 'E_flex_opt_cumsum'},
+                    temp_flex_df = pd.DataFrame(0, columns={'E_opt', 'E_flex', 'E_opt_cumsum',
+                                                            'E_flex_cumsum', 'E_flex_opt_cumsum'},
                                                  index=ev_flex_temp.index[i:i + idx_p_neg_max])
                     temp_flex_df['E_opt'] = (ev_flex_temp[p_opt].iloc[i:i+idx_p_neg_max] / n_time_steps_phour)
                     temp_flex_df['E_flex'] = (ev_flex_temp[p_neg].iat[i] / n_time_steps_phour)
@@ -125,7 +127,9 @@ def calc_flex_ev(my_ems):
                         pass
                     else:
                         # Find number of time steps until remaining energy has been charged
-                        idx_allowed = int((temp_flex_df['E_flex_opt_cumsum'][temp_flex_df['E_flex_opt_cumsum'] > ev_flex_temp[e_remain].iat[i]].index[0] - ev_flex_temp.index[i]).seconds / 3600 * n_time_steps_phour)
+                        idx_allowed = int((temp_flex_df['E_flex_opt_cumsum'][temp_flex_df['E_flex_opt_cumsum'] >
+                                                                             ev_flex_temp[e_remain].iat[i]].index[0] -
+                                           ev_flex_temp.index[i]).total_seconds() / 3600 * n_time_steps_phour)
                         # Calculate maximal available time steps negative flex can be offered
                         # if number of available time steps is lower do not change offered energy
                         if idx_p_neg_max <= idx_allowed:
