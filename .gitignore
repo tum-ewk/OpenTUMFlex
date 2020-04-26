@@ -54,3 +54,5 @@ tests/data/
 tests/results/SA_ems_results/ev_ems_0.txt
 *.txt
 *.csv
+tests/results/UniformPricing/problem_definition.json
+tests/results/VarPricing/problem_definition.json
