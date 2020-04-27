@@ -10,8 +10,8 @@ from forecast import price_fcst
 #################################################################
 """
 # minimal and maximal time of all files (known)
-t_min = pd.Timestamp('2012-02-01 11:30:00')
-t_max = pd.Timestamp('2013-02-04 06:15:00')
+t_min = pd.Timestamp('2017-09-01 00:00:00')
+t_max = pd.Timestamp('2017-12-01 00:00:00')
 # Date range from minimal to maximal time
 t_range = pd.date_range(start=t_min, end=t_max, freq='15Min')
 # Create df for sum of optimal charging plans
@@ -61,7 +61,7 @@ chts_flex_sum_df = pd.DataFrame(0, index=t_range, columns={'P_pos_sum_tou',
                                                            'Daytime_ID'})
 # Get forecast electricity prices for each time step
 price_forecast = price_fcst.get_elect_price_fcst(t_start=t_min, t_end=t_max, pr_constant=0.19)
-rtp_price_forecast = pd.read_hdf('C:/Users/ga47num/PycharmProjects/CHTS - OpenTUMFlex - EV/Input-Data/RTP/rtp_15min_201802010000-201903010000.h5', key='df')
+rtp_price_forecast = pd.read_hdf('C:/Users/ga47num/PycharmProjects/GER MP - OpenTUMFlex - EV/Input/RTP/rtp_15min_201701010000-201801010000.h5', key='df')
 price_forecast.insert(value=rtp_price_forecast['price'].loc[t_min:t_max], loc=0, column='RTP')
 chts_opt_sum_df.loc[:, 'c_elect_in_tou'] = price_forecast['ToU']
 chts_opt_sum_df.loc[:, 'c_elect_in_const'] = price_forecast['Constant']
@@ -69,12 +69,8 @@ chts_opt_sum_df.loc[:, 'c_elect_in_tou_mi'] = price_forecast['ToU_minimally_incr
 chts_opt_sum_df.loc[:, 'c_elect_in_const_mi'] = price_forecast['Constant_minimally_increasing']
 chts_opt_sum_df.loc[:, 'c_elect_in_rtp'] = price_forecast['RTP']
 # Create a daytime identifier for weekday and time for heat map
-chts_opt_sum_df['Daytime_ID'] = chts_opt_sum_df.index.weekday_name.array + \
-                                ', ' + \
-                                chts_opt_sum_df.index.strftime('%H:%M').array
-chts_flex_sum_df['Daytime_ID'] = chts_opt_sum_df.index.weekday_name.array + \
-                                ', ' + \
-                                chts_opt_sum_df.index.strftime('%H:%M').array
+chts_opt_sum_df['Daytime_ID'] = chts_opt_sum_df.index.day_name() + ', ' + chts_opt_sum_df.index.strftime('%H:%M').array
+chts_flex_sum_df['Daytime_ID'] = chts_opt_sum_df.index.day_name() + ', ' + chts_opt_sum_df.index.strftime('%H:%M').array
 days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 
 
@@ -84,26 +80,26 @@ days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 #################################################################################
 """
 # List all file names, for all scenarios (ToU & Constant, with and without minimally increasing prices) the same
-file_names = os.listdir('C:/Users/ga47num/PycharmProjects/CHTS - OpenTUMFlex - EV/Results/ToU/')
+file_names = os.listdir('C:/Users/ga47num/PycharmProjects/GER MP - OpenTUMFlex - EV/Output/ToU/')
 
 # read all results and store them in result lists
 for result_name in file_names:
     my_ems_tou_mi = ems_loc(initialize=True,
-                            path='C:/Users/ga47num/PycharmProjects/CHTS - OpenTUMFlex - EV/Results/'
-                                 'ToU_with_price_increment/'
+                            path='C:/Users/ga47num/PycharmProjects/GER MP - OpenTUMFlex - EV/Output/'
+                                 'ToU_minimally_increasing/'
                                  + result_name)
     my_ems_tou = ems_loc(initialize=True,
-                         path='C:/Users/ga47num/PycharmProjects/CHTS - OpenTUMFlex - EV/Results/ToU/'
+                         path='C:/Users/ga47num/PycharmProjects/GER MP - OpenTUMFlex - EV/Output/ToU/'
                               + result_name)
     my_ems_const_mi = ems_loc(initialize=True,
-                              path='C:/Users/ga47num/PycharmProjects/CHTS - OpenTUMFlex - EV/Results/'
-                                   'Constant_with_price_increment/'
+                              path='C:/Users/ga47num/PycharmProjects/GER MP - OpenTUMFlex - EV/Output/'
+                                   'Constant_minimally_increasing/'
                                    + result_name)
     my_ems_const = ems_loc(initialize=True,
-                           path='C:/Users/ga47num/PycharmProjects/CHTS - OpenTUMFlex - EV/Results/Constant/'
+                           path='C:/Users/ga47num/PycharmProjects/GER MP - OpenTUMFlex - EV/Output/Constant/'
                                 + result_name)
     my_ems_rtp = ems_loc(initialize=True,
-                         path='C:/Users/ga47num/PycharmProjects/CHTS - OpenTUMFlex - EV/Results/RTP/'
+                         path='C:/Users/ga47num/PycharmProjects/GER MP - OpenTUMFlex - EV/Output/RTP/'
                               + result_name)
 
     opt_result_df = pd.DataFrame({'P_ev_opt_tou_mi': my_ems_tou_mi['optplan']['EV_power'],
@@ -195,5 +191,5 @@ for result_name in file_names:
 
 
 # Save data to hdf files for further analysis
-chts_flex_sum_df.to_hdf('C:/Users/ga47num/PycharmProjects/CHTS - OpenTUMFlex - EV/Results/Aggregated Data/chts_flex_sum_data.h5', mode='w', key='df')
-chts_opt_sum_df.to_hdf('C:/Users/ga47num/PycharmProjects/CHTS - OpenTUMFlex - EV/Results/Aggregated Data/chts_opt_sum_data.h5', mode='w', key='df')
+chts_flex_sum_df.to_hdf('C:/Users/ga47num/PycharmProjects/GER MP - OpenTUMFlex - EV/Output/Aggregated Data/chts_flex_sum_data.h5', mode='w', key='df')
+chts_opt_sum_df.to_hdf('C:/Users/ga47num/PycharmProjects/GER MP - OpenTUMFlex - EV/Output/Aggregated Data/chts_opt_sum_data.h5', mode='w', key='df')
