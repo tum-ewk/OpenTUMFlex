@@ -1,0 +1,1 @@
+{"num_vars": 4, "names": ["t_avail", "p_max", "e_req", "eta"], "bounds": [[0, 24], [1, 200], [1, 200], [0.8, 1]]}

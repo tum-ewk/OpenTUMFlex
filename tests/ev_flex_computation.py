@@ -1,6 +1,5 @@
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
 
 from ems.ems_mod import ems as ems_loc
 from ems.ems_mod import ems_write
@@ -17,21 +16,24 @@ from pyomo.opt import SolverFactory
 # import flex devices modules
 from ems.flex.flex_ev import calc_flex_ev
 from ems.plot.flex_draw import plot_flex as plot
+import os
+
+p_charge_max = 22                   # Maximal charging power
+mil2km_conversion = 1.61            # Miles to kilometer conversion rate
+electr_consumption_per_km = 0.2     # electricity consumption per km (e.g. 0.2 equals 20kWh/100km
 
 # Define input and output paths
 input_path = 'C:/Users/ga47num/PycharmProjects/GER MP - OpenTUMFlex - EV/Input/'
-output_path = 'C:/Users/ga47num/PycharmProjects/GER MP - OpenTUMFlex - EV/Output/'
+output_path = 'C:/Users/ga47num/PycharmProjects/GER MP - OpenTUMFlex - EV/Output/' + str(p_charge_max) + '/'
 
 # Read home availabilities and real time prices from file
 veh_availability = pd.read_csv(input_path + 'Veh_Availability/ger_mp_veh_availability.csv')
-rtp_price_forecast = pd.read_hdf(input_path + 'RTP/rtp_15min_201701010000-201801010000.h5', key='df')
+rtp_files = os.listdir(input_path + 'RTP/')
+rtp_price_forecast = pd.read_hdf(input_path + 'RTP/' + rtp_files[rtp_files == 'rtp_15min'], key='df')
 
 # Total number of home availabilities with trips conducted before and afterwards
 n_avail = len(veh_availability)
 n_veh = len(veh_availability['vehID'].unique())
-
-mil2km_conversion = 1.61            # Miles to kilometer conversion rate
-electr_consumption_per_km = 0.2     # electricity consumption per km (e.g. 0.2 equals 20kWh/100km
 
 # load the predefined ems data, initialization by user input is also possible:
 my_ems = ems_loc(initialize=True, path='data/ev_ems_sa_constant_price_incl_error.txt')
@@ -80,7 +82,7 @@ for i in range(len(veh_availability)):
         my_ems['fcst']['solar'] = len(price_fcst) * [0]
 
         # Update EV parameters
-        my_ems['devices'].update(devices(device_name='ev', minpow=0, maxpow=11,
+        my_ems['devices'].update(devices(device_name='ev', minpow=0, maxpow=p_charge_max,
                                          stocap=round(veh_availability['d_travelled'][i]*electr_consumption_per_km),
                                          init_soc=[0], end_soc=[100], eta=0.98,
                                          ev_aval=[my_ems['time_data']['start_time'], my_ems['time_data']['end_time']],
