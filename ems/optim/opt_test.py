@@ -38,7 +38,7 @@ def run_opt(ems_local, plot_fig=True, result_folder='C:'):
     length = len(timesteps)
 
     # transfer the data from model parameters and results into list using built-in function (value)
-    print('Load Results ...\n')
+    #print('Load Results ...\n')
     # ev parameters
     ev_node = ems_local['devices']['ev']['node']
 
@@ -130,7 +130,7 @@ def run_opt(ems_local, plot_fig=True, result_folder='C:'):
     ts = np.asarray(ts)
 
     width = 1  # the width of the bars: can also be len(x) sequence
-    print('Results Loaded.')
+    #print('Results Loaded.')
 
     """
     plot the results
@@ -286,16 +286,16 @@ def run_model(ems_local):
     # read the device parameters
     devices = ems_local['devices']
 
-    print('Data Read. time: ' + "{:.1f}".format(tm.time() - t0) + ' s\n')
+    #print('Data Read. time: ' + "{:.1f}".format(tm.time() - t0) + ' s\n')
 
-    print('Prepare Data ...\n')
+    #print('Prepare Data ...\n')
 
     time_interval = ems_local['time_data']['t_inval']  # x minutes for one time step
 
     # obtain the forecasting data from ems
     time_series = pd.DataFrame.from_dict(ems_local['fcst'])
 
-    print('Data Prepared. time: ' + "{:.1f}".format(tm.time() - t0) + ' s\n')
+    #print('Data Prepared. time: ' + "{:.1f}".format(tm.time() - t0) + ' s\n')
 
     # get the initial and final time step
     time_step_initial = 0
@@ -367,7 +367,7 @@ def run_model(ems_local):
     """ 
     build the concrete model
     """
-    print('Define Model ...\n')
+    #print('Define Model ...\n')
 
     # create the model object m
     m = pyen.ConcreteModel()
@@ -652,12 +652,12 @@ def run_model(ems_local):
 
     m.obj = pyen.Objective(sense=pyen.minimize, rule=obj_rule, doc='Sum costs by cost type')
 
-    print('Model Defined. time: ' + "{:.1f}".format(tm.time() - t0) + ' s\n')
+    #print('Model Defined. time: ' + "{:.1f}".format(tm.time() - t0) + ' s\n')
 
     """
     solve the model
     """
-    print('Solve Model ...\n')
+    #print('Solve Model ...\n')
 
     # use glpk as solver
     optimizer = SolverFactory('glpk')
@@ -672,7 +672,7 @@ def run_model(ems_local):
 
     optimizer.solve(m, load_solutions=True, options=solver_opt, timelimit=15)
 
-    print('Model Solved. time: ' + "{:.1f}".format(tm.time() - t0) + ' s\n')
+    #print('Model Solved. time: ' + "{:.1f}".format(tm.time() - t0) + ' s\n')
 
     return m, timesteps
 

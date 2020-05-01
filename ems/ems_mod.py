@@ -66,7 +66,7 @@ def ems_write(dict_ems, path):
             if not isinstance(dict_ems['flexopts'][key], dict):
                 dict_ems['flexopts'][key] = dict_ems['flexopts'][key].to_dict('dict')
         js.dump(dict_ems, f)
-    print('complete saving EMS_data!!! ')
+    #print('complete saving EMS_data!!! ')
 
 
 def update_time_data(dict_ems):

@@ -18,7 +18,7 @@ from ems.flex.flex_ev import calc_flex_ev
 from ems.plot.flex_draw import plot_flex as plot
 import os
 
-p_charge_max = 22                   # Maximal charging power
+p_charge_max = 3.7                   # Maximal charging power
 mil2km_conversion = 1.61            # Miles to kilometer conversion rate
 electr_consumption_per_km = 0.2     # electricity consumption per km (e.g. 0.2 equals 20kWh/100km
 
@@ -47,6 +47,7 @@ results = list()
 # Go through all vehicle availabilities
 # for i in range(0, 3):
 for i in range(len(veh_availability)):
+    print('################# Vehicle availability #' + str(i) + ' #################')
     # Ceil arrival time to next quarter hour
     t_arrival_ceiled = pd.Timestamp(veh_availability['t_arrival'][i]).ceil(freq='15Min')
     # Floor departure time to previous quarter hour

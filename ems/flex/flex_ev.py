@@ -3,7 +3,7 @@ import math
 
 
 def calc_flex_ev(my_ems):
-    print('EV Flex Calculation ...')
+    #print('EV Flex Calculation ...')
     # Time Data ###########################
     n_time_steps = my_ems['time_data']['nsteps']
     temp_res = my_ems['time_data']['t_inval']
@@ -166,7 +166,7 @@ def calc_flex_ev(my_ems):
         # Copy temporary data frame to overall dataframe
         ev_flex[my_ems['devices']['ev']['aval_init'][j]:my_ems['devices']['ev']['aval_end'][j]] = ev_flex_temp
 
-    print('EV Flex Calculation completed!')
+    #print('EV Flex Calculation completed!')
     ev_flex[p_opt] = -ev_flex[p_opt]
     ev_flex[p_neg] = -ev_flex[p_neg]
     ev_flex[e_neg] = -ev_flex[e_neg]
