@@ -18,9 +18,13 @@ from pyomo.opt import SolverFactory
 from ems.flex.flex_ev import calc_flex_ev
 from ems.plot.flex_draw import plot_flex as plot
 
+# Define input and output paths
+input_path = 'C:/Users/ga47num/PycharmProjects/GER MP - OpenTUMFlex - EV/Input/'
+output_path = 'C:/Users/ga47num/PycharmProjects/GER MP - OpenTUMFlex - EV/Output/'
+
 # Read home availabilities and real time prices from file
-veh_availability = pd.read_csv('C:/Users/ga47num/PycharmProjects/GER MP - OpenTUMFlex - EV/Input/Veh_Availability/ger_mp_veh_availability.csv')
-rtp_price_forecast = pd.read_hdf('C:/Users/ga47num/PycharmProjects/GER MP - OpenTUMFlex - EV/Input/RTP/rtp_15min_201701010000-201801010000.h5', key='df')
+veh_availability = pd.read_csv(input_path + 'Veh_Availability/ger_mp_veh_availability.csv')
+rtp_price_forecast = pd.read_hdf(input_path + 'RTP/rtp_15min_201701010000-201801010000.h5', key='df')
 
 # Total number of home availabilities with trips conducted before and afterwards
 n_avail = len(veh_availability)
@@ -93,5 +97,4 @@ for i in range(len(veh_availability)):
 
         # Save results to files
         # results.append(my_ems)
-        ems_write(my_ems, path='C:/Users/ga47num/PycharmProjects/GER MP - OpenTUMFlex - EV/Output/' + price +
-                               '/ev_avail_' + str(i) + '.txt')
+        ems_write(my_ems, path=output_path + price + '/ev_avail_' + str(i) + '.txt')
