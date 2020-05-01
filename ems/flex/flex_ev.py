@@ -105,7 +105,7 @@ def calc_flex_ev(my_ems):
                     idx_p_neg_max = len(ev_flex_temp[p_neg].iloc[i:])
                 # Offers with maximum negative power
                 if ev_flex_temp[p_neg].iat[i] == my_ems['devices']['ev']['maxpow']:
-                    if ev_flex_temp[e_neg].iat[i].round(2) > ev_flex_temp[e_remain].iat[i].round(2):
+                    if ev_flex_temp[e_neg].iat[i] > ev_flex_temp[e_remain].iat[i]:
                         ev_flex_temp[e_neg].iat[i] = ev_flex_temp[e_remain].iat[i]
                         if ev_flex_temp[e_neg].iat[i] == 0:
                             ev_flex_temp[p_neg].iat[i] = 0
