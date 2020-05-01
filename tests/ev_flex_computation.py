@@ -27,7 +27,9 @@ input_path = 'C:/Users/ga47num/PycharmProjects/GER MP - OpenTUMFlex - EV/Input/'
 output_path = 'C:/Users/ga47num/PycharmProjects/GER MP - OpenTUMFlex - EV/Output/' + str(p_charge_max) + '/'
 
 # Read home availabilities and real time prices from file
-veh_availability = pd.read_csv(input_path + 'Veh_Availability/ger_mp_veh_availability.csv')
+veh_avail_files = os.listdir(input_path + 'Veh_Availability/')
+veh_availability = pd.read_csv(input_path + 'Veh_Availability/' +
+                               veh_avail_files[veh_avail_files == 'veh_availability.csv'])
 rtp_files = os.listdir(input_path + 'RTP/')
 rtp_price_forecast = pd.read_hdf(input_path + 'RTP/' + rtp_files[rtp_files == 'rtp_15min'], key='df')
 
