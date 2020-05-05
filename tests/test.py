@@ -1,3 +1,8 @@
+"""
+Created on Tue Oct 29 17:08:47 2019
+@author: Babu Kumaran Nalini, M.Sc. Technical University Munich
+Strictly not for ciruculation. Personal file. 
+"""
 
 import pandas as pd
 import numpy as np
@@ -26,6 +31,9 @@ from ems.flex.flex_ev import  calc_flex_ev
 # import plot module
 from ems.plot.flex_draw import plot_flex as plot
 from ems.plot.flex_draw import save_results
+
+# import reoptimization
+from ems.optim.reoptim import reoptimize
 
 # import offers
 from ems.offers.gen_offers import alf_markt
@@ -77,19 +85,20 @@ my_ems['optplan'] = opt(my_ems, plot_fig=True, result_folder='data/')
 # my_ems['flexopts']['hp'] = calc_flex_hp(my_ems)
 # my_ems['flexopts']['chp'] = calc_flex_chp(my_ems)
 # my_ems['flexopts']['bat'] = calc_flex_bat(my_ems)
-my_ems['flexopts']['pv'] = calc_flex_pv(my_ems)
+my_ems['flexopts']['pv'] = calc_flex_pv(my_ems, reopt=0)
 # my_ems['flexopts']['ev'] = calc_flex_ev(my_ems)
 
 # plot the results
-# plot(my_ems, "hp")
+# plot(my_ems, "hp", reopt=0)
 plot(my_ems, "pv")
-# plot(my_ems, "bat")
+# plot(my_ems, "bat", reopt=0)
 
 # Reoptimization
+# Selected offer - Device and timestep
 my_ems['reoptim']['device'] = 'pv'
-my_ems['reoptim']['timestep'] = 30
-
-
+my_ems['reoptim']['timestep'] = 50 
+my_ems['reoptim']['flextype'] = 'Neg' # Use Neg/Pos
+my_ems = reoptimize(my_ems)
 
 # Generate offers
 # alf_markt(my_ems, "hp")

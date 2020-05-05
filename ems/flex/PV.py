@@ -9,15 +9,20 @@ from ems.ems_mod import ems as ems_loc
 import pandas as pd
 
 
-def calc_flex_pv(my_ems):
-    isteps = my_ems['time_data']['isteps']
-    nsteps = my_ems['time_data']['nsteps']
-    nsteps = nsteps - isteps
+def calc_flex_pv(my_ems, reopt):
+    # Find whether optimization or reoptimization
+    if reopt == 0:
+        dat1 = my_ems['optplan']['pv_pv2grid'] 
+        dat2 = my_ems['optplan']['PV_power']    
+    elif reopt == 1:
+        dat1 = my_ems['reoptim']['optplan']['pv_pv2grid'] 
+        dat2 = my_ems['reoptim']['optplan']['PV_power'] 
+        
+    nsteps = len(dat1)
     ntsteps = my_ems['time_data']['ntsteps']
     PV_flex = pd.DataFrame(0, index=range(nsteps), columns=range(7))
     PV_flex.columns = ['Sch_P', 'Neg_P', 'Pos_P', 'Neg_E', 'Pos_E', 'Neg_Pr', 'Pos_Pr']
-    dat1 = my_ems['optplan']['pv_pv2grid'] 
-    dat2 = my_ems['optplan']['PV_power']
+
 
     # PV negative flexibility
     for i in range(0, nsteps):
