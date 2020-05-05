@@ -74,16 +74,22 @@ my_ems['devices'].update(devices(device_name='ev', minpow=0, maxpow=0, stocap=0,
 my_ems['optplan'] = opt(my_ems, plot_fig=True, result_folder='data/')
 
 # calculate the flexibility of one device
-my_ems['flexopts']['hp'] = calc_flex_hp(my_ems)
+# my_ems['flexopts']['hp'] = calc_flex_hp(my_ems)
 # my_ems['flexopts']['chp'] = calc_flex_chp(my_ems)
-my_ems['flexopts']['bat'] = calc_flex_bat(my_ems)
+# my_ems['flexopts']['bat'] = calc_flex_bat(my_ems)
 my_ems['flexopts']['pv'] = calc_flex_pv(my_ems)
 # my_ems['flexopts']['ev'] = calc_flex_ev(my_ems)
 
-# plot the results#
-plot(my_ems, "hp")
+# plot the results
+# plot(my_ems, "hp")
 plot(my_ems, "pv")
-plot(my_ems, "bat")
+# plot(my_ems, "bat")
+
+# Reoptimization
+my_ems['reoptim']['device'] = 'pv'
+my_ems['reoptim']['timestep'] = 30
+
+
 
 # Generate offers
 # alf_markt(my_ems, "hp")

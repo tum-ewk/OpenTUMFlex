@@ -10,7 +10,9 @@ import pandas as pd
 
 
 def calc_flex_pv(my_ems):
+    isteps = my_ems['time_data']['isteps']
     nsteps = my_ems['time_data']['nsteps']
+    nsteps = nsteps - isteps
     ntsteps = my_ems['time_data']['ntsteps']
     PV_flex = pd.DataFrame(0, index=range(nsteps), columns=range(7))
     PV_flex.columns = ['Sch_P', 'Neg_P', 'Pos_P', 'Neg_E', 'Pos_E', 'Neg_Pr', 'Pos_Pr']
@@ -18,17 +20,17 @@ def calc_flex_pv(my_ems):
     dat2 = my_ems['optplan']['PV_power']
 
     # PV negative flexibility
-    for i in range(nsteps):
+    for i in range(0, nsteps):
         PV_flex.iloc[i, 0] = dat2[i]
         if dat2[i] > 0.1:  # min_export
             j = i
             while dat2[i] <= dat2[j]:
                 j = j + 1
             PV_flex.iloc[i, 1] = -1 * dat2[i]
-            PV_flex.iloc[i, 3] = PV_flex.iloc[i, 1] * (j - i) / ntsteps
+            PV_flex.iloc[i, 3] = PV_flex.iloc[i, 1] * (j-i) / ntsteps
 
     # PV negative flexibility pricing
-    for i in range(nsteps):
+    for i in range(0, nsteps):
         if PV_flex.iloc[i, 1] < 0:
             flex_steps = int(round(ntsteps * PV_flex.iloc[i, 3] / PV_flex.iloc[i, 1]))
             net_income = 0
@@ -41,8 +43,9 @@ def calc_flex_pv(my_ems):
             PV_flex.iloc[i, 5] = (net_income + net_payable) / PV_flex.iloc[i, 3]
             
     # Insert time column
-    temp = my_ems['time_data']['time_slots'][:]
-    PV_flex.insert(0,"time",temp)
+    # temp = my_ems['time_data']['time_slots'][:]
+    # PV_flex.insert(0,"time",temp)
+    # PV_flex.index += isteps
     return PV_flex
 
 

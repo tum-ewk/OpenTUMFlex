@@ -54,6 +54,7 @@ def ems(emsid=000000, userpref=None, flexprodtype=None, timeintervall=15, days=1
                    'fcst': df_fcst.to_dict('dict'),
                    'optplan': df_optplan.to_dict('dict'),
                    'flexopts': df_flexopts,
+                   'reoptim': df_flexopts,
                    'devices': None
                    }
 
@@ -96,6 +97,7 @@ def update_time_data(dict_ems):
     dict_time['time_slots'] = pd.date_range(start=dict_time['start_time'], end=dict_time['end_time'],
                                             freq=str(dict_time['t_inval']) + 'min').strftime('%Y-%m-%d %H:%M')
 
+    dict_time['isteps'] = 0
     dict_time['nsteps'] = len(dict_time['time_slots'])
     dict_time['ntsteps'] = int(60 / dict_ems['time_data']['t_inval'])
     dict_time_data = {'time_data': dict_time}

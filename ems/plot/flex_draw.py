@@ -9,7 +9,9 @@ import matplotlib.pyplot as plt
 from matplotlib import gridspec
 
 def plot_flex(my_ems, device):
-    nsteps = my_ems['time_data']['nsteps']
+    isteps = my_ems['time_data']['isteps']
+    esteps = my_ems['time_data']['nsteps']
+    nsteps = esteps - isteps
     ntsteps = my_ems['time_data']['ntsteps']
     t_intval = my_ems['time_data']['t_inval']
     dat1 = pd.DataFrame.from_dict(my_ems['flexopts'][device])
@@ -22,7 +24,7 @@ def plot_flex(my_ems, device):
     plt_pow = fig.add_subplot(spec[2, 0], sharex=plt_prc)
     plt_cum = fig.add_subplot(spec[0:2, 0], sharex=plt_prc)
     #ts = my_ems['time_data']['time_slots'].tolist()
-    ts = my_ems['time_data']['time_slots']
+    ts = my_ems['time_data']['time_slots'][isteps:esteps]
 
     # Plotting cummulative energy exchange
     theta = 0
@@ -30,10 +32,10 @@ def plot_flex(my_ems, device):
     #     index=pd.date_range(start="00:00", end="23:59",
     #     freq=str(t_intval) + 'min').strftime('%H:%M'), columns={'cumm'})
     cum_data = pd.DataFrame(
-             index=my_ems['time_data']['time_slots'], columns={'cumm'})
+             index=my_ems['time_data']['time_slots'][isteps:esteps], columns={'cumm'})
     cum_data.iloc[0, 0] = 0
     for i in range(nsteps - 1):
-        cum_data.iloc[i + 1, 0] = theta + dat1['Sch_P'][i] / ntsteps
+        cum_data.iloc[i + 1, 0] = theta + dat1['Sch_P'][i]/ntsteps
         theta = cum_data.iloc[i + 1, 0]
     p1 = plt_cum.plot(cum_data.iloc[:, 0], linewidth=3, color='k')
 
@@ -50,7 +52,7 @@ def plot_flex(my_ems, device):
                 theta = cum_data.iloc[x + y, 0] + (slot_flex * y)
         p4 = plt_pow.bar(ts[x], dat1['Neg_P'][x], color='tab:blue', width=1.0, align='edge', edgecolor='k', zorder=3)
         p6 = plt_prc.bar(ts[x], dat1['Neg_Pr'][x], color='tab:blue', width=1.0, align='edge', edgecolor='k', zorder=3)
-
+        
         # Positive flexibility plots
         if dat1['Pos_E'][x] > 0:
             pos_leg = 1
@@ -137,9 +139,8 @@ def plot_flex(my_ems, device):
     plt.rc('font', family='serif')
     plt.margins(x=0)
     plt.show()
-
+    
     return
-
 
 def save_results(dat1, nsteps, save_path):
     dat1.to_excel("output.xlsx", sheet_name='flex_results')

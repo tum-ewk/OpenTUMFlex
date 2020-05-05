@@ -33,7 +33,8 @@ def run_hp_opt(ems_local, plot_fig=True, result_folder='C:'):
 
     # chece if the results have been initialized
     try:
-        value(prob.ev_power[0])
+        # value(prob.ev_power[0])
+        value(prob.ev_power[ems_local['time_data']['isteps']])
     except ValueError as error:
         print(error)
         raise ImportError(
@@ -139,7 +140,9 @@ def run_hp_opt(ems_local, plot_fig=True, result_folder='C:'):
     N = len(timesteps)
     ind = np.arange(N)  # the x locations for the groups
     # ts = ems_local['time_data']['time_slots'].tolist()
-    ts = ems_local['time_data']['time_slots']
+    isteps = ems_local['time_data']['isteps']
+    nsteps = ems_local['time_data']['nsteps']
+    ts = ems_local['time_data']['time_slots'][isteps:nsteps]
     ts = np.asarray(ts)
     # ind = ems_local['time_data']['time_slots'].tolist()
     width = 1  # the width of the bars: can also be len(x) sequence
@@ -211,7 +214,7 @@ def run_hp_opt(ems_local, plot_fig=True, result_folder='C:'):
         plt.xlabel('time [h]', fontsize=font_size)
         plt.ylabel('SOC [%]', fontsize=font_size)
         # plt.title('SOC of Battery', fontsize=font_size)
-        plt.xticks(ind[idx_plt], timesteps[idx_plt])
+        plt.xticks(ind[idx_plt], ts[idx_plt], rotation=20)
         ax2.set_xlim(0, len(timesteps) - 1)
         plt.show()
 
@@ -224,7 +227,7 @@ def run_hp_opt(ems_local, plot_fig=True, result_folder='C:'):
         plt.xlabel('time [h]', fontsize=font_size)
         plt.ylabel('SOC [%]', fontsize=font_size)
         # plt.title('SOC of EV', fontsize=font_size)
-        plt.xticks(ind[idx_plt], timesteps[idx_plt])
+        plt.xticks(ind[idx_plt], ts[idx_plt], rotation=20)
         ax2.set_xlim(0, len(timesteps) - 1)
         for i in np.arange(0, len(ev_node), 2):
             plt.axvspan(ev_node[i], ev_node[i + 1], facecolor='#b9ebeb', alpha=0.5)
@@ -250,7 +253,7 @@ def run_hp_opt(ems_local, plot_fig=True, result_folder='C:'):
         plt.xticks([0, 24, 2, 2], fontsize=font_size)
         plt.yticks(fontsize=font_size)
         idx_plt = np.arange(0, len(timesteps), int(len(timesteps) / 5))
-        plt.xticks(ind[idx_plt], timesteps[idx_plt])
+        plt.xticks(ind[idx_plt], ts[idx_plt], rotation=20)
         ax1.set_xlim(0, len(timesteps) - 1)
         # plt.yticks(np.arange(-10, 10, 2))
         plt.legend((p1[0], p2[0], p3[0], p4[0], p6[0]), ('boiler', 'CHP', 'HP', 'heat storage', 'heat demand'),
@@ -261,7 +264,7 @@ def run_hp_opt(ems_local, plot_fig=True, result_folder='C:'):
         p7 = plt.step(ind, SOC_heat, linewidth=1, where='mid', color='red')
         plt.xlabel('time [h]', fontsize=font_size)
         plt.ylabel('SOC [%]', fontsize=font_size)
-        plt.xticks(ind[idx_plt], timesteps[idx_plt])
+        plt.xticks(ind[idx_plt], ts[idx_plt], rotation=20)
         ax2.set_xlim(0, len(timesteps) - 1)
         # plt.title('SOC of heat storage', fontsize=font_size)
         plt.show()
@@ -334,10 +337,10 @@ def run_hp(ems_local):
     # system
     # get the initial time step
     # time_step_initial = parameter.loc['System']['value']
-    time_step_initial = 0
+    time_step_initial = ems_local['time_data']['isteps']
     # time_step_end = int(60 / time_interval * 24)
     time_step_end = ems_local['time_data']['nsteps']
-    timesteps = np.arange(0, time_step_end)
+    timesteps = np.arange(time_step_initial, time_step_end)
     # timestep_1 = timesteps[0]
 
     # timesteps = timesteps_all[time_step_initial:time_step_end]
