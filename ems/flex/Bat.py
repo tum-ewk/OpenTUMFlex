@@ -8,16 +8,25 @@ import pandas as pd
 import statistics
 
 
-def calc_flex_bat(my_ems):
-    nsteps = my_ems['time_data']['nsteps']
+def calc_flex_bat(my_ems, reopt):
+    # Find whether optimization or reoptimization
+    if reopt == 0:
+        dat1 = {'col1': my_ems['optplan']['bat_grid2bat'], 
+            'col2': my_ems['optplan']['bat_input_power'],
+            'col3': my_ems['optplan']['bat_output_power'],
+            'col4': my_ems['optplan']['bat_SOC']}    
+    elif reopt == 1:
+        dat1 = {'col1': my_ems['reoptim']['optplan']['bat_grid2bat'], 
+            'col2': my_ems['reoptim']['optplan']['bat_input_power'],
+            'col3': my_ems['reoptim']['optplan']['bat_output_power'],
+            'col4': my_ems['reoptim']['optplan']['bat_SOC']}   
+    
+    dat1 = pd.DataFrame(data=dat1)   
+    nsteps = len(dat1)
     ntsteps = my_ems['time_data']['ntsteps']
     Bat_flex = pd.DataFrame(0, index=range(nsteps), columns=range(7))
     Bat_flex.columns = ['Sch_P', 'Neg_P', 'Pos_P', 'Neg_E', 'Pos_E', 'Neg_Pr', 'Pos_Pr']
-    dat1 = {'col1': my_ems['optplan']['bat_grid2bat'], 
-            'col2': my_ems['optplan']['bat_input_power'],
-            'col3': my_ems['optplan']['bat_output_power'],
-            'col4': my_ems['optplan']['bat_SOC']}
-    dat1 = pd.DataFrame(data=dat1)
+    
     # Bat_flex.iloc[:, 0] = my_ems['optplan']['bat_grid2bat']
     Bat_maxP = my_ems['devices']['bat']['maxpow']
     Bat_minP = my_ems['devices']['bat']['minpow']
@@ -147,7 +156,7 @@ def calc_flex_bat(my_ems):
             Bat_flex.iloc[i, 6] = my_ems['fcst']['ele_price_in'][i]
     
     # Insert time column
-    temp = my_ems['time_data']['time_slots'][:]
-    Bat_flex.insert(0,"time",temp)
+    # temp = my_ems['time_data']['time_slots'][:]
+    # Bat_flex.insert(0,"time",temp)
          
     return Bat_flex

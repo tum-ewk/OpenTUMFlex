@@ -62,13 +62,13 @@ my_ems['devices']['chp']['maxpow'] = 0
 my_ems['devices']['pv']['maxpow'] = 5
 my_ems['devices']['bat']['stocap'] = 5
 my_ems['devices']['bat']['maxpow'] = 3
-my_ems['devices'].update(devices(device_name='ev', minpow=0, maxpow=0, stocap=0, init_soc=[20, 35, 30],
-                                 end_soc=[50, 50, 40], eta=0.98,
-                                 ev_aval=["2019-12-18 04:00", "2019-12-18 09:00",
-                                          "2019-12-19 09:30", "2019-12-19 11:15",
-                                          "2019-12-18 13:45", "2019-12-18 18:15"],
-                                 # ev_aval=["2019-12-18 4:00", "2019-12-18 9:00"],
-                                 timesetting=my_ems['time_data']))
+my_ems['devices'].update(devices(device_name='ev', minpow=0, maxpow=0, stocap=0, init_soc=[20,35, 30],
+                                  end_soc=[50, 50, 40], eta=0.98,
+                                  ev_aval=["2019-12-18 04:00", "2019-12-18 09:00",
+                                           "2019-12-19 09:30", "2019-12-19 11:15",
+                                           "2019-12-18 13:45", "2019-12-18 18:15"],
+                                  # ev_aval=["2019-12-18 4:00", "2019-12-18 9:00"],
+                                  timesetting=my_ems['time_data']))
 
 
 # plt.plot(my_ems['devices']['ev']['consm'])
@@ -79,19 +79,20 @@ my_ems['devices'].update(devices(device_name='ev', minpow=0, maxpow=0, stocap=0,
 # device_write(my_ems, 'ev', '../ems/devices/ev_test.txt')
 
 # calculate the timetable for all the devices
+print('Optimization')
 my_ems['optplan'] = opt(my_ems, plot_fig=True, result_folder='data/')
 
 # calculate the flexibility of one device
 # my_ems['flexopts']['hp'] = calc_flex_hp(my_ems)
 # my_ems['flexopts']['chp'] = calc_flex_chp(my_ems)
-# my_ems['flexopts']['bat'] = calc_flex_bat(my_ems)
+my_ems['flexopts']['bat'] = calc_flex_bat(my_ems, reopt=0)
 my_ems['flexopts']['pv'] = calc_flex_pv(my_ems, reopt=0)
 # my_ems['flexopts']['ev'] = calc_flex_ev(my_ems)
 
 # plot the results
-# plot(my_ems, "hp", reopt=0)
+# plot(my_ems, "hp")
 plot(my_ems, "pv")
-# plot(my_ems, "bat", reopt=0)
+plot(my_ems, "bat")
 
 # Reoptimization
 # Selected offer - Device and timestep

@@ -42,7 +42,7 @@ def run_hp_opt(ems_local, plot_fig=True, result_folder='C:'):
 
     length = len(timesteps)
 
-    print('Load Results ...\n')
+    # print('Load Results ...\n')
 
     # ev parameters
     ev_node = ems_local['devices']['ev']['node']
@@ -50,8 +50,8 @@ def run_hp_opt(ems_local, plot_fig=True, result_folder='C:'):
     # electricity variable
     HP_ele_cap, HP_ele_run, elec_import, elec_export, lastprofil_elec, ev_pow, ev_soc, CHP_cap, pv_power, bat_cont, \
     bat_power, pv_pv2demand, pv_pv2grid, bat_grid2bat, \
-    bat_power_pos, bat_power_neg, CHP_elec_run, CHP_operation, elec_supply_price = \
-        (np.zeros(length) for i in range(19))
+    bat_power_pos, bat_power_neg, CHP_elec_run, CHP_operation, elec_supply_price, opt_ele_price = \
+        (np.zeros(length) for i in range(20))
     # heat variable
     boiler_cap, CHP_heat_run, HP_heat_run, HP_heat_cap, CHP_operation, HP_operation, lastprofil_heat, sto_e_pow, sto_e_pow_pos, \
     CHP_gas_run, sto_e_pow_neg, sto_e_cont = \
@@ -109,11 +109,14 @@ def run_hp_opt(ems_local, plot_fig=True, result_folder='C:'):
 
         elec_supply_price[i] = (elec_import[i] * value(prob.ele_price_in[idx]) + pv_power[i] * value(
             prob.ele_price_out[idx]) + CHP_gas_run[i] * CHP_operation[i] * value(prob.gas_price[idx]) + 0.000011) / \
-                               (elec_import[i] + pv_power[i] + CHP_cap[i] + 0.0001)
-
+                               (elec_import[i] + pv_power[i] + CHP_cap[i] + 0.0001)        
         lastprofil_heat[i] = value(prob.lastprofil_heat[idx])
         sto_e_pow[i] = value(prob.sto_e_pow[idx])
         sto_e_cont[i] = value(prob.sto_e_cont[idx])
+        
+        # Optimized electricity price (Import - Export)                      
+        opt_ele_price[i] = elec_import[i]*value(prob.ele_price_in[idx]) - pv_pv2grid[i] \
+            *value(prob.ele_price_out[idx]) - (elec_export[i] - pv_pv2grid[i]) * value(prob.gas_price[idx])
 
         # the total cost
         cost_min[i] = value(prob.costs[idx])
@@ -147,7 +150,8 @@ def run_hp_opt(ems_local, plot_fig=True, result_folder='C:'):
     # ind = ems_local['time_data']['time_slots'].tolist()
     width = 1  # the width of the bars: can also be len(x) sequence
 
-    print('Results Loaded.')
+    print('Optimized electricity net cost (€):', sum(opt_ele_price))
+    print('Results Loaded.' + '\n')
     # plt.clf()
 
     COLOURS = {
@@ -298,7 +302,8 @@ def run_hp_opt(ems_local, plot_fig=True, result_folder='C:'):
                   'EV_power': list(ev_pow),
                   'EV_SOC': list(ev_soc),
                   'elec_supply_price': list(elec_supply_price),
-                  'min cost': list(cost_min)}
+                  'min cost': list(cost_min),
+                  'opt_ele_price':list(opt_ele_price)}
 
     # df = pd.DataFrame(data=data_input)
     # df.to_excel(writer, 'operation_plan', merge_cells=False)
@@ -319,9 +324,8 @@ def run_hp(ems_local):
 
     # read data from excel file
 
-    print('Data Read. time: ' + "{:.1f}".format(tm.time() - t0) + ' s\n')
-
-    print('Prepare Data ...\n')
+    # print('Data Read. time: ' + "{:.1f}".format(tm.time() - t0) + ' s\n')
+    # print('Prepare Data ...\n')
     t = tm.time()
     time_interval = ems_local['time_data']['t_inval']  # x minutes for one time step
     # write in the time series from the data
@@ -329,7 +333,7 @@ def run_hp(ems_local):
     time_series = pd.DataFrame.from_dict(df_time_series)
     # time = time_series.index.values
 
-    print('Data Prepared. time: ' + "{:.1f}".format(tm.time() - t0) + ' s\n')
+    # print('Data Prepared. time: ' + "{:.1f}".format(tm.time() - t0) + ' s\n')
     #    lastprofil =data['Lastprofil']
     #    source_import =data['import']
     #    source_export =data['export']
@@ -404,7 +408,7 @@ def run_hp(ems_local):
     bat_eta = bat_param['eta']
 
     ## create the parameter
-    print('Define Model ...\n')
+    # print('Define Model ...\n')
     #
     m.t = pyen.Set(ordered=True, initialize=timesteps)
 
@@ -749,19 +753,19 @@ def run_hp(ems_local):
         rule=obj_rule,
         doc='Sum costs by cost type')
 
-    print('Model Defined. time: ' + "{:.1f}".format(tm.time() - t0) + ' s\n')
-    print('Solve Model ...\n')
+    # print('Model Defined. time: ' + "{:.1f}".format(tm.time() - t0) + ' s\n')
+    # print('Solve Model ...\n')
     optimizer = SolverFactory('glpk')
     solver_opt = dict()
     # solver_opt['SolTimeLimit'] = 50
     solver_opt['mipgap'] = 0.001
-    # solver_manager = SolverManagerFactory('neos')
+    solver_manager = SolverManagerFactory('neos')
     # result = solver_manager.solve(m,opt=optimizer,tee=True,load_solutions=True)
     optimizer.solve(m, load_solutions=True, options=solver_opt, timelimit=15)
     # m.solutions.load_from(result);
     # aa = 1 if results['solution'] else 0
 
-    print('Model Solved. time: ' + "{:.1f}".format(tm.time() - t0) + ' s\n')
+    print('Model Solved in: ' + "{:.1f}".format(tm.time() - t0) + 's (time)')
     return m, timesteps
 
 
