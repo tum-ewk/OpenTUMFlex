@@ -4,7 +4,6 @@ from matplotlib import cm as cmap
 from matplotlib import rcParams
 import os
 import numpy as np
-import seaborn as sb
 from pandas.plotting import register_matplotlib_converters
 register_matplotlib_converters()
 
@@ -19,7 +18,7 @@ rcParams["figure.figsize"] = [11.69, 8.27]
 ####################################################################
 """
 # Output and input path
-chts_output_path = 'C:/Users/ga47num/PycharmProjects/US CHTS - OpenTUMFlex - EV/Output/'
+chts_output_path = 'C:/Users/ga47num/PycharmProjects/US CHTS - OpenTUMFlex - EV/Output/11/'
 chts_input_path = 'C:/Users/ga47num/PycharmProjects/US CHTS - OpenTUMFlex - EV/Input/'
 # Read data
 chts_flex_sum_df = pd.read_hdf(chts_output_path + 'Aggregated Data/flex_sum_data.h5', key='df')
@@ -27,19 +26,9 @@ chts_opt_sum_df = pd.read_hdf(chts_output_path + 'Aggregated Data/opt_sum_data.h
 chts_opt_per_daytime = pd.read_hdf(chts_output_path + 'Aggregated Data/opt_per_daytime_data.h5', key='df')
 chts_flex_per_daytime = pd.read_hdf(chts_output_path + 'Aggregated Data/flex_per_daytime_data.h5', key='df')
 chts_opt_per_daytime_qt = pd.read_hdf(chts_output_path + 'Aggregated Data/opt_per_daytime_qt_data.h5', key='df')
-chts_P_pos_tou_hm = pd.read_hdf(chts_output_path + 'Aggregated Data/P_pos_tou_hm_data.h5', key='df')
-chts_P_pos_const_hm = pd.read_hdf(chts_output_path + 'Aggregated Data/P_pos_const_hm_data.h5', key='df')
-chts_P_pos_tou_mi_hm = pd.read_hdf(chts_output_path + 'Aggregated Data/P_pos_tou_mi_hm_data.h5', key='df')
-chts_P_pos_const_mi_hm = pd.read_hdf(chts_output_path + 'Aggregated Data/P_pos_const_mi_hm_data.h5', key='df')
-chts_P_pos_rtp_hm = pd.read_hdf(chts_output_path + 'Aggregated Data/P_pos_rtp_hm_data.h5', key='df')
-chts_P_neg_tou_hm = pd.read_hdf(chts_output_path + 'Aggregated Data/P_neg_tou_hm_data.h5', key='df')
-chts_P_neg_const_hm = pd.read_hdf(chts_output_path + 'Aggregated Data/P_neg_const_hm_data.h5', key='df')
-chts_P_neg_tou_mi_hm = pd.read_hdf(chts_output_path + 'Aggregated Data/P_neg_tou_mi_hm_data.h5', key='df')
-chts_P_neg_const_mi_hm = pd.read_hdf(chts_output_path + 'Aggregated Data/P_neg_const_mi_hm_data.h5', key='df')
-chts_P_neg_rtp_hm = pd.read_hdf(chts_output_path + 'Aggregated Data/P_neg_rtp_hm_data.h5', key='df')
 
 # Output and input path
-mp_output_path = 'C:/Users/ga47num/PycharmProjects/GER MP - OpenTUMFlex - EV/Output/'
+mp_output_path = 'C:/Users/ga47num/PycharmProjects/GER MP - OpenTUMFlex - EV/Output/11/'
 mp_input_path = 'C:/Users/ga47num/PycharmProjects/GER MP - OpenTUMFlex - EV/Input/'
 # Read data
 mp_flex_sum_df = pd.read_hdf(mp_output_path + 'Aggregated Data/flex_sum_data.h5', key='df')
@@ -47,46 +36,6 @@ mp_opt_sum_df = pd.read_hdf(mp_output_path + 'Aggregated Data/opt_sum_data.h5', 
 mp_opt_per_daytime = pd.read_hdf(mp_output_path + 'Aggregated Data/opt_per_daytime_data.h5', key='df')
 mp_flex_per_daytime = pd.read_hdf(mp_output_path + 'Aggregated Data/flex_per_daytime_data.h5', key='df')
 mp_opt_per_daytime_qt = pd.read_hdf(mp_output_path + 'Aggregated Data/opt_per_daytime_qt_data.h5', key='df')
-mp_P_pos_tou_hm = pd.read_hdf(mp_output_path + 'Aggregated Data/P_pos_tou_hm_data.h5', key='df')
-mp_P_pos_const_hm = pd.read_hdf(mp_output_path + 'Aggregated Data/P_pos_const_hm_data.h5', key='df')
-mp_P_pos_tou_mi_hm = pd.read_hdf(mp_output_path + 'Aggregated Data/P_pos_tou_mi_hm_data.h5', key='df')
-mp_P_pos_const_mi_hm = pd.read_hdf(mp_output_path + 'Aggregated Data/P_pos_const_mi_hm_data.h5', key='df')
-mp_P_pos_rtp_hm = pd.read_hdf(mp_output_path + 'Aggregated Data/P_pos_rtp_hm_data.h5', key='df')
-mp_P_neg_tou_hm = pd.read_hdf(mp_output_path + 'Aggregated Data/P_neg_tou_hm_data.h5', key='df')
-mp_P_neg_const_hm = pd.read_hdf(mp_output_path + 'Aggregated Data/P_neg_const_hm_data.h5', key='df')
-mp_P_neg_tou_mi_hm = pd.read_hdf(mp_output_path + 'Aggregated Data/P_neg_tou_mi_hm_data.h5', key='df')
-mp_P_neg_const_mi_hm = pd.read_hdf(mp_output_path + 'Aggregated Data/P_neg_const_mi_hm_data.h5', key='df')
-mp_P_neg_rtp_hm = pd.read_hdf(mp_output_path + 'Aggregated Data/P_neg_rtp_hm_data.h5', key='df')
-
-# Charging power
-fig3, axs = plt.subplots(nrows=5, ncols=2, sharex=True, sharey=True)
-cm = ['Greens', 'Blues_r']
-pcm = axs[0, 0].pcolormesh(chts_P_pos_tou_hm, vmin=0, vmax=20, cmap='Greens', edgecolors=None)
-axs[0, 0].set_title('ToU prices')
-sb.heatmap(chts_P_pos_const_hm, ax=axs[1, 0], cbar=False, vmin=0, vmax=20, cmap='Greens')
-axs[1, 0].set_title('Constant prices')
-sb.heatmap(chts_P_pos_tou_mi_hm, ax=axs[2, 0], cbar=False, vmin=0, vmax=20, cmap='Greens')
-axs[2, 0].set_title('ToU prices minimally increasing')
-sb.heatmap(chts_P_pos_const_mi_hm, ax=axs[3, 0], cbar=False, vmin=0, vmax=20, cmap='Greens')
-axs[3, 0].set_title('Constant prices minimally increasing')
-sb.heatmap(chts_P_pos_rtp_hm, ax=axs[4, 0], cbar=False, vmin=0, vmax=20, cmap='Greens')
-axs[4, 0].set_title('Real-time prices')
-fig3.colorbar(pcm, ax=axs[:, 0], shrink=0.6, label='Positive flexible power [kW]')
-axs[0, 0].set_xticklabels(chts_P_pos_const_hm.columns)
-axs[0, 0].set_yticklabels(chts_P_pos_const_hm.index)
-
-pcm = axs[0, 1].pcolormesh(chts_P_neg_tou_hm, vmin=-50, vmax=0, cmap='Blues_r')
-axs[0, 1].set_title('ToU prices')
-sb.heatmap(chts_P_neg_const_hm, ax=axs[1, 1], cbar=False, vmin=-50, vmax=0, cmap='Blues_r')
-axs[1, 1].set_title('Constant prices')
-sb.heatmap(chts_P_neg_tou_mi_hm, ax=axs[2, 1], cbar=False, vmin=-50, vmax=0, cmap='Blues_r')
-axs[2, 1].set_title('ToU prices minimally increasing')
-sb.heatmap(chts_P_neg_const_mi_hm, ax=axs[3, 1], cbar=False, vmin=-50, vmax=0, cmap='Blues_r')
-axs[3, 1].set_title('Constant prices minimally increasing')
-sb.heatmap(chts_P_neg_rtp_hm, ax=axs[4, 1], cbar=False, vmin=-50, vmax=0, cmap='Blues_r')
-axs[4, 1].set_title('Real-time prices')
-fig3.colorbar(pcm, ax=axs[:, 1], shrink=0.6, label='Negative flexible power [kW]')
-
 
 """
 ##################################################################
