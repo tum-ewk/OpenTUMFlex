@@ -59,7 +59,7 @@ my_ems['devices'].update(devices(device_name='hp', minpow=0, maxpow=2))
 my_ems['devices']['sto']['stocap'] = 15
 my_ems['devices']['boiler']['maxpow'] = 2
 my_ems['devices']['chp']['maxpow'] = 0
-my_ems['devices']['pv']['maxpow'] = 5
+my_ems['devices']['pv']['maxpow'] = 10
 my_ems['devices']['bat']['stocap'] = 5
 my_ems['devices']['bat']['maxpow'] = 3
 my_ems['devices'].update(devices(device_name='ev', minpow=0, maxpow=0, stocap=0, init_soc=[20,35, 30],
@@ -96,9 +96,9 @@ plot(my_ems, "bat")
 
 # Reoptimization
 # Selected offer - Device and timestep
-my_ems['reoptim']['device'] = 'pv'
-my_ems['reoptim']['timestep'] = 50 
-my_ems['reoptim']['flextype'] = 'Neg' # Use Neg/Pos
+my_ems['reoptim']['device'] = 'bat'
+my_ems['reoptim']['timestep'] = 19 
+my_ems['reoptim']['flextype'] = 'Pos' # Use Neg/Pos
 my_ems = reoptimize(my_ems)
 
 # Generate offers
