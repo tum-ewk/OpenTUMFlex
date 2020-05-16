@@ -38,6 +38,9 @@ from ems.optim.reoptim import reoptimize
 # import offers
 from ems.offers.gen_offers import alf_markt
 
+# Close all figures
+plt.close('all')
+
 # load the predefined ems data, initialization by user input is also possible:
 my_ems = ems_loc(initialize=True, path='data/test_Nr_01.txt')
 
