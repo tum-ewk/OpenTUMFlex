@@ -172,6 +172,7 @@ def run_hp_opt(ems_local, plot_fig=True, result_folder='C:'):
 
     if plot_fig is True:
         # figure properties
+        print('Here' + '\n')
         fig = plt.figure(figsize=(10, 6))
         plt.rc('font', family='serif')
         font_size = 16
@@ -208,7 +209,8 @@ def run_hp_opt(ems_local, plot_fig=True, result_folder='C:'):
         # plot properties
         plt.grid(color='lightgrey', linewidth=0.75)
         plt.tight_layout(rect=[0, 0, 1, 1])
-        plt.margins(x=0)
+        plt.margins(x=0)        
+        plt.show()
 
         fig1 = plt.figure()
         ax2 = plt.subplot()

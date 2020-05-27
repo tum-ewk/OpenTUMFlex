@@ -32,6 +32,8 @@ from ems.flex.flex_ev import  calc_flex_ev
 from ems.plot.flex_draw import plot_flex as plot
 from ems.plot.flex_draw import save_results
 from ems.plot.reopt_draw import plot_reopt as plot_reopt
+from ems.plot.reopt_draw import plot_reopt_compare as plot_com
+from ems.plot.reopt_draw import plot_reopt_price as plot_reopt_price
 
 # import reoptimization
 from ems.optim.reoptim import reoptimize
@@ -101,13 +103,15 @@ plot(my_ems, "bat")
 # Reoptimization
 # Selected offer - Device and timestep
 my_ems['reoptim']['device'] = 'bat'  # Ues pv/bat
-my_ems['reoptim']['timestep'] = 19 
-my_ems['reoptim']['flextype'] = 'Pos' # Use Neg/Pos
+my_ems['reoptim']['timestep'] = 50 
+my_ems['reoptim']['flextype'] = 'Neg' # Use Neg/Pos
 my_ems = reoptimize(my_ems)
 
 # Plot reoptimization
 if my_ems['reoptim']['status'] == 1:
     plot_reopt(my_ems)
+    plot_com(my_ems)
+    plot_reopt_price(my_ems)
 
 # Generate offers
 # alf_markt(my_ems, "hp")
