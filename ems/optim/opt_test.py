@@ -172,7 +172,6 @@ def run_hp_opt(ems_local, plot_fig=True, result_folder='C:'):
 
     if plot_fig is True:
         # figure properties
-        print('Here' + '\n')
         fig = plt.figure(figsize=(10, 6))
         plt.rc('font', family='serif')
         font_size = 16
