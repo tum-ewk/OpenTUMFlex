@@ -62,20 +62,12 @@ my_ems['fcst'] = load_data(my_ems, path='data/input_data.xlsx')
 
 # add or change the utility/devices
 # if deleting one specific device please use del my_ems['devices']['hp']
-# my_ems['devices'].update(dev(device_name='hp', minpow=3, maxpow=6))
 my_ems['devices'].update(devices(device_name='hp', minpow=0, maxpow=2))
-my_ems['devices']['sto']['stocap'] = 15
-my_ems['devices']['boiler']['maxpow'] = 2
-my_ems['devices']['chp']['maxpow'] = 0
-my_ems['devices']['pv']['maxpow'] = 10
-my_ems['devices']['bat']['stocap'] = 5
-my_ems['devices']['bat']['maxpow'] = 3
-my_ems['devices'].update(devices(device_name='ev', minpow=0, maxpow=0, stocap=0, init_soc=[20,35, 30],
+my_ems['devices'].update(devices(device_name='ev', minpow=0, maxpow=0, stocap=0, init_soc=[20,35,30],
                                   end_soc=[50, 50, 40], eta=0.98,
                                   ev_aval=["2019-12-18 04:00", "2019-12-18 09:00",
                                             "2019-12-19 09:30", "2019-12-19 11:15",
                                             "2019-12-18 13:45", "2019-12-18 18:15"],
-                                  # ev_aval=["2019-12-18 4:00", "2019-12-18 9:00"],
                                   timesetting=my_ems['time_data']))
 
 
@@ -110,6 +102,7 @@ my_ems['reoptim']['flextype'] = 'Neg' # Use Neg/Pos
 my_ems = reoptimize(my_ems)
 
 # Plot reoptimization
+my_ems['reoptim']['nsteps_reopt'] = 97
 if my_ems['reoptim']['status'] == 1:
     plot_reopt(my_ems)
     plot_com(my_ems)

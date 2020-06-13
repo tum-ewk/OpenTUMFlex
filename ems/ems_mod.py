@@ -93,7 +93,7 @@ def ems_write(dict_ems, path):
 
 
 def read_xl_input(path):
-    data = pd.read_excel(path, sheet_name='Einstellung', index_col=0, usecols=range(0,3))
+    data = pd.read_excel(path, sheet_name='properties', index_col=0, usecols=range(0,3))
     data_index = data.index.unique()    
     my_ems = {}
     devices = {}
