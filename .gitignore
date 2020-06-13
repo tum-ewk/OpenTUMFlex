@@ -54,3 +54,6 @@ tests/data/
 tests/results/SA_ems_results/ev_ems_0.txt
 *.txt
 *.csv
+
+# Input data
+!tests/data/input_data.xlsx

@@ -92,6 +92,38 @@ def ems_write(dict_ems, path):
     print('complete saving EMS_data!!! ')
 
 
+def read_xl_input(path):
+    data = pd.read_excel(path, sheet_name='Einstellung', index_col=0, usecols=range(0,3))
+    data_index = data.index.unique()    
+    my_ems = {}
+    devices = {}
+    
+    for i in range(0,len(data_index)):         
+        dat = data[data.index == data_index[i]].set_index('parameter')
+        dat_T = dat.T
+        dat_T.reset_index(inplace=True, drop=True)
+        devices[data_index[i]] = dat_T.to_dict('records')[0]
+        
+    devices['hp']['COP'] = {'266.15':{'288.15':2.5263,'318.15':2.5263,'333.15':2.5263},
+                            '275.15':{'288.15':2.8571,'318.15':2.8571,'333.15':2.8571}, 
+                            '280.15':{'288.15':3.2609,'318.15':3.2609,'333.15':3.2609}, 
+                            '288.15':{'288.15':3.6799,'318.15':3.6799,'333.15':3.6799},
+                            '293.15':{'288.15':3.8077,'318.15':3.8077,'333.15':3.8077}}
+    
+    devices['hp']['maxpow'] = {'266.15':{'288.15':1.8095,'318.15':1.8095,'333.15':1.8095},
+                            '275.15':{'288.15':2.0,'318.15':2.0,'333.15':2.0}, 
+                            '280.15':{'288.15':2.1905,'318.15':2.1905,'333.15':2.1905}, 
+                            '288.15':{'288.15':2.3809,'318.15':2.3809,'333.15':2.3809},
+                            '293.15':{'288.15':2.4762,'318.15':2.4762,'333.15':2.4762}}
+    
+    devices['chp']['eta']=[0.3853,0.4816]    
+    my_ems['devices'] = devices
+    my_ems['flexopts'] = {}
+    my_ems['optplan'] = {}
+    my_ems['time_data'] = {}
+    my_ems['reoptim'] = {}
+    return my_ems
+
 def update_time_data(dict_ems):
     dict_time = dict_ems['time_data']
     dict_time['time_slots'] = pd.date_range(start=dict_time['start_time'], end=dict_time['end_time'],
