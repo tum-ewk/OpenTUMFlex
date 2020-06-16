@@ -45,8 +45,11 @@ def plot_flex(my_ems, device):
             neg_leg = 1
             theta = cum_data.iloc[x, 0]
             slots = int(round(ntsteps * dat1['Neg_E'][x] / dat1['Neg_P'][x]))
+            slots_lim = slots
+            if x + slots >= nsteps:
+                slots_lim = nsteps-x-1
             slot_flex = dat1['Neg_E'][x] / slots
-            for y in range(1, slots + 1):
+            for y in range(1, slots_lim + 1):
                 p2 = plt_cum.plot([ts[x + y - 1], ts[x + y]], [theta, cum_data.iloc[x + y, 0] + (slot_flex * y)],
                                   color='tab:blue')
                 theta = cum_data.iloc[x + y, 0] + (slot_flex * y)
@@ -58,8 +61,11 @@ def plot_flex(my_ems, device):
             pos_leg = 1
             theta = cum_data.iloc[x, 0]
             slots = int(round(ntsteps * dat1['Pos_E'][x] / dat1['Pos_P'][x]))
+            slots_lim = slots
+            if x + slots >= nsteps:
+                slots_lim = nsteps-x-1
             slot_flex = dat1['Pos_E'][x] / slots
-            for y in range(1, slots + 1):
+            for y in range(1, slots_lim + 1):
                 p3 = plt_cum.plot([ts[x + y - 1], ts[x + y]], [theta, cum_data.iloc[x + y, 0] + (slot_flex * y)],
                                   color='darkred')
                 theta = cum_data.iloc[x + y, 0] + (slot_flex * y)

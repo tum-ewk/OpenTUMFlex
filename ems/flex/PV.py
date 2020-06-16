@@ -28,8 +28,8 @@ def calc_flex_pv(my_ems, reopt):
     for i in range(0, nsteps):
         PV_flex.iloc[i, 0] = dat2[i]
         if dat2[i] > 0.1:  # min_export
-            j = i
-            while dat2[i] <= dat2[j]:
+            j = i 
+            while j < nsteps and dat2[i] <= dat2[j]:
                 j = j + 1
             PV_flex.iloc[i, 1] = -1 * dat2[i]
             PV_flex.iloc[i, 3] = PV_flex.iloc[i, 1] * (j-i) / ntsteps

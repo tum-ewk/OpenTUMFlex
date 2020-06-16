@@ -47,7 +47,7 @@ plt.close('all')
 
 # load the predefined ems data, initialization by user input is also possible:
 # my_ems = ems_loc(initialize=True, path='data/test_Nr_01.txt')
-my_ems = read_xl_input(path='data/input_data.xlsx')
+my_ems = read_xl_input(path='data/flex_house_2.xlsx')
 
 # change the time interval
 my_ems['time_data']['t_inval'] = 15
@@ -58,7 +58,7 @@ my_ems['time_data']['days'] = 1
 my_ems.update(update_time_data(my_ems))
 
 # load the weather and price data
-my_ems['fcst'] = load_data(my_ems, path='data/input_data.xlsx')
+my_ems['fcst'] = load_data(my_ems, path='data/flex_house_2.xlsx')
 
 # add or change the utility/devices
 # if deleting one specific device please use del my_ems['devices']['hp']
