@@ -760,7 +760,7 @@ def run_hp(ems_local):
     solver_opt = dict()
     # solver_opt['SolTimeLimit'] = 50
     solver_opt['mipgap'] = 0.001
-    solver_manager = SolverManagerFactory('neos')
+    # solver_manager = SolverManagerFactory('neos')
     # result = solver_manager.solve(m,opt=optimizer,tee=True,load_solutions=True)
     optimizer.solve(m, load_solutions=True, options=solver_opt, timelimit=15)
     # m.solutions.load_from(result);
