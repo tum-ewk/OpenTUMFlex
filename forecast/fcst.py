@@ -12,14 +12,14 @@ import pandas as pd
 def load_data(my_ems, path=r"../forecast/Testdata/Eingangsdaten_hp.xlsx"):
     # path = filedialog.askopenfilename()
     if my_ems['time_data']['t_inval'] == my_ems['time_data']['d_inval']:
-        df = pd.read_excel(path, sheet_name='time_series', usecols='B:H', nrows=my_ems['time_data']['nsteps'])
+        df = pd.read_excel(path, sheet_name='time_series', usecols='B:I', nrows=my_ems['time_data']['nsteps'])
         dict_fcst = df.to_dict('dict')
         for key in dict_fcst:
             dict_fcst[key] = list(dict_fcst[key].values())
         return dict_fcst
     elif my_ems['time_data']['t_inval'] > my_ems['time_data']['d_inval']:
         ratio = int(my_ems['time_data']['t_inval'] / my_ems['time_data']['d_inval'])
-        df = pd.read_excel(path, sheet_name='time_series', usecols='B:H', nrows=my_ems['time_data']['nsteps'] * ratio)
+        df = pd.read_excel(path, sheet_name='time_series', usecols='B:I', nrows=my_ems['time_data']['nsteps'] * ratio)
         df_mean = df.groupby(df.index // ratio).mean()
         dict_fcst = df_mean.to_dict('dict')
         for key in dict_fcst:

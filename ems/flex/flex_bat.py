@@ -100,6 +100,7 @@ def calc_flex_bat(my_ems, reopt):
     # Feeding into the grid
     for i in range(nsteps):
         ava_ebatout = dat1.iloc[i, 3]*Bat_maxE/100 - Bat_minE
+        ava_steps = 0
         if ava_ebatout > 0:
             pflex_P = Bat_maxP - dat1.iloc[i, 0] + dat1.iloc[i, 1] - dat1.iloc[i, 2]
             if pflex_P > 0:

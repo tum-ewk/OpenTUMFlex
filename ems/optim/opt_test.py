@@ -25,11 +25,11 @@ import scipy.io
 from ems.ems_mod import ems as ems_loc
 
 
-def run_hp_opt(ems_local, plot_fig=True, result_folder='C:'):
+def run_hp_opt(ems_local, plot_fig=True, prnt_pgr=False, result_folder='C:'):
     #    input_file = 'C:\Optimierung\Eingangsdaten_hp.xlsx'
     #    data = read_xlsdata(input_file);
-
-    prob, timesteps = run_hp(ems_local)
+    if prnt_pgr: print('Optimization')
+    prob, timesteps = run_hp(ems_local, prnt_pgr)
 
     # chece if the results have been initialized
     try:
@@ -150,8 +150,8 @@ def run_hp_opt(ems_local, plot_fig=True, result_folder='C:'):
     # ind = ems_local['time_data']['time_slots'].tolist()
     width = 1  # the width of the bars: can also be len(x) sequence
 
-    print('Optimized electricity net cost (€):', sum(opt_ele_price))
-    print('Results Loaded.' + '\n')
+    if prnt_pgr: print('Optimized electricity net cost (€):', sum(opt_ele_price))
+    if prnt_pgr: print('Results Loaded.' + '\n')
     # plt.clf()
 
     COLOURS = {
@@ -234,8 +234,8 @@ def run_hp_opt(ems_local, plot_fig=True, result_folder='C:'):
         # plt.title('SOC of EV', fontsize=font_size)
         plt.xticks(ind[idx_plt], ts[idx_plt], rotation=20)
         ax2.set_xlim(0, len(timesteps) - 1)
-        for i in np.arange(0, len(ev_node), 2):
-            plt.axvspan(ev_node[i], ev_node[i + 1], facecolor='#b9ebeb', alpha=0.5)
+        # for i in np.arange(0, len(ev_node), 2):
+        #     plt.axvspan(ev_node[i], ev_node[i + 1], facecolor='#b9ebeb', alpha=0.5)
         plt.show()
 
     #  plot heat balance
@@ -244,7 +244,7 @@ def run_hp_opt(ems_local, plot_fig=True, result_folder='C:'):
         fig = plt.figure()
         ax1 = fig.add_subplot(111)
         ax1.axhline(linewidth=2, color="black")
-        p1 = plt.bar(ind, boiler_cap, width, bottom=sto_e_pow_pos, color='#689eb8')
+        p1 = plt.bar(ind, boiler_cap, width, bottom=sto_e_pow_pos, color='burlywood')
         p2 = plt.bar(ind, CHP_heat_run, width,
                      bottom=boiler_cap + sto_e_pow_pos, color='skyblue')
         p3 = plt.bar(ind, HP_heat_cap, width, bottom=boiler_cap + CHP_heat_run + sto_e_pow_pos, color='#a79b94')
@@ -316,7 +316,7 @@ def run_hp_opt(ems_local, plot_fig=True, result_folder='C:'):
     return data_input
 
 
-def run_hp(ems_local):
+def run_hp(ems_local, prnt_pgr):
     # record the time
     t0 = tm.time()
     # get all the data from the external file
@@ -766,7 +766,7 @@ def run_hp(ems_local):
     # m.solutions.load_from(result);
     # aa = 1 if results['solution'] else 0
 
-    print('Model Solved in: ' + "{:.1f}".format(tm.time() - t0) + 's (time)')
+    if prnt_pgr: print('Model Solved in: ' + "{:.1f}".format(tm.time() - t0) + 's (time)')
     return m, timesteps
 
 

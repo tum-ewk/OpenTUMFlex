@@ -11,8 +11,8 @@ def plot_reopt(my_ems):
     print('Reoptimization Plot')
     
     device=my_ems['reoptim']['device']
-    # nsteps = my_ems['time_data']['nsteps']
-    nsteps = my_ems['reoptim']['nsteps_reopt']
+    nsteps = my_ems['time_data']['nsteps']
+    # nsteps = my_ems['reoptim']['nsteps_reopt']
     ntsteps = my_ems['time_data']['ntsteps']
     t_intval = my_ems['time_data']['t_inval']
     dat1 = pd.DataFrame.from_dict(my_ems['flexopts'][device])
@@ -178,8 +178,8 @@ def plot_reopt(my_ems):
 def plot_reopt_compare(my_ems):
     print('Reoptimization comparison Plot')
     device=my_ems['reoptim']['device']
-    # nsteps = my_ems['time_data']['nsteps']
-    nsteps = my_ems['reoptim']['nsteps_reopt']
+    nsteps = my_ems['time_data']['nsteps']
+    # nsteps = my_ems['reoptim']['nsteps_reopt']
     ntsteps = my_ems['time_data']['ntsteps']
     t_intval = my_ems['time_data']['t_inval']
     dat1 = pd.DataFrame.from_dict(my_ems['flexopts'][device])
@@ -346,8 +346,8 @@ def plot_reopt_compare(my_ems):
 def plot_reopt_price(my_ems):
     print('New CE Plot')
     device=my_ems['reoptim']['device']
-    # nsteps = my_ems['time_data']['nsteps']
-    nsteps = my_ems['reoptim']['nsteps_reopt']
+    nsteps = my_ems['time_data']['nsteps']
+    # nsteps = my_ems['reoptim']['nsteps_reopt']
     ntsteps = my_ems['time_data']['ntsteps']
     t_intval = my_ems['time_data']['t_inval']
     dat1 = pd.DataFrame.from_dict(my_ems['flexopts'][device])

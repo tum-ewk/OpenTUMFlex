@@ -95,8 +95,7 @@ def plot_flex(my_ems, device):
         plt_prc.legend((p7), ['$C_{Pos\_flex}}$'],
                        prop={'size': font_size+2}, bbox_to_anchor=(1.01, 0), loc="lower left")
     else:
-        plt_cum.legend((p1[0]), ('Cummulative'),
-                       prop={'size': font_size}, bbox_to_anchor=(1.01, 0), loc="lower left")
+        plt_cum.legend(['Cummulative'], prop={'size': font_size+2})
 
     # Labels            
     # plt_cum.set_title('Flexibility plots', fontsize=font_size, pad=20)
