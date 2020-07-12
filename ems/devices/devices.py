@@ -194,6 +194,9 @@ def devices(device_name, minpow=0, maxpow=0, stocap=None, eta=None, init_soc=Non
                 if ev_column[i] > ev_column[i+1]:
                     change_toZero = change_toZero +1
                     node.append(i+1)
+            elif ev_column[i]==1 and i==nsteps-1:
+                change_toZero = change_toZero +1
+                node.append(i)
 
         # print(change_toZero)
         end_soc= []
@@ -215,6 +218,10 @@ def devices(device_name, minpow=0, maxpow=0, stocap=None, eta=None, init_soc=Non
                     k+=1 
         if len(aval_time_end) == 0:
             aval_time_end.append(ev_aval['timeStamp'][0])
+        if len(aval_time_init) > len(aval_time_end):
+            end_soc_check[nsteps-1]= end_soc[k]
+            aval_time_end.append(ev_aval['timeStamp'][nsteps-1])
+            
         node.sort()
        
         unit.update({'initSOC': init_soc,'endSOC': end_soc, 'aval': aval, 'aval_init': list(aval_time_init),

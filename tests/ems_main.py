@@ -141,7 +141,7 @@ def run_ems(path= None):
 
     
     # calculate the timetable for all the devices    
-    my_ems['optplan'] = opt(my_ems, plot_fig=False, prnt_pgr=False, result_folder='data/')
+    my_ems['optplan'] = opt(my_ems, plot_fig=True, prnt_pgr=False, result_folder='data/')
         
     # # calculate the flexibility of one device
     my_ems['flexopts']['hp'] = calc_flex_hp(my_ems)
@@ -175,7 +175,7 @@ def run_ems(path= None):
 
 if __name__ == "__main__":
     base_dir = os.path.abspath(os.getcwd())
-    sub_dir = r'test_files\flex_house_10.xlsx'
+    sub_dir = r'test_files\flex_house_16.xlsx'
     # sub_dir = r'data\input_data.xlsx'
     directory = os.path.join(base_dir, sub_dir)
     my_ems = run_ems(path=directory)
