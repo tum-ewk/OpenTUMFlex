@@ -25,7 +25,7 @@ import scipy.io
 from ems.ems_mod import ems as ems_loc
 
 
-def run_hp_opt(ems_local, plot_fig=True, result_folder='C:'):
+def run_hp_opt(ems_local, plot_fig=True, plot_temp=True, result_folder='C:'):
     #    input_file = 'C:\Optimierung\Eingangsdaten_hp.xlsx'
     #    data = read_xlsdata(input_file);
 
@@ -33,7 +33,8 @@ def run_hp_opt(ems_local, plot_fig=True, result_folder='C:'):
 
     # chece if the results have been initialized
     try:
-        value(prob.ev_power[0])
+        # value(prob.ev_power[0])
+        value(prob.ev_power[ems_local['time_data']['isteps']])
     except ValueError as error:
         print(error)
         raise ImportError(
@@ -41,7 +42,7 @@ def run_hp_opt(ems_local, plot_fig=True, result_folder='C:'):
 
     length = len(timesteps)
 
-    print('Load Results ...\n')
+    # print('Load Results ...\n')
 
     # ev parameters
     ev_node = ems_local['devices']['ev']['node']
@@ -49,12 +50,12 @@ def run_hp_opt(ems_local, plot_fig=True, result_folder='C:'):
     # electricity variable
     HP_ele_cap, HP_ele_run, elec_import, elec_export, lastprofil_elec, ev_pow, ev_soc, CHP_cap, pv_power, bat_cont, \
     bat_power, pv_pv2demand, pv_pv2grid, bat_grid2bat, \
-    bat_power_pos, bat_power_neg, CHP_elec_run, CHP_operation, elec_supply_price = \
-        (np.zeros(length) for i in range(19))
+    bat_power_pos, bat_power_neg, CHP_elec_run, CHP_operation, elec_supply_price, opt_ele_price = \
+        (np.zeros(length) for i in range(20))
     # heat variable
     boiler_cap, CHP_heat_run, HP_heat_run, HP_heat_cap, CHP_operation, HP_operation, lastprofil_heat, sto_e_pow, sto_e_pow_pos, \
-    CHP_gas_run, sto_e_pow_neg, sto_e_cont = \
-        (np.zeros(length) for i in range(12))
+    CHP_gas_run, sto_e_pow_neg, sto_e_cont, HP_room_temp = \
+        (np.zeros(length) for i in range(13))
 
     # final cost
     cost_min = np.zeros(length)
@@ -103,16 +104,19 @@ def run_hp_opt(ems_local, plot_fig=True, result_folder='C:'):
             HP_ele_cap[i] = value(prob.hp_run[idx] * prob.hp_ele_pow[idx])
             HP_heat_run[i] = value(prob.hp_ther_pow[idx])
             HP_ele_run[i] = value(prob.hp_ele_pow[idx])
-
+            HP_room_temp[i] = value(prob.roomtemp[idx])
         # supply prices
 
         elec_supply_price[i] = (elec_import[i] * value(prob.ele_price_in[idx]) + pv_power[i] * value(
             prob.ele_price_out[idx]) + CHP_gas_run[i] * CHP_operation[i] * value(prob.gas_price[idx]) + 0.000011) / \
-                               (elec_import[i] + pv_power[i] + CHP_cap[i] + 0.0001)
-
+                               (elec_import[i] + pv_power[i] + CHP_cap[i] + 0.0001)        
         lastprofil_heat[i] = value(prob.lastprofil_heat[idx])
         sto_e_pow[i] = value(prob.sto_e_pow[idx])
         sto_e_cont[i] = value(prob.sto_e_cont[idx])
+        
+        # Optimized electricity price (Import - Export)                      
+        opt_ele_price[i] = elec_import[i]*value(prob.ele_price_in[idx]) - pv_pv2grid[i] \
+            *value(prob.ele_price_out[idx]) - (elec_export[i] - pv_pv2grid[i]) * value(prob.gas_price[idx])
 
         # the total cost
         cost_min[i] = value(prob.costs[idx])
@@ -139,12 +143,15 @@ def run_hp_opt(ems_local, plot_fig=True, result_folder='C:'):
     N = len(timesteps)
     ind = np.arange(N)  # the x locations for the groups
     # ts = ems_local['time_data']['time_slots'].tolist()
-    ts = ems_local['time_data']['time_slots']
+    isteps = ems_local['time_data']['isteps']
+    nsteps = ems_local['time_data']['nsteps']
+    ts = ems_local['time_data']['time_slots'][isteps:nsteps]
     ts = np.asarray(ts)
     # ind = ems_local['time_data']['time_slots'].tolist()
     width = 1  # the width of the bars: can also be len(x) sequence
 
-    print('Results Loaded.')
+    print('Optimized electricity net cost (€):', sum(opt_ele_price))
+    print('Results Loaded.' + '\n')
     # plt.clf()
 
     COLOURS = {
@@ -162,6 +169,13 @@ def run_hp_opt(ems_local, plot_fig=True, result_folder='C:'):
         11: 'firebrick',
         12: 'blue',
         13: 'darkgreen'}
+
+    if plot_temp is True:
+        fig0 = plt.figure()
+        plt.plot(HP_room_temp)
+        plt.xlabel('Timesteps [-]', fontsize=16)
+        plt.ylabel('temperature [C]', fontsize=16)
+        plt.title('room temperature', fontsize=20)
 
     if plot_fig is True:
         # figure properties
@@ -211,7 +225,7 @@ def run_hp_opt(ems_local, plot_fig=True, result_folder='C:'):
         plt.xlabel('time [h]', fontsize=font_size)
         plt.ylabel('SOC [%]', fontsize=font_size)
         # plt.title('SOC of Battery', fontsize=font_size)
-        plt.xticks(ind[idx_plt], timesteps[idx_plt])
+        plt.xticks(ind[idx_plt], ts[idx_plt], rotation=20)
         ax2.set_xlim(0, len(timesteps) - 1)
         plt.show()
 
@@ -224,7 +238,7 @@ def run_hp_opt(ems_local, plot_fig=True, result_folder='C:'):
         plt.xlabel('time [h]', fontsize=font_size)
         plt.ylabel('SOC [%]', fontsize=font_size)
         # plt.title('SOC of EV', fontsize=font_size)
-        plt.xticks(ind[idx_plt], timesteps[idx_plt])
+        plt.xticks(ind[idx_plt], ts[idx_plt], rotation=20)
         ax2.set_xlim(0, len(timesteps) - 1)
         for i in np.arange(0, len(ev_node), 2):
             plt.axvspan(ev_node[i], ev_node[i + 1], facecolor='#b9ebeb', alpha=0.5)
@@ -250,7 +264,7 @@ def run_hp_opt(ems_local, plot_fig=True, result_folder='C:'):
         plt.xticks([0, 24, 2, 2], fontsize=font_size)
         plt.yticks(fontsize=font_size)
         idx_plt = np.arange(0, len(timesteps), int(len(timesteps) / 5))
-        plt.xticks(ind[idx_plt], timesteps[idx_plt])
+        plt.xticks(ind[idx_plt], ts[idx_plt], rotation=20)
         ax1.set_xlim(0, len(timesteps) - 1)
         # plt.yticks(np.arange(-10, 10, 2))
         plt.legend((p1[0], p2[0], p3[0], p4[0], p6[0]), ('boiler', 'CHP', 'HP', 'heat storage', 'heat demand'),
@@ -261,7 +275,7 @@ def run_hp_opt(ems_local, plot_fig=True, result_folder='C:'):
         p7 = plt.step(ind, SOC_heat, linewidth=1, where='mid', color='red')
         plt.xlabel('time [h]', fontsize=font_size)
         plt.ylabel('SOC [%]', fontsize=font_size)
-        plt.xticks(ind[idx_plt], timesteps[idx_plt])
+        plt.xticks(ind[idx_plt], ts[idx_plt], rotation=20)
         ax2.set_xlim(0, len(timesteps) - 1)
         # plt.title('SOC of heat storage', fontsize=font_size)
         plt.show()
@@ -295,7 +309,8 @@ def run_hp_opt(ems_local, plot_fig=True, result_folder='C:'):
                   'EV_power': list(ev_pow),
                   'EV_SOC': list(ev_soc),
                   'elec_supply_price': list(elec_supply_price),
-                  'min cost': list(cost_min)}
+                  'min cost': list(cost_min),
+                  'opt_ele_price':list(opt_ele_price)}
 
     # df = pd.DataFrame(data=data_input)
     # df.to_excel(writer, 'operation_plan', merge_cells=False)
@@ -316,9 +331,8 @@ def run_hp(ems_local):
 
     # read data from excel file
 
-    print('Data Read. time: ' + "{:.1f}".format(tm.time() - t0) + ' s\n')
-
-    print('Prepare Data ...\n')
+    # print('Data Read. time: ' + "{:.1f}".format(tm.time() - t0) + ' s\n')
+    # print('Prepare Data ...\n')
     t = tm.time()
     time_interval = ems_local['time_data']['t_inval']  # x minutes for one time step
     # write in the time series from the data
@@ -326,7 +340,7 @@ def run_hp(ems_local):
     time_series = pd.DataFrame.from_dict(df_time_series)
     # time = time_series.index.values
 
-    print('Data Prepared. time: ' + "{:.1f}".format(tm.time() - t0) + ' s\n')
+    # print('Data Prepared. time: ' + "{:.1f}".format(tm.time() - t0) + ' s\n')
     #    lastprofil =data['Lastprofil']
     #    source_import =data['import']
     #    source_export =data['export']
@@ -334,16 +348,16 @@ def run_hp(ems_local):
     # system
     # get the initial time step
     # time_step_initial = parameter.loc['System']['value']
-    time_step_initial = 0
+    time_step_initial = ems_local['time_data']['isteps']
     # time_step_end = int(60 / time_interval * 24)
     time_step_end = ems_local['time_data']['nsteps']
-    timesteps = np.arange(0, time_step_end)
+    timesteps = np.arange(time_step_initial, time_step_end)
     # timestep_1 = timesteps[0]
 
     # timesteps = timesteps_all[time_step_initial:time_step_end]
-    t_dn = 2
+    t_dn = 4
     # 6*time_step_end/96
-    t_up = 2
+    t_up = 4
     # 6*time_step_end/96
     timesteps_dn = timesteps[time_step_initial + 1:time_step_end - t_dn]
     timesteps_up = timesteps[time_step_initial + 1:time_step_end - t_up]
@@ -389,6 +403,11 @@ def run_hp(ems_local):
     hp_param = devices['hp']
     hp_ther_cap = pd.DataFrame.from_dict(hp_param['maxpow'])
     hp_cop = pd.DataFrame.from_dict(hp_param['COP'])
+    hp_themInertia = hp_param['thermInertia']
+    hp_minTemp = hp_param['minTemp']
+    hp_maxTemp = hp_param['maxTemp']
+    hp_heatgain = hp_param['heatgain']
+
     # PV
     pv_param = devices['pv']
     pv_peak_pow = pv_param['maxpow']
@@ -401,7 +420,7 @@ def run_hp(ems_local):
     bat_eta = bat_param['eta']
 
     ## create the parameter
-    print('Define Model ...\n')
+    # print('Define Model ...\n')
     #
     m.t = pyen.Set(ordered=True, initialize=timesteps)
 
@@ -428,6 +447,10 @@ def run_hp(ems_local):
     m.hp_ele_pow = pyen.Param(m.t, initialize=1, mutable=True, within=pyen.NonNegativeReals)
     m.T_DN = pyen.Param(initialize=t_dn, mutable=True)
     m.T_UP = pyen.Param(initialize=t_up, mutable=True)
+    m.hp_themInertia = pyen.Param(initialize=hp_themInertia)
+    m.hp_minTemp = pyen.Param(initialize=hp_minTemp)
+    m.hp_maxTemp = pyen.Param(initialize=hp_maxTemp)
+    m.hp_heatgain = pyen.Param(initialize=hp_heatgain)
 
     # elec_vehicle
     m.ev_min_pow = pyen.Param(initialize=ev_min_power)
@@ -496,8 +519,8 @@ def run_hp(ems_local):
     m.ev_power = pyen.Var(m.t, within=pyen.NonNegativeReals, bounds=(ev_min_power, ev_max_power),
                           doc='power of the EV')
     m.boiler_cap, m.PV_cap, m.elec_import, m.elec_export, m.bat_cont, m.sto_e_cont, m.bat_pow_pos, m.bat_pow_neg, \
-    m.ev_cont, m.ev_var_pow, m.soc_diff = (pyen.Var(m.t, within=pyen.NonNegativeReals) for i in range(11))
-    m.sto_e_pow, m.costs = (pyen.Var(m.t, within=pyen.Reals) for i in range(2))
+    m.ev_cont, m.ev_var_pow, m.soc_diff, m.roomtemp = (pyen.Var(m.t, within=pyen.NonNegativeReals) for i in range(12))
+    m.sto_e_pow, m.costs, m.heatextra = (pyen.Var(m.t, within=pyen.Reals) for i in range(3))
 
     # Constrains
 
@@ -514,11 +537,38 @@ def run_hp(ems_local):
 
     def heat_balance_rule(m, t):
         return m.boiler_cap[t] + m.CHP_run[t] * m.chp_heat_run[t] + \
-               m.hp_run[t] * m.hp_ther_pow[t] - m.lastprofil_heat[t] - m.sto_e_pow[t] == 0
+               m.hp_run[t] * m.hp_ther_pow[t] - m.lastprofil_heat[t] - m.sto_e_pow[t] == m.heatextra[t]*0
 
     m.heat_power_balance = pyen.Constraint(m.t,
                                            rule=heat_balance_rule,
                                            doc='heat_storage_balance')
+
+    # the room in the building
+    def heat_room_rule(m, t):
+        if t > m.t[1]:
+            return m.roomtemp[t] == m.roomtemp[t-1] + (m.heatextra[t]+m.hp_heatgain)/m.hp_themInertia
+        else:
+            return m.roomtemp[t] == 23
+
+    m.heat_room_balance = pyen.Constraint(m.t, rule=heat_room_rule, doc='heat_room_balance')
+
+    def heat_room_maxtemp_rule(m, t):
+        return m.roomtemp[t] <= m.hp_maxTemp
+
+    m.heat_room_maxtemp = pyen.Constraint(m.t, rule=heat_room_maxtemp_rule)
+
+    def heat_room_mintemp_rule(m, t):
+        return m.roomtemp[t] >= m.hp_minTemp
+
+    m.heat_room_mintemp = pyen.Constraint(m.t, rule=heat_room_mintemp_rule)
+
+    def heat_room_end_rule(m, t):
+        if t == m.t[-1]:
+            return m.roomtemp[t] == 23
+        else:
+            return Constraint.Skip
+
+    m.heat_room_end = pyen.Constraint(m.t, rule=heat_room_end_rule)
 
     # battery
     def battery_e_cont_def_rule(m, t):
@@ -604,21 +654,19 @@ def run_hp(ems_local):
     ##hp
     def hp_min_still_t_rule(m, t):
         return (m.hp_run[t - 1] - m.hp_run[t]) * m.T_DN <= m.T_DN - (
-            # m.hp_run[t] + m.hp_run[t + 1] + m.hp_run[t + 2] + m.hp_run[t + 3] + m.hp_run[t + 4] + m.hp_run[t + 5])
-                m.hp_run[t] + m.hp_run[t + 1])
+                m.hp_run[t] + m.hp_run[t + 1] + m.hp_run[t + 2] + m.hp_run[t + 3])
 
-    # m.hp_min_still_t_def = pyen.Constraint(m.t_DN,
-    #                                     rule=hp_min_still_t_rule)
+
+    m.hp_min_still_t_def = pyen.Constraint(m.t_DN, rule=hp_min_still_t_rule)
 
     def hp_min_lauf_t_rule(m, t):
 
-        return (m.hp_run[t] - m.hp_run[t - 1]) * m.T_UP <= m.hp_run[t] + m.hp_run[t + 1]
+        return (m.hp_run[t] - m.hp_run[t - 1]) * m.T_UP <= m.hp_run[t] + \
+               m.hp_run[t + 1] + m.hp_run[t + 2] + m.hp_run[t + 3]
         # + m.hp_run[t + 2] + m.hp_run[
         # t + 3] + m.hp_run[t + 4] + m.hp_run[t + 5]
 
-    #  return (m.hp_run[t]-m.hp_run[t-1])*m.t_up[t] <= m.t_up[t]; m.hp_run[k]
-    # m.hp_min_lauf_t_def = pyen.Constraint(m.t_UP,
-    #                rule=hp_min_lauf_t_rule)
+    m.hp_min_lauf_t_def = pyen.Constraint(m.t_UP, rule=hp_min_lauf_t_rule)
 
     def chp_min_still_t_rule(m, t):
         return (m.CHP_run[t - 1] - m.CHP_run[t]) * m.T_DN <= m.T_DN - (
@@ -746,19 +794,20 @@ def run_hp(ems_local):
         rule=obj_rule,
         doc='Sum costs by cost type')
 
-    print('Model Defined. time: ' + "{:.1f}".format(tm.time() - t0) + ' s\n')
-    print('Solve Model ...\n')
+    # print('Model Defined. time: ' + "{:.1f}".format(tm.time() - t0) + ' s\n')
+    # print('Solve Model ...\n')
+    # optimizer = SolverFactory('glpk')
     optimizer = SolverFactory('glpk')
     solver_opt = dict()
     # solver_opt['SolTimeLimit'] = 50
     solver_opt['mipgap'] = 0.001
-    # solver_manager = SolverManagerFactory('neos')
+    solver_manager = SolverManagerFactory('neos')
     # result = solver_manager.solve(m,opt=optimizer,tee=True,load_solutions=True)
     optimizer.solve(m, load_solutions=True, options=solver_opt, timelimit=15)
     # m.solutions.load_from(result);
     # aa = 1 if results['solution'] else 0
 
-    print('Model Solved. time: ' + "{:.1f}".format(tm.time() - t0) + ' s\n')
+    print('Model Solved in: ' + "{:.1f}".format(tm.time() - t0) + 's (time)')
     return m, timesteps
 
 

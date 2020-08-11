@@ -69,6 +69,12 @@ def ems_write(dict_ems, path):
     print('complete saving EMS_data!!! ')
 
 
+def ems_save(results, path):
+    with open(path, 'w') as f:
+        js.dump(results, f)
+    print('complete saving results!!! ')
+
+
 def update_time_data(dict_ems):
     # update ems["time_data"], add new parameters: time_slots, nsteps, ntsteps
     dict_time = dict_ems['time_data']
