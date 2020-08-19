@@ -163,5 +163,7 @@ def calc_flex_ev(my_ems):
     ev_flex[p_opt] = -ev_flex[p_opt]
     ev_flex[p_neg] = -ev_flex[p_neg]
     ev_flex[e_neg] = -ev_flex[e_neg]
+    
+    ev_flex.index = range(n_time_steps)
 
     return ev_flex

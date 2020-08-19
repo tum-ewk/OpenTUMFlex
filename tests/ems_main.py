@@ -133,7 +133,7 @@ def run_ems(path= None):
     my_ems['fcst'] = load_data(my_ems, path)   
     
     # add or change the utility/devices
-    my_ems['devices']['chp']['maxpow'] = 2
+    my_ems['devices']['chp']['maxpow'] = 0
     my_ems['devices'].update(devices(device_name='hp', minpow=0, maxpow=2))   
     my_ems['devices'].update(devices(device_name='ev_new', minpow=0, maxpow=2, 
                                       stocap=3, eta=0.98, timesetting = my_ems['time_data'],
@@ -144,11 +144,11 @@ def run_ems(path= None):
     my_ems['optplan'] = opt(my_ems, plot_fig=True, prnt_pgr=False, result_folder='data/')
         
     # # calculate the flexibility of one device
-    my_ems['flexopts']['hp'] = calc_flex_hp(my_ems)
-    my_ems['flexopts']['chp'] = calc_flex_chp(my_ems)
-    my_ems['flexopts']['bat'] = calc_flex_bat(my_ems, reopt=0)
     my_ems['flexopts']['pv'] = calc_flex_pv(my_ems, reopt=0)
+    my_ems['flexopts']['bat'] = calc_flex_bat(my_ems, reopt=0)
     my_ems['flexopts']['ev'] = calc_flex_ev(my_ems)
+    my_ems['flexopts']['hp'] = calc_flex_hp(my_ems, reopt=0)
+    my_ems['flexopts']['chp'] = calc_flex_chp(my_ems)
         
     # plot the results
     # plot(my_ems, "ev")
@@ -159,8 +159,8 @@ def run_ems(path= None):
     
     # Reoptimization
     # Selected offer - Device and timestep
-    my_ems['reoptim']['device'] = 'bat'  # Ues pv/bat
-    my_ems['reoptim']['timestep'] = 12 
+    my_ems['reoptim']['device'] = 'hp'  # Ues pv/bat
+    my_ems['reoptim']['timestep'] = 32
     my_ems['reoptim']['flextype'] = 'Neg' # Use Neg/Pos
     my_ems = reoptimize(my_ems)
     
@@ -168,8 +168,8 @@ def run_ems(path= None):
     my_ems['reoptim']['nsteps_reopt'] = 97
     if my_ems['reoptim']['status'] == 1:
         plot_reopt(my_ems)
-        plot_com(my_ems)
-        plot_reopt_price(my_ems)
+        # plot_com(my_ems)
+        # plot_reopt_price(my_ems)
 
     return my_ems
 

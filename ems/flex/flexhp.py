@@ -14,12 +14,17 @@ from ems.plot.flex_draw import plot_flex as plot_flex
 from ems.plot.flex_draw import save_results as save_results
 
 
-def calc_flex_hp(ems):  # datafram open and break it down
+def calc_flex_hp(ems, reopt):  # datafram open and break it down
 
     # week = pd.DataFrame(index=pd.date_range(start="00:00", end="23:59", freq='15min').strftime('%H:%M'),
     #                     columns={'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'})
 
-    optm_df = pd.DataFrame.from_dict(ems['optplan'])
+    if reopt == 0:
+        optm_df = pd.DataFrame.from_dict(ems['optplan'])  
+        
+    elif reopt == 1:
+        optm_df = pd.DataFrame.from_dict(ems['reoptim']['optplan'])       
+        
     timesteps = len(optm_df['HP_operation'])
     ntsteps = ems['time_data']['ntsteps']
     pow2energy = 1 / ntsteps
@@ -102,9 +107,12 @@ def calc_flex_hp(ems):  # datafram open and break it down
 
     # get the price
 
-    cost_elec_input = list(map(float, list(ems['fcst']['ele_price_in'])))
+    # cost_elec_input = list(map(float, list(ems['fcst']['ele_price_in'])))
     # cost_elec_input = pd.DataFrame.from_dict(ems['fcst']['ele_price_in'], orient='index')[0]
     # cost_elec_input = ems['optplan']['elec_supply_price']
+    start_step = ems['time_data']['isteps']
+    cost_elec_input = ems['fcst']['ele_price_in'][start_step:]
+    
     cost_diff_pos = np.zeros(timesteps)
     cost_diff_neg = np.zeros(timesteps)
     for i in range(timesteps):
@@ -124,7 +132,8 @@ def calc_flex_hp(ems):  # datafram open and break it down
     # write the results in data
     timeslots = list(ems['time_data']['time_slots'])
     # 'times': pd.date_range(start="00:00", end="23:59", freq='15min').strftime('%H:%M')
-    data = {'time': timeslots,
+    data = {
+            # 'time': timeslots,
             'Sch_P': pow_schedual,
             'Neg_P': pow_neg,
             'Pos_P': pow_pos,

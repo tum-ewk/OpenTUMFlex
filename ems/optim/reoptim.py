@@ -14,6 +14,7 @@ from ems.optim.opt_test import run_hp_opt as opt
 # import flex devices modules
 from ems.flex.flex_pv import calc_flex_pv
 from ems.flex.flex_bat import calc_flex_bat
+from ems.flex.flexhp import calc_flex_hp
 
 # import plot module
 from ems.plot.flex_draw import plot_flex as plot
@@ -25,13 +26,19 @@ def reoptimize(my_ems):
         my_ems = reflex_pv(my_ems)    
     elif device == 'bat':
         my_ems = reflex_bat(my_ems)
+    elif device == 'ev':
+        my_ems = reflex_ev(my_ems)
+    elif device == 'hp':
+        my_ems = reflex_hp(my_ems)
         
     if my_ems['reoptim']['status'] == 1:        
         print('Reoptimization')
-        my_ems['reoptim']['optplan'] = opt(my_ems, plot_fig=False, result_folder='data/')
+        my_ems['reoptim']['optplan'] = opt(my_ems, plot_fig=True, result_folder='data/')
         my_ems['reoptim']['flexopts'] = {}
         my_ems['reoptim']['flexopts']['pv'] = calc_flex_pv(my_ems, reopt=1)
         my_ems['reoptim']['flexopts']['bat'] = calc_flex_bat(my_ems, reopt=1)
+        # my_ems['reoptim']['flexopts']['ev'] = calc_flex_ev(my_ems, reopt=1)
+        my_ems['reoptim']['flexopts']['hp'] = calc_flex_hp(my_ems, reopt=1)
         
     return my_ems
 
@@ -136,6 +143,90 @@ def reflex_bat(my_ems):
        
     return my_ems  
 
+def reflex_ev(my_ems):
+    device = my_ems['reoptim']['device']
+    rstep = my_ems['reoptim']['timestep']
+    f_type = my_ems['reoptim']['flextype']
+    ntsteps = my_ems['time_data']['ntsteps']
+    
+    # Flexibility information    
+    f_pow = my_ems['flexopts'][device].loc[rstep, f_type+'_P']
+    f_ene = my_ems['flexopts'][device].loc[rstep, f_type+'_E']
+    if f_pow != 0:
+        f_steps = int(round(f_ene*ntsteps/f_pow))
+        my_ems['reoptim']['status'] = 1
+    else:
+        f_steps = 0
+        print('No flexibility found \n')    
+        my_ems['reoptim']['status'] = 0
+            
+    if my_ems['reoptim']['status'] == 1:         
+        # Update initial steps for reoptimization
+        my_ems['time_data']['isteps'] = rstep+f_steps+1
+        
+        # Battery SOC at flexibility time step
+        # s_bSOC = my_ems['optplan']['bat_SOC'][rstep]
+        e_bSOC = my_ems['optplan']['EV_SOC'][rstep+f_steps]    
+        bat_max_e = my_ems['devices']['ev']['stocap']
+        
+        if f_type == 'Neg':
+           SOC_added = abs(f_ene*100/bat_max_e)
+           if e_bSOC + SOC_added > 100:
+               my_ems['devices']['bat']['initSOC'] = 100
+           else:
+               my_ems['devices']['bat']['initSOC'] = e_bSOC + SOC_added
+           
+        elif f_type == 'Pos':
+            SOC_rem = abs(f_ene*100/bat_max_e)
+            if e_bSOC - SOC_rem < 0:
+                my_ems['devices']['bat']['initSOC'] = 0
+            else: 
+                my_ems['devices']['bat']['initSOC'] = e_bSOC - SOC_rem     
+                
+    return my_ems  
+
+def reflex_hp(my_ems):
+    device = my_ems['reoptim']['device']
+    rstep = my_ems['reoptim']['timestep']
+    f_type = my_ems['reoptim']['flextype']
+    ntsteps = my_ems['time_data']['ntsteps']
+    
+    # Flexibility information    
+    f_pow = my_ems['flexopts'][device].loc[rstep, f_type+'_P']
+    f_ene = my_ems['flexopts'][device].loc[rstep, f_type+'_E']
+    if f_pow != 0:
+        f_steps = int(round(f_ene*ntsteps/f_pow))
+        my_ems['reoptim']['status'] = 1
+    else:
+        f_steps = 0
+        print('No flexibility found \n')    
+        my_ems['reoptim']['status'] = 0
+        
+    if my_ems['reoptim']['status'] == 1:         
+        # Update initial steps for reoptimization
+        my_ems['time_data']['isteps'] = rstep+f_steps+1
+        
+        # Battery SOC at flexibility time step
+        # s_bSOC = my_ems['optplan']['bat_SOC'][rstep]
+        e_hSOC = my_ems['optplan']['SOC_heat'][rstep+f_steps]    
+        sto_max_e = my_ems['devices']['sto']['stocap']
+        
+        if f_type == 'Neg':
+           SOC_added = abs(f_ene*100/sto_max_e)
+           if e_hSOC + SOC_added > 100:
+               my_ems['devices']['sto']['initSOC'] = 100
+           else:
+               my_ems['devices']['sto']['initSOC'] = e_hSOC + SOC_added
+           
+        elif f_type == 'Pos':
+            SOC_rem = abs(f_ene*100/sto_max_e)
+            print(SOC_rem)
+            if e_hSOC - SOC_rem < 0:
+                my_ems['devices']['sto']['initSOC'] = 0
+            else: 
+                my_ems['devices']['sto']['initSOC'] = e_hSOC - SOC_rem 
+                
+    return my_ems      
 
 if __name__ == '__main__':
     print('update myems')
