@@ -41,7 +41,7 @@ def plot_reopt(my_ems):
         theta = cum_data.iloc[i + 1, 0]
     p1 = plt_cum.plot(cum_data.iloc[:, 0], linewidth=3, color='k')
     
-    for x in range(nsteps):
+    for x in range(nsteps-1):
         # Negative flexibility plots
         if dat1['Neg_E'][x] < 0:
             neg_leg = 1
@@ -209,7 +209,7 @@ def plot_reopt_compare(my_ems):
         theta = cum_data.iloc[i + 1, 0]
     p1 = plt_cum.plot(cum_data.iloc[:, 0], linewidth=3, color='k')
     
-    for x in range(nsteps):
+    for x in range(nsteps-1):
         # Negative flexibility plots
         if dat1['Neg_E'][x] < 0:
             neg_leg = 1

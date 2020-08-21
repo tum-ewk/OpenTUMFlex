@@ -63,6 +63,7 @@ def run_ems(path= None):
     my_ems['fcst'] = load_data(my_ems, path)   
     
     # add or change the utility/devices
+    my_ems['devices']['boiler']['maxpow'] = 2
     my_ems['devices']['chp']['maxpow'] = 0
     my_ems['devices'].update(devices(device_name='hp', minpow=0, maxpow=2))   
     my_ems['devices'].update(devices(device_name='ev_new', minpow=0, maxpow=2, 
@@ -71,7 +72,7 @@ def run_ems(path= None):
 
     
     # calculate the timetable for all the devices    
-    my_ems['optplan'] = opt(my_ems, plot_fig=True, prnt_pgr=False, result_folder='data/')
+    my_ems['optplan'] = opt(my_ems, plot_fig=False, prnt_pgr=False, result_folder='data/')
         
     # # calculate the flexibility of one device
     my_ems['flexopts']['pv'] = calc_flex_pv(my_ems, reopt=0)
@@ -89,8 +90,8 @@ def run_ems(path= None):
     
     # Reoptimization
     # Selected offer - Device and timestep
-    my_ems['reoptim']['device'] = 'hp'  # Ues pv/bat
-    my_ems['reoptim']['timestep'] = 32
+    my_ems['reoptim']['device'] = 'bat'  # Ues pv/bat
+    my_ems['reoptim']['timestep'] = 40
     my_ems['reoptim']['flextype'] = 'Neg' # Use Neg/Pos
     my_ems = reoptimize(my_ems)
     
@@ -98,14 +99,14 @@ def run_ems(path= None):
     my_ems['reoptim']['nsteps_reopt'] = 97
     if my_ems['reoptim']['status'] == 1:
         plot_reopt(my_ems)
-        # plot_com(my_ems)
-        # plot_reopt_price(my_ems)
+        plot_com(my_ems)
+        plot_reopt_price(my_ems)
 
     return my_ems
 
 if __name__ == "__main__":
     base_dir = os.path.abspath(os.getcwd())
-    sub_dir = r'test_files\flex_house_16.xlsx'
-    # sub_dir = r'data\input_data.xlsx'
+    # sub_dir = r'test_files\flex_house_16.xlsx'
+    sub_dir = r'data\input_data.xlsx'
     directory = os.path.join(base_dir, sub_dir)
     my_ems = run_ems(path=directory)
