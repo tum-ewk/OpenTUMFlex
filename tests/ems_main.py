@@ -91,7 +91,7 @@ def run_ems(path= None):
     # Reoptimization
     # Selected offer - Device and timestep
     my_ems['reoptim']['device'] = 'bat'  # Ues pv/bat
-    my_ems['reoptim']['timestep'] = 40
+    my_ems['reoptim']['timestep'] = 50
     my_ems['reoptim']['flextype'] = 'Neg' # Use Neg/Pos
     my_ems = reoptimize(my_ems)
     
