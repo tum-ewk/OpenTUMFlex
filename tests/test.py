@@ -32,7 +32,7 @@ from ems.flex.flex_ev import  calc_flex_ev
 # import plot module
 from ems.plot.flex_draw import plot_flex as plot
 from ems.plot.flex_draw import save_results
-from ems.plot.reopt_draw import plot_reopt as plot_reopt
+# from ems.plot.reopt_draw import plot_reopt as plot_reopt
 
 # import reoptimization
 from ems.optim.reoptim import reoptimize
@@ -52,6 +52,7 @@ my_ems['time_data']['d_inval'] = 15
 my_ems['time_data']['start_time'] = '2019-12-18 00:00'
 my_ems['time_data']['end_time'] = '2019-12-18 23:59'
 my_ems['time_data']['days'] = 1
+my_ems['time_data']['isteps'] = 0
 my_ems.update(update_time_data(my_ems))
 
 # load the weather and price data
@@ -60,7 +61,7 @@ my_ems['fcst'] = load_data(my_ems)
 # add or change the utility/devices
 # if deleting one specific device please use del my_ems['devices']['hp']
 # my_ems['devices'].update(dev(device_name='hp', minpow=3, maxpow=6))
-my_ems['devices'].update(devices(device_name='hp', minpow=0, maxpow=6.25))
+my_ems['devices'].update(devices(device_name='hp', minpow=0, maxpow=3, supply_temp=34))
 my_ems['devices']['sto']['stocap'] = 36.56
 my_ems['devices']['boiler']['maxpow'] = 0
 my_ems['devices']['chp']['maxpow'] = 0
@@ -68,12 +69,12 @@ my_ems['devices']['pv']['maxpow'] = 10
 my_ems['devices']['bat']['stocap'] = 5
 my_ems['devices']['bat']['maxpow'] = 3
 my_ems['devices'].update(devices(device_name='ev', minpow=0, maxpow=0, stocap=0, init_soc=[20, 35, 30],
-                                  end_soc=[50, 50, 40], eta=0.98,
-                                  ev_aval=["2019-12-18 04:00", "2019-12-18 09:00",
-                                           "2019-12-18 09:30", "2019-12-18 11:15",
-                                           "2019-12-18 13:45", "2019-12-18 18:15"],
-                                  # ev_aval=["2019-12-18 4:00", "2019-12-18 9:00"],
-                                  timesetting=my_ems['time_data']))
+                                 end_soc=[50, 50, 40], eta=0.98,
+                                 ev_aval=["2019-12-18 04:00", "2019-12-18 09:00",
+                                          "2019-12-18 09:30", "2019-12-18 11:15",
+                                          "2019-12-18 13:45", "2019-12-18 18:15"],
+                                 # ev_aval=["2019-12-18 4:00", "2019-12-18 9:00"],
+                                 timesetting=my_ems['time_data']))
 
 
 # plt.plot(my_ems['devices']['ev']['consm'])
@@ -95,7 +96,7 @@ my_ems['flexopts']['hp'] = calc_flex_hp(my_ems)
 # # my_ems['flexopts']['ev'] = calc_flex_ev(my_ems)
 #
 # # plot the results
-# # plot(my_ems, "hp")
+plot(my_ems, "hp")
 # plot(my_ems, "pv")
 # plot(my_ems, "bat")
 #

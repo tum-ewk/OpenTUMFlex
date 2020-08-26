@@ -7,10 +7,11 @@ import pandas as pd
 import json as js
 import numpy as np
 import datetime
+from scipy.interpolate import UnivariateSpline
 
 
 def devices(device_name, minpow=0, maxpow=0, stocap=None, eta=None, init_soc=None, end_soc=None, ev_aval=None,
-            timesetting=96, sto_volume=0, path=None):
+            supply_temp=None, timesetting=96, sto_volume=0, path=None):
     # define general unit parameters
     unit = {'minpow': minpow,
             'maxpow': maxpow,
@@ -25,7 +26,7 @@ def devices(device_name, minpow=0, maxpow=0, stocap=None, eta=None, init_soc=Non
         # if no predefined device data is available:
         if path is None:
             # typical heat pump power map
-            temp_supply = [288.15, 318.15, 333.15]
+            temp_supply = [288.15, 308.15, 318.15, 328.15, 333.15]
             # 45 C supply temperature
             # hp_q = pd.DataFrame({'266.15': [4.8, 4.8, 4.8],
             #                      '275.15': [6.0, 6.0, 6.0],
@@ -35,27 +36,41 @@ def devices(device_name, minpow=0, maxpow=0, stocap=None, eta=None, init_soc=Non
             #                      }, index=temp_supply
             #                     )
             # 20 C supply temperature
-            hp_q = pd.DataFrame({'266.15': [5, 5, 5],
-                                 '275.15': [6.25, 6.25, 6.25],
-                                 '280.15': [7.75, 7.75, 7.75],
-                                 '288.15': [9.45, 9.45, 9.45],
-                                 '293.15': [10.2, 10.2, 10.2],
+            hp_q = pd.DataFrame({'266.15': [6, 5.2, 4.8, 4.2, 3.9],
+                                 '275.15': [7.5, 6.5, 6.0, 5.3, 5.0],
+                                 '280.15': [9.0, 8.0, 7.5, 6.8, 6.5],
+                                 '288.15': [10.7, 9.7, 9.2, 8.4, 8.0],
+                                 '293.15': [11.7, 10.5, 9.9, 9.2, 8.9],
                                  }, index=temp_supply
                                 )
-            hp_p = pd.DataFrame({'266.15': [1.85, 1.85, 1.85],
-                                 '275.15': [2, 2, 2],
-                                 '280.15': [2.15, 2.15, 2.15],
-                                 '288.15': [2.3, 2.3, 2.3],
-                                 '293.15': [2.4, 2.4, 2.4],
+            hp_p = pd.DataFrame({'266.15': [1.5, 1.8, 1.9, 2.0, 2.1],
+                                 '275.15': [1.6, 1.9, 2.1, 2.1, 2.1],
+                                 '280.15': [1.6, 2.0, 2.3, 2.4, 2.4],
+                                 '288.15': [1.7, 2.1, 2.5, 2.7, 2.8],
+                                 '293.15': [1.8, 2.2, 2.6, 2.9, 3.0],
                                  }, index=temp_supply
                                 )
 
+            def modify_hp_data(data_original, temperature):
+                temp_data = data_original
+                value = np.zeros(temp_data.shape[1])
+                for _col_num in range(temp_data.shape[1]):
+                    spline = UnivariateSpline(list(map(float, temp_data.index.values)),
+                                              list(temp_data.iloc[:, _col_num]))
+                    value[_col_num] = spline(temperature).item(0)
+                temp_data.loc[temperature] = value
+                return temp_data.sort_index()
+
+            supply_temp = supply_temp + 273.15  # convert from grad celsius to kelvin
+            hp_q = modify_hp_data(hp_q, supply_temp)
+            hp_p = modify_hp_data(hp_p, supply_temp)
             hp_cop = hp_q.div(hp_p)
-            fact_q = maxpow / hp_q.mean(axis=0)[1]
+            fact_p = maxpow / hp_p.loc[supply_temp, '275.15']
 
             # change the DataFrame to Dict
-            unit.update({'maxpow': hp_q.multiply(fact_q).to_dict('dict'), 'COP': hp_cop.to_dict('dict'),
-                        'thermInertia': 50, 'minTemp': 20, 'maxTemp': 26, 'heatgain': 0.1})
+            unit.update({'maxpow': hp_p.multiply(fact_p).to_dict('dict'), 'COP': hp_cop.to_dict('dict'),
+                         'supply_temp': supply_temp,
+                         'thermInertia': 50, 'minTemp': 20, 'maxTemp': 26, 'heatgain': 0.1})
             df_unit_hp = unit
             dict_unit_hp = {device_name: df_unit_hp}
 
