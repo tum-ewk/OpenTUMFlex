@@ -25,7 +25,7 @@ import scipy.io
 from ems.ems_mod import ems as ems_loc
 
 
-def run_hp_opt(ems_local, plot_fig=True, prnt_pgr=False, result_folder='C:'):
+def run_hp_opt(ems_local, plot_fig=True, prnt_pgr=False, plot_temp=True, result_folder='C:'):
     #    input_file = 'C:\Optimierung\Eingangsdaten_hp.xlsx'
     #    data = read_xlsdata(input_file);
     if prnt_pgr: print('Optimization')
@@ -54,8 +54,8 @@ def run_hp_opt(ems_local, plot_fig=True, prnt_pgr=False, result_folder='C:'):
         (np.zeros(length) for i in range(20))
     # heat variable
     boiler_cap, CHP_heat_run, HP_heat_run, HP_heat_cap, CHP_operation, HP_operation, lastprofil_heat, sto_e_pow, sto_e_pow_pos, \
-    CHP_gas_run, sto_e_pow_neg, sto_e_cont = \
-        (np.zeros(length) for i in range(12))
+    CHP_gas_run, sto_e_pow_neg, sto_e_cont, HP_room_temp = \
+        (np.zeros(length) for i in range(13))
 
     # final cost
     cost_min = np.zeros(length)
@@ -101,22 +101,24 @@ def run_hp_opt(ems_local, plot_fig=True, prnt_pgr=False, result_folder='C:'):
         if value(prob.hp_ther_pow[idx]) > 0:
             HP_operation[i] = value(prob.hp_run[idx])
             HP_heat_cap[i] = value(prob.hp_run[idx] * prob.hp_ther_pow[idx])
-            HP_ele_cap[i] = value(prob.hp_run[idx] * prob.hp_ele_pow[idx])
+            HP_ele_cap[i] = value(prob.hp_run[idx] * prob.hp_elec_pow[idx])
             HP_heat_run[i] = value(prob.hp_ther_pow[idx])
-            HP_ele_run[i] = value(prob.hp_ele_pow[idx])
+            HP_ele_run[i] = value(prob.hp_elec_pow[idx])
+            HP_room_temp[i] = value(prob.roomtemp[idx])
 
         # supply prices
 
         elec_supply_price[i] = (elec_import[i] * value(prob.ele_price_in[idx]) + pv_power[i] * value(
             prob.ele_price_out[idx]) + CHP_gas_run[i] * CHP_operation[i] * value(prob.gas_price[idx]) + 0.000011) / \
-                               (elec_import[i] + pv_power[i] + CHP_cap[i] + 0.0001)        
+                               (elec_import[i] + pv_power[i] + CHP_cap[i] + 0.0001)
         lastprofil_heat[i] = value(prob.lastprofil_heat[idx])
         sto_e_pow[i] = value(prob.sto_e_pow[idx])
         sto_e_cont[i] = value(prob.sto_e_cont[idx])
-        
+
         # Optimized electricity price (Import - Export)                      
-        opt_ele_price[i] = elec_import[i]*value(prob.ele_price_in[idx]) - pv_pv2grid[i] \
-            *value(prob.ele_price_out[idx]) - (elec_export[i] - pv_pv2grid[i]) * value(prob.gas_price[idx])
+        opt_ele_price[i] = elec_import[i] * value(prob.ele_price_in[idx]) - pv_pv2grid[i] \
+                           * value(prob.ele_price_out[idx]) - (elec_export[i] - pv_pv2grid[i]) * value(
+            prob.gas_price[idx])
 
         # the total cost
         cost_min[i] = value(prob.costs[idx])
@@ -170,6 +172,14 @@ def run_hp_opt(ems_local, plot_fig=True, prnt_pgr=False, result_folder='C:'):
         12: 'blue',
         13: 'darkgreen'}
 
+    if plot_temp is True:
+        fig0 = plt.figure()
+        plt.plot(HP_room_temp)
+        plt.xlabel('Timesteps [-]', fontsize=16)
+        plt.ylabel('temperature [C]', fontsize=16)
+        plt.title('room temperature', fontsize=20)
+
+
     if plot_fig is True:
         # figure properties
         fig = plt.figure(figsize=(10, 6))
@@ -208,7 +218,7 @@ def run_hp_opt(ems_local, plot_fig=True, prnt_pgr=False, result_folder='C:'):
         # plot properties
         plt.grid(color='lightgrey', linewidth=0.75)
         plt.tight_layout(rect=[0, 0, 1, 1])
-        plt.margins(x=0)        
+        plt.margins(x=0)
         plt.show()
 
         fig1 = plt.figure()
@@ -304,7 +314,15 @@ def run_hp_opt(ems_local, plot_fig=True, prnt_pgr=False, result_folder='C:'):
                   'EV_SOC': list(ev_soc),
                   'elec_supply_price': list(elec_supply_price),
                   'min cost': list(cost_min),
-                  'opt_ele_price':list(opt_ele_price)}
+                  'opt_ele_price': list(opt_ele_price)}
+
+    # from datetime import datetime
+    # now = datetime.now().strftime('%Y%m%dT%H%M')
+    # resultfile = os.path.join(result_folder, 'result_optimization_{}.xlsx'.format(now))
+    # writer = pd.ExcelWriter(resultfile)
+    # df = pd.DataFrame(data=data_input)
+    # df.to_excel(writer, 'operation_plan', merge_cells=False)
+    # writer.save()  # save
 
     # df = pd.DataFrame(data=data_input)
     # df.to_excel(writer, 'operation_plan', merge_cells=False)
@@ -349,9 +367,9 @@ def run_hp(ems_local, prnt_pgr):
     # timestep_1 = timesteps[0]
 
     # timesteps = timesteps_all[time_step_initial:time_step_end]
-    t_dn = 2
+    t_dn = 4
     # 6*time_step_end/96
-    t_up = 2
+    t_up = 4
     # 6*time_step_end/96
     timesteps_dn = timesteps[time_step_initial + 1:time_step_end - t_dn]
     timesteps_up = timesteps[time_step_initial + 1:time_step_end - t_up]
@@ -395,8 +413,14 @@ def run_hp(ems_local, prnt_pgr):
     chp_elec_cap = chp_param['maxpow']
     # heat pump
     hp_param = devices['hp']
-    hp_ther_cap = pd.DataFrame.from_dict(hp_param['maxpow'])
+    hp_elec_cap = pd.DataFrame.from_dict(hp_param['maxpow'])
     hp_cop = pd.DataFrame.from_dict(hp_param['COP'])
+    hp_supply_temp = hp_param['supply_temp']
+    hp_themInertia = hp_param['thermInertia']
+    hp_minTemp = hp_param['minTemp']
+    hp_maxTemp = hp_param['maxTemp']
+    hp_heatgain = hp_param['heatgain']
+
     # PV
     pv_param = devices['pv']
     pv_peak_pow = pv_param['maxpow']
@@ -433,9 +457,13 @@ def run_hp(ems_local, prnt_pgr):
     m.hp_ther_pow = pyen.Param(m.t, initialize=1, mutable=True, within=pyen.NonNegativeReals)
     m.sto_cont = pyen.Param(initialize=sto_cont)
     m.hp_COP = pyen.Param(m.t, initialize=1, mutable=True, within=pyen.NonNegativeReals)
-    m.hp_ele_pow = pyen.Param(m.t, initialize=1, mutable=True, within=pyen.NonNegativeReals)
+    m.hp_elec_pow = pyen.Param(m.t, initialize=1, mutable=True, within=pyen.NonNegativeReals)
     m.T_DN = pyen.Param(initialize=t_dn, mutable=True)
     m.T_UP = pyen.Param(initialize=t_up, mutable=True)
+    m.hp_themInertia = pyen.Param(initialize=hp_themInertia)
+    m.hp_minTemp = pyen.Param(initialize=hp_minTemp)
+    m.hp_maxTemp = pyen.Param(initialize=hp_maxTemp)
+    m.hp_heatgain = pyen.Param(initialize=hp_heatgain)
 
     # elec_vehicle
     m.ev_min_pow = pyen.Param(initialize=ev_min_power)
@@ -482,12 +510,13 @@ def run_hp(ems_local, prnt_pgr):
         # fill the ev availability
         m.ev_aval[t] = ev_aval[t]
         # calculate the spline function for thermal power of heat pump
-        spl_ther_pow = UnivariateSpline(list(map(float, hp_ther_cap.columns.values)), list(hp_ther_cap.iloc[0, :]))
-        m.hp_ther_pow[t] = spl_ther_pow(time_series.loc[t]['temp'] + 273.15).item(0)
+        spl_elec_pow = UnivariateSpline(list(map(float, hp_elec_cap.columns.values)),
+                                        list(hp_elec_cap.loc[hp_supply_temp, :]))
+        m.hp_elec_pow[t] = spl_elec_pow(time_series.loc[t]['temp'] + 273.15).item(0)
         # calculate the spline function for COP of heat pump
-        spl_cop = UnivariateSpline(list(map(float, hp_cop.columns.values)), list(hp_cop.iloc[0, :]))
+        spl_cop = UnivariateSpline(list(map(float, hp_cop.columns.values)), list(hp_cop.loc[hp_supply_temp, :]))
         m.hp_COP[t] = spl_cop(time_series.loc[t]['temp'] + 273.15).item(0)
-        m.hp_ele_pow[t] = m.hp_ther_pow[t] / m.hp_COP[t]
+        m.hp_ther_pow[t] = m.hp_elec_pow[t] * m.hp_COP[t]
         # calculate the chp electric and thermal power when it's running
         m.chp_heat_run[t] = m.chp_elec_run[t] / m.chp_elec_effic[t] * m.chp_ther_effic[t]
         m.chp_gas_run[t] = m.chp_elec_run[t] / m.chp_elec_effic[t]
@@ -504,8 +533,8 @@ def run_hp(ems_local, prnt_pgr):
     m.ev_power = pyen.Var(m.t, within=pyen.NonNegativeReals, bounds=(ev_min_power, ev_max_power),
                           doc='power of the EV')
     m.boiler_cap, m.PV_cap, m.elec_import, m.elec_export, m.bat_cont, m.sto_e_cont, m.bat_pow_pos, m.bat_pow_neg, \
-    m.ev_cont, m.ev_var_pow, m.soc_diff = (pyen.Var(m.t, within=pyen.NonNegativeReals) for i in range(11))
-    m.sto_e_pow, m.costs = (pyen.Var(m.t, within=pyen.Reals) for i in range(2))
+    m.ev_cont, m.ev_var_pow, m.soc_diff, m.roomtemp = (pyen.Var(m.t, within=pyen.NonNegativeReals) for i in range(12))
+    m.sto_e_pow, m.costs, m.heatextra = (pyen.Var(m.t, within=pyen.Reals) for i in range(3))
 
     # Constrains
 
@@ -522,13 +551,45 @@ def run_hp(ems_local, prnt_pgr):
 
     def heat_balance_rule(m, t):
         return m.boiler_cap[t] + m.CHP_run[t] * m.chp_heat_run[t] + \
-               m.hp_run[t] * m.hp_ther_pow[t] - m.lastprofil_heat[t] - m.sto_e_pow[t] == 0
+               m.hp_run[t] * m.hp_ther_pow[t] - m.lastprofil_heat[t] - m.sto_e_pow[t] == m.heatextra[t]
 
     m.heat_power_balance = pyen.Constraint(m.t,
                                            rule=heat_balance_rule,
                                            doc='heat_storage_balance')
 
-    # battery
+
+    # the room in the building
+    def heat_room_rule(m, t):
+        if t > m.t[1]:
+            return m.roomtemp[t] == m.roomtemp[t - 1] + (m.heatextra[t] + m.hp_heatgain) / m.hp_themInertia
+        else:
+             return m.roomtemp[t] == 23
+
+    m.heat_room_balance = pyen.Constraint(m.t, rule=heat_room_rule, doc='heat_room_balance')
+
+
+
+    def heat_room_maxtemp_rule(m, t):
+        return m.roomtemp[t] <= m.hp_maxTemp
+
+    m.heat_room_maxtemp = pyen.Constraint(m.t, rule=heat_room_maxtemp_rule)
+
+
+    def heat_room_mintemp_rule(m, t):
+        return m.roomtemp[t] >= m.hp_minTemp
+
+    m.heat_room_mintemp = pyen.Constraint(m.t, rule=heat_room_mintemp_rule)
+
+
+    def heat_room_end_rule(m, t):
+        if t == m.t[-1]:
+            return m.roomtemp[t] == 23
+        else:
+            return Constraint.Skip
+    m.heat_room_end = pyen.Constraint(m.t, rule=heat_room_end_rule)
+
+
+# battery
     def battery_e_cont_def_rule(m, t):
         if t > m.t[1]:
             return m.bat_cont[t] == m.bat_cont[t - 1] + (
@@ -543,7 +604,7 @@ def run_hp(ems_local, prnt_pgr):
 
     def elec_balance_rule(m, t):
         return m.elec_import[t] + m.CHP_run[t] * m.chp_elec_run[t] + m.PV_cap[t] * m.pv_effic * m.solar[t] - \
-               m.elec_export[t] - m.hp_run[t] * m.hp_ele_pow[t] - m.lastprofil_elec[t] - \
+               m.elec_export[t] - m.hp_run[t] * m.hp_elec_pow[t] - m.lastprofil_elec[t] - \
                (m.bat_pow_pos[t] - m.bat_pow_neg[t]) - m.ev_power[t] == 0
 
     m.elec_power_balance = pyen.Constraint(m.t, rule=elec_balance_rule, doc='elec_balance')
@@ -611,22 +672,20 @@ def run_hp(ems_local, prnt_pgr):
 
     ##hp
     def hp_min_still_t_rule(m, t):
-        return (m.hp_run[t - 1] - m.hp_run[t]) * m.T_DN <= m.T_DN - (
-            # m.hp_run[t] + m.hp_run[t + 1] + m.hp_run[t + 2] + m.hp_run[t + 3] + m.hp_run[t + 4] + m.hp_run[t + 5])
-                m.hp_run[t] + m.hp_run[t + 1])
+        return (m.hp_run[t - 1] - m.hp_run[t]) * m.T_DN <= m.T_DN - (m.hp_run[t] + m.hp_run[t + 1] +
+                                                                     m.hp_run[t + 2] + m.hp_run[t + 3])
 
-    # m.hp_min_still_t_def = pyen.Constraint(m.t_DN,
-    #                                     rule=hp_min_still_t_rule)
+    # m.hp_min_still_t_def = pyen.Constraint(m.t_DN, rule=hp_min_still_t_rule)
 
     def hp_min_lauf_t_rule(m, t):
 
-        return (m.hp_run[t] - m.hp_run[t - 1]) * m.T_UP <= m.hp_run[t] + m.hp_run[t + 1]
+        return (m.hp_run[t] - m.hp_run[t - 1]) * m.T_UP <= m.hp_run[t] + m.hp_run[t + 1] \
+               + m.hp_run[t + 2] + m.hp_run[t + 3]
         # + m.hp_run[t + 2] + m.hp_run[
         # t + 3] + m.hp_run[t + 4] + m.hp_run[t + 5]
 
-    #  return (m.hp_run[t]-m.hp_run[t-1])*m.t_up[t] <= m.t_up[t]; m.hp_run[k]
-    # m.hp_min_lauf_t_def = pyen.Constraint(m.t_UP,
-    #                rule=hp_min_lauf_t_rule)
+
+    # m.hp_min_lauf_t_def = pyen.Constraint(m.t_UP, rule=hp_min_lauf_t_rule)
 
     def chp_min_still_t_rule(m, t):
         return (m.CHP_run[t - 1] - m.CHP_run[t]) * m.T_DN <= m.T_DN - (
