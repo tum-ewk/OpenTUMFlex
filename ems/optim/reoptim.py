@@ -140,7 +140,7 @@ def reflex_bat(my_ems):
                 my_ems['devices']['bat']['initSOC'] = 0
             else: 
                 my_ems['devices']['bat']['initSOC'] = e_bSOC - SOC_rem
-       
+                
     return my_ems  
 
 def reflex_ev(my_ems):
@@ -208,18 +208,19 @@ def reflex_hp(my_ems):
         
         # Battery SOC at flexibility time step
         # s_bSOC = my_ems['optplan']['bat_SOC'][rstep]
-        e_hSOC = my_ems['optplan']['SOC_heat'][rstep+f_steps]    
+        e_hSOC = my_ems['optplan']['SOC_heat'][rstep]    
         sto_max_e = my_ems['devices']['sto']['stocap']
-        
+        COP_avg = sum(my_ems['optplan']['HP_COP'][rstep:rstep+f_steps])/f_steps
+
         if f_type == 'Neg':
-           SOC_added = abs(f_ene*100/sto_max_e)
+           SOC_added = abs(COP_avg*f_ene*100/sto_max_e)
            if e_hSOC + SOC_added > 100:
                my_ems['devices']['sto']['initSOC'] = 100
            else:
                my_ems['devices']['sto']['initSOC'] = e_hSOC + SOC_added
            
         elif f_type == 'Pos':
-            SOC_rem = abs(f_ene*100/sto_max_e)
+            SOC_rem = abs(COP_avg*f_ene*100/sto_max_e)
             print(SOC_rem)
             if e_hSOC - SOC_rem < 0:
                 my_ems['devices']['sto']['initSOC'] = 0

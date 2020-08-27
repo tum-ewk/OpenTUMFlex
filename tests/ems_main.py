@@ -63,16 +63,16 @@ def run_ems(path= None):
     my_ems['fcst'] = load_data(my_ems, path)   
     
     # add or change the utility/devices
-    my_ems['devices']['boiler']['maxpow'] = 2
+    my_ems['devices']['boiler']['maxpow'] = 5
     my_ems['devices']['chp']['maxpow'] = 0
-    my_ems['devices'].update(devices(device_name='hp', minpow=0, maxpow=2))   
+    my_ems['devices'].update(devices(device_name='hp', minpow=0, maxpow=3))   
     my_ems['devices'].update(devices(device_name='ev_new', minpow=0, maxpow=2, 
                                       stocap=3, eta=0.98, timesetting = my_ems['time_data'],
                                       ev_aval=my_ems['fcst']['ev_aval']))
 
     
     # calculate the timetable for all the devices    
-    my_ems['optplan'] = opt(my_ems, plot_fig=False, prnt_pgr=False, result_folder='data/')
+    my_ems['optplan'] = opt(my_ems, plot_fig=True, prnt_pgr=False, result_folder='data/')
         
     # # calculate the flexibility of one device
     my_ems['flexopts']['pv'] = calc_flex_pv(my_ems, reopt=0)
@@ -90,8 +90,8 @@ def run_ems(path= None):
     
     # Reoptimization
     # Selected offer - Device and timestep
-    my_ems['reoptim']['device'] = 'bat'  # Ues pv/bat
-    my_ems['reoptim']['timestep'] = 40
+    my_ems['reoptim']['device'] = 'hp'  # Ues pv/bat
+    my_ems['reoptim']['timestep'] = 26
     my_ems['reoptim']['flextype'] = 'Neg' # Use Neg/Pos
     my_ems = reoptimize(my_ems)
     
