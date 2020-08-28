@@ -56,7 +56,10 @@ def run_hp_opt(ems_local, plot_fig=True, prnt_pgr=False, plot_temp=True, result_
     boiler_cap, CHP_heat_run, HP_heat_run, HP_heat_cap, CHP_operation, HP_operation, lastprofil_heat, sto_e_pow, sto_e_pow_pos, \
     CHP_gas_run, sto_e_pow_neg, sto_e_cont, HP_room_temp = \
         (np.zeros(length) for i in range(13))
-
+    
+    # COP - HP
+    HP_cop = np.zeros(length)
+    
     # final cost
     cost_min = np.zeros(length)
     # heat balance
@@ -119,6 +122,9 @@ def run_hp_opt(ems_local, plot_fig=True, prnt_pgr=False, plot_temp=True, result_
         opt_ele_price[i] = elec_import[i] * value(prob.ele_price_in[idx]) - pv_pv2grid[i] \
                            * value(prob.ele_price_out[idx]) - (elec_export[i] - pv_pv2grid[i]) * value(
             prob.gas_price[idx])
+                           
+        # COP heat
+        HP_cop[i] = value(prob.hp_COP[idx])
 
         # the total cost
         cost_min[i] = value(prob.costs[idx])
@@ -228,7 +234,7 @@ def run_hp_opt(ems_local, plot_fig=True, prnt_pgr=False, plot_temp=True, result_
         p8 = plt.step(ind, SOC_elec, linewidth=1, color='red', where='mid')
         plt.xlabel('time [h]', fontsize=font_size)
         plt.ylabel('SOC [%]', fontsize=font_size)
-        # plt.title('SOC of Battery', fontsize=font_size)
+        plt.title('SOC of Battery', fontsize=font_size)
         plt.xticks(ind[idx_plt], ts[idx_plt], rotation=20)
         ax2.set_xlim(0, len(timesteps) - 1)
         plt.show()
@@ -241,7 +247,7 @@ def run_hp_opt(ems_local, plot_fig=True, prnt_pgr=False, plot_temp=True, result_
         p8 = plt.step(ind, ev_soc, linewidth=1, color='red', where='mid')
         plt.xlabel('time [h]', fontsize=font_size)
         plt.ylabel('SOC [%]', fontsize=font_size)
-        # plt.title('SOC of EV', fontsize=font_size)
+        plt.title('SOC of EV', fontsize=font_size)
         plt.xticks(ind[idx_plt], ts[idx_plt], rotation=20)
         ax2.set_xlim(0, len(timesteps) - 1)
         # for i in np.arange(0, len(ev_node), 2):
@@ -314,6 +320,7 @@ def run_hp_opt(ems_local, plot_fig=True, prnt_pgr=False, plot_temp=True, result_
                   'EV_SOC': list(ev_soc),
                   'elec_supply_price': list(elec_supply_price),
                   'min cost': list(cost_min),
+                  'HP_COP':list(HP_cop),
                   'opt_ele_price': list(opt_ele_price)}
 
     # from datetime import datetime
