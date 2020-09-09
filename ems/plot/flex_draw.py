@@ -8,11 +8,13 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib import gridspec
 
-def plot_flex(my_ems, device):
+def plot_flex(my_ems, device):  
     nsteps = my_ems['time_data']['nsteps']
     ntsteps = my_ems['time_data']['ntsteps']
     t_intval = my_ems['time_data']['t_inval']
     dat1 = pd.DataFrame.from_dict(my_ems['flexopts'][device])
+      
+    # Initialize    
     neg_leg = 0
     pos_leg = 0
     font_size = 20
@@ -33,31 +35,37 @@ def plot_flex(my_ems, device):
              index=my_ems['time_data']['time_slots'], columns={'cumm'})
     cum_data.iloc[0, 0] = 0
     for i in range(nsteps - 1):
-        cum_data.iloc[i + 1, 0] = theta + dat1['Sch_P'][i] / ntsteps
+        cum_data.iloc[i + 1, 0] = theta + dat1['Sch_P'][i]/ntsteps
         theta = cum_data.iloc[i + 1, 0]
     p1 = plt_cum.plot(cum_data.iloc[:, 0], linewidth=3, color='k')
-
+    
     for x in range(nsteps):
         # Negative flexibility plots
         if dat1['Neg_E'][x] < 0:
             neg_leg = 1
             theta = cum_data.iloc[x, 0]
             slots = int(round(ntsteps * dat1['Neg_E'][x] / dat1['Neg_P'][x]))
+            slots_lim = slots
+            if x + slots >= nsteps:
+                slots_lim = nsteps-x-1
             slot_flex = dat1['Neg_E'][x] / slots
-            for y in range(1, slots + 1):
+            for y in range(1, slots_lim + 1):
                 p2 = plt_cum.plot([ts[x + y - 1], ts[x + y]], [theta, cum_data.iloc[x + y, 0] + (slot_flex * y)],
                                   color='tab:blue')
                 theta = cum_data.iloc[x + y, 0] + (slot_flex * y)
         p4 = plt_pow.bar(ts[x], dat1['Neg_P'][x], color='tab:blue', width=1.0, align='edge', edgecolor='k', zorder=3)
         p6 = plt_prc.bar(ts[x], dat1['Neg_Pr'][x], color='tab:blue', width=1.0, align='edge', edgecolor='k', zorder=3)
-
+        
         # Positive flexibility plots
         if dat1['Pos_E'][x] > 0:
             pos_leg = 1
             theta = cum_data.iloc[x, 0]
             slots = int(round(ntsteps * dat1['Pos_E'][x] / dat1['Pos_P'][x]))
+            slots_lim = slots
+            if x + slots >= nsteps:
+                slots_lim = nsteps-x-1
             slot_flex = dat1['Pos_E'][x] / slots
-            for y in range(1, slots + 1):
+            for y in range(1, slots_lim + 1):
                 p3 = plt_cum.plot([ts[x + y - 1], ts[x + y]], [theta, cum_data.iloc[x + y, 0] + (slot_flex * y)],
                                   color='darkred')
                 theta = cum_data.iloc[x + y, 0] + (slot_flex * y)
@@ -87,8 +95,7 @@ def plot_flex(my_ems, device):
         plt_prc.legend((p7), ['$C_{Pos\_flex}}$'],
                        prop={'size': font_size+2}, bbox_to_anchor=(1.01, 0), loc="lower left")
     else:
-        plt_cum.legend((p1[0]), ('Cummulative'),
-                       prop={'size': font_size}, bbox_to_anchor=(1.01, 0), loc="lower left")
+        plt_cum.legend(['Cummulative'], prop={'size': font_size+2})
 
     # Labels            
     # plt_cum.set_title('Flexibility plots', fontsize=font_size, pad=20)
@@ -96,7 +103,7 @@ def plot_flex(my_ems, device):
     plt_cum.tick_params(axis="x", labelsize=font_size, labelbottom=False)
     plt_cum.tick_params(axis="y", labelsize=font_size)
     plt_cum.grid(color='lightgrey', linewidth=0.75)
-    plt_pow.set_ylabel('$Power\ [kWh]$)', fontsize=font_size+2)
+    plt_pow.set_ylabel('$Power\ [kW]$', fontsize=font_size+2)
     plt_pow.tick_params(axis="x", labelsize=font_size, labelbottom=False)
     plt_pow.tick_params(axis="y", labelsize=font_size)
     plt_pow.grid(color='lightgrey', linewidth=0.75, zorder=0)
@@ -136,10 +143,8 @@ def plot_flex(my_ems, device):
     # Settings
     plt.rc('font', family='serif')
     plt.margins(x=0)
-    plt.show()
-
-    return
-
+    plt.show()   
+    return 
 
 def save_results(dat1, nsteps, save_path):
     dat1.to_excel("output.xlsx", sheet_name='flex_results')

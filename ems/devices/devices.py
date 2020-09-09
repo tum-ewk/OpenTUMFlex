@@ -7,10 +7,11 @@ import pandas as pd
 import json as js
 import numpy as np
 import datetime
+from scipy.interpolate import UnivariateSpline
 
 
 def devices(device_name, minpow=0, maxpow=0, stocap=None, eta=None, init_soc=None, end_soc=None, ev_aval=None,
-            timesetting=96, sto_volume=0, path=None):
+            supply_temp=None, timesetting=96, sto_volume=0, path=None):
     # define general unit parameters
     unit = {'minpow': minpow,
             'maxpow': maxpow,
@@ -25,28 +26,51 @@ def devices(device_name, minpow=0, maxpow=0, stocap=None, eta=None, init_soc=Non
         # if no predefined device data is available:
         if path is None:
             # typical heat pump power map
-            temp_supply = [288.15, 318.15, 333.15]
-            hp_q = pd.DataFrame({'266.15': [4.8, 4.8, 4.8],
-                                 '275.15': [6.0, 6.0, 6.0],
-                                 '280.15': [7.5, 7.5, 7.5],
-                                 '288.15': [9.2, 9.2, 9.2],
-                                 '293.15': [9.9, 9.9, 9.9],
+            temp_supply = [288.15, 308.15, 318.15, 328.15, 333.15]
+            # 45 C supply temperature
+            # hp_q = pd.DataFrame({'266.15': [4.8, 4.8, 4.8],
+            #                      '275.15': [6.0, 6.0, 6.0],
+            #                      '280.15': [7.5, 7.5, 7.5],
+            #                      '288.15': [9.2, 9.2, 9.2],
+            #                      '293.15': [9.9, 9.9, 9.9],
+            #                      }, index=temp_supply
+            #                     )
+            # 20 C supply temperature
+            hp_q = pd.DataFrame({'266.15': [6, 5.2, 4.8, 4.2, 3.9],
+                                 '275.15': [7.5, 6.5, 6.0, 5.3, 5.0],
+                                 '280.15': [9.0, 8.0, 7.5, 6.8, 6.5],
+                                 '288.15': [10.7, 9.7, 9.2, 8.4, 8.0],
+                                 '293.15': [11.7, 10.5, 9.9, 9.2, 8.9],
+                                 }, index=temp_supply
+                                )
+            hp_p = pd.DataFrame({'266.15': [1.5, 1.8, 1.9, 2.0, 2.1],
+                                 '275.15': [1.6, 1.9, 2.1, 2.1, 2.1],
+                                 '280.15': [1.6, 2.0, 2.3, 2.4, 2.4],
+                                 '288.15': [1.7, 2.1, 2.5, 2.7, 2.8],
+                                 '293.15': [1.8, 2.2, 2.6, 2.9, 3.0],
                                  }, index=temp_supply
                                 )
 
-            hp_p = pd.DataFrame({'266.15': [1.9, 1.9, 1.9],
-                                 '275.15': [2.1, 2.1, 2.1],
-                                 '280.15': [2.3, 2.3, 2.3],
-                                 '288.15': [2.5, 2.5, 2.5],
-                                 '293.15': [2.6, 2.6, 2.6],
-                                 }, index=temp_supply
-                                )
+            def modify_hp_data(data_original, temperature):
+                temp_data = data_original
+                value = np.zeros(temp_data.shape[1])
+                for _col_num in range(temp_data.shape[1]):
+                    spline = UnivariateSpline(list(map(float, temp_data.index.values)),
+                                              list(temp_data.iloc[:, _col_num]))
+                    value[_col_num] = spline(temperature).item(0)
+                temp_data.loc[temperature] = value
+                return temp_data.sort_index()
 
+            supply_temp = supply_temp + 273.15  # convert from grad celsius to kelvin
+            hp_q = modify_hp_data(hp_q, supply_temp)
+            hp_p = modify_hp_data(hp_p, supply_temp)
             hp_cop = hp_q.div(hp_p)
-            fact_p = maxpow / hp_p.mean(axis=0)[1]
+            fact_p = maxpow / hp_p.loc[supply_temp, '275.15']
 
             # change the DataFrame to Dict
-            unit.update({'maxpow': hp_p.multiply(fact_p).to_dict('dict'), 'COP': hp_cop.to_dict('dict')})
+            unit.update({'maxpow': hp_p.multiply(fact_p).to_dict('dict'), 'COP': hp_cop.to_dict('dict'),
+                         'supply_temp': supply_temp,
+                         'thermInertia': 50, 'minTemp': 20, 'maxTemp': 26, 'heatgain': 0.1})
             df_unit_hp = unit
             dict_unit_hp = {device_name: df_unit_hp}
 
@@ -147,6 +171,99 @@ def devices(device_name, minpow=0, maxpow=0, stocap=None, eta=None, init_soc=Non
                 dict_ev = js.load(f)
             dict_unit_ev = {device_name: dict_ev}
 
+        return dict_unit_ev
+    
+    # use case for electric vehicle
+    #use ev_new when importing data from excel
+    elif device_name == 'ev_new':        
+        device_name = 'ev'   
+        nsteps = timesetting['nsteps']
+        ev_aval_list = {'timeStamp':timesetting['time_slots'].to_list(),'ev_aval':ev_aval}
+        ev_aval = pd.DataFrame(ev_aval_list)               
+        aval = ev_aval['ev_aval'].values.tolist()
+        init_soc_check = np.zeros(nsteps) + 100
+        end_soc_check = np.zeros(nsteps)
+        node= []
+        
+        #checking no. of changes in the column: ev_aval from 0 to 1
+        change_toOne = 0
+        ev_column = ev_aval['ev_aval']
+        length = len(ev_column.index)
+        for i in range(length):
+            if i<nsteps-1:
+                if ev_column[i] == 1 and i==0:
+                    change_toOne = change_toOne +1
+                    node.append(i)
+                elif ev_column[i] < ev_column[i+1]:
+                    change_toOne = change_toOne +1
+                    node.append(i)
+
+        # print(change_toOne)
+        init_soc= []
+        for p in range(change_toOne):
+            init_soc.append(40)
+        if change_toOne == 0:
+            init_soc.append(0)            
+            
+        #for change from 0 to 1: updating init_soc_check
+        j=0
+        aval_time_init =[]
+        for i in range(length):
+            if i<nsteps-1:
+                if ev_column[i] == 1 and i==0:
+                    init_soc_check[i]= init_soc[j]
+                    aval_time_init.append(ev_aval['timeStamp'][i])
+                    j+=1
+                elif ev_column[i] < ev_column[i+1]:
+                    init_soc_check[i]= init_soc[j]                      
+                    aval_time_init.append(ev_aval['timeStamp'][i+1])
+                    j+=1
+        if len(aval_time_init) == 0:
+            aval_time_init.append(ev_aval['timeStamp'][0]) ##edit
+
+        #checking no. of changes in the column: ev_aval from 1 to 0   
+        change_toZero = 0
+        for i in range(length):
+            if i<nsteps-1:
+                if ev_column[i] > ev_column[i+1]:
+                    change_toZero = change_toZero +1
+                    node.append(i+1)
+            elif ev_column[i]==1 and i==nsteps-1:
+                change_toZero = change_toZero +1
+                node.append(i)
+
+        # print(change_toZero)
+        end_soc= []
+        for q in range(change_toZero):
+            end_soc.append(60)
+        if change_toZero == 0:
+            end_soc.append(0)
+      
+        #for change from 1 to 0: updating end_soc_check
+        k=0
+        aval_time_end =[]
+        for i in range(length):
+            if i<nsteps-1:
+                if ev_column[i] > ev_column[i+1]:
+                    end_soc_check[i]= end_soc[k]
+                    aval_time_end.append(ev_aval['timeStamp'][i+1])
+                    if k == change_toZero - 1:
+                        end_soc_check[i:] = end_soc[k]
+                    k+=1 
+        if len(aval_time_end) == 0:
+            aval_time_end.append(ev_aval['timeStamp'][0])
+        if len(aval_time_init) > len(aval_time_end):
+            end_soc_check[nsteps-1]= end_soc[k]
+            aval_time_end.append(ev_aval['timeStamp'][nsteps-1])
+            
+        node.sort()
+       
+        unit.update({'initSOC': init_soc,'endSOC': end_soc, 'aval': aval, 'aval_init': list(aval_time_init),
+                     'aval_end': list(aval_time_end),
+                     'init_soc_check': list(init_soc_check),
+                     'end_soc_check': list(end_soc_check), 'node': list(node)})
+        df_unit_ev = unit
+        dict_unit_ev = {device_name: df_unit_ev}
         return dict_unit_ev
 
     # use case for heat storage
