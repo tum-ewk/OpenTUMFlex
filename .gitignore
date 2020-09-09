@@ -10,6 +10,7 @@
 *.pot
 __pycache__/*
 *.xlsx
+*.mat
 .cache/*
 .*.swp
 */.ipynb_checkpoints/*
@@ -47,13 +48,13 @@ docs/_build/*
 cover/*
 MANIFEST
 
+# Input data
+!tests/data/input_data.xlsx
+
 # Per-project virtualenvs
 .venv*/
 venv/
-tests/data/
 tests/results/SA_ems_results/ev_ems_0.txt
 *.txt
 *.csv
 
-# Input data
-!/tests/data/input_data.xlsx
