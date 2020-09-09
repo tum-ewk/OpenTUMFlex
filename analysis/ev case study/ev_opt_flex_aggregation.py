@@ -11,8 +11,8 @@ from forecast import price_fcst
 #################################################################
 """
 # Output and input path
-output_path = 'C:/Users/ga47num/PycharmProjects/GER MP - OpenTUMFlex - EV/Output/'
-input_path = 'C:/Users/ga47num/PycharmProjects/GER MP - OpenTUMFlex - EV/Input/'
+output_path = 'C:/Users/ga47num/PycharmProjects/US CHTS - OpenTUMFlex - EV/Output/22/'
+input_path = 'C:/Users/ga47num/PycharmProjects/US CHTS - OpenTUMFlex - EV/Input/'
 # List all file names, for all scenarios (ToU & Constant, with and without minimally increasing prices) the same
 file_names = os.listdir(output_path + 'ToU/')
 rtp_file_names = os.listdir(input_path + 'RTP/')
@@ -85,109 +85,118 @@ flex_sum_df['Daytime_ID'] = opt_sum_df.index.weekday_name.array + \
 days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 
 
-"""
-#################################################################################
-# Read ems results, sum charging power, flexibility and veh availability ########
-#################################################################################
-"""
-# read all results and store them in result lists
-for result_name in file_names:
-    my_ems_tou_mi = ems_loc(initialize=True, path=output_path + 'ToU_minimally_increasing/' + result_name)
-    my_ems_tou = ems_loc(initialize=True, path=output_path + 'ToU/' + result_name)
-    my_ems_const_mi = ems_loc(initialize=True, path=output_path + 'Constant_minimally_increasing/' + result_name)
-    my_ems_const = ems_loc(initialize=True, path=output_path + 'Constant/' + result_name)
-    my_ems_rtp = ems_loc(initialize=True, path=output_path + 'RTP/' + result_name)
+# """
+# #################################################################################
+# # Read ems results, sum charging power, flexibility and veh availability ########
+# #################################################################################
+# """
+# # read all results and store them in result lists
+# for result_name in file_names:
+#     my_ems_tou_mi = ems_loc(initialize=True, path=output_path + 'ToU_minimally_increasing/' + result_name)
+#     my_ems_tou = ems_loc(initialize=True, path=output_path + 'ToU/' + result_name)
+#     my_ems_const_mi = ems_loc(initialize=True, path=output_path + 'Constant_minimally_increasing/' + result_name)
+#     my_ems_const = ems_loc(initialize=True, path=output_path + 'Constant/' + result_name)
+#     my_ems_rtp = ems_loc(initialize=True, path=output_path + 'RTP/' + result_name)
+#
+#     opt_result_df = pd.DataFrame({'P_ev_opt_tou_mi': my_ems_tou_mi['optplan']['EV_power'],
+#                                   'P_ev_opt_tou': my_ems_tou['optplan']['EV_power'],
+#                                   'P_ev_opt_const_mi': my_ems_const_mi['optplan']['EV_power'],
+#                                   'P_ev_opt_const': my_ems_const['optplan']['EV_power'],
+#                                   'P_ev_opt_rtp': my_ems_rtp['optplan']['EV_power']},
+#                                  index=pd.date_range(start=my_ems_tou_mi['time_data']['time_slots'][0],
+#                                                      end=my_ems_tou_mi['time_data']['time_slots'][-1],
+#                                                      freq='15Min'))
+#     flex_result_df = pd.DataFrame({'P_pos_tou': my_ems_tou['flexopts']['ev']['Pos_P'],
+#                                    'P_pos_tou_mi': my_ems_tou_mi['flexopts']['ev']['Pos_P'],
+#                                    'P_pos_const': my_ems_const['flexopts']['ev']['Pos_P'],
+#                                    'P_pos_const_mi': my_ems_const_mi['flexopts']['ev']['Pos_P'],
+#                                    'P_pos_rtp': my_ems_rtp['flexopts']['ev']['Pos_P'],
+#                                    'P_neg_tou': my_ems_tou['flexopts']['ev']['Neg_P'],
+#                                    'P_neg_tou_mi': my_ems_tou_mi['flexopts']['ev']['Neg_P'],
+#                                    'P_neg_const': my_ems_const['flexopts']['ev']['Neg_P'],
+#                                    'P_neg_const_mi': my_ems_const_mi['flexopts']['ev']['Neg_P'],
+#                                    'P_neg_rtp': my_ems_rtp['flexopts']['ev']['Neg_P'],
+#                                    'E_pos_tou': my_ems_tou['flexopts']['ev']['Pos_E'],
+#                                    'E_pos_tou_mi': my_ems_tou_mi['flexopts']['ev']['Pos_E'],
+#                                    'E_pos_const': my_ems_const['flexopts']['ev']['Pos_E'],
+#                                    'E_pos_const_mi': my_ems_const_mi['flexopts']['ev']['Pos_E'],
+#                                    'E_pos_rtp': my_ems_rtp['flexopts']['ev']['Pos_E'],
+#                                    'E_neg_tou': my_ems_tou['flexopts']['ev']['Neg_E'],
+#                                    'E_neg_tou_mi': my_ems_tou_mi['flexopts']['ev']['Neg_E'],
+#                                    'E_neg_const': my_ems_const['flexopts']['ev']['Neg_E'],
+#                                    'E_neg_const_mi': my_ems_const_mi['flexopts']['ev']['Neg_E'],
+#                                    'E_neg_rtp': my_ems_rtp['flexopts']['ev']['Neg_E']
+#                                    },
+#                                   index=pd.date_range(start=my_ems_tou_mi['time_data']['time_slots'][0],
+#                                                       end=my_ems_tou_mi['time_data']['time_slots'][-1],
+#                                                       freq='15Min'))
+#     # Optimal charging power addition
+#     opt_sum_df.loc[opt_result_df.index[0]:opt_result_df.index[-1], 'P_ev_opt_sum_tou_mi'] \
+#         += opt_result_df['P_ev_opt_tou_mi']
+#     opt_sum_df.loc[opt_result_df.index[0]:opt_result_df.index[-1], 'P_ev_opt_sum_tou'] \
+#         += opt_result_df['P_ev_opt_tou']
+#     opt_sum_df.loc[opt_result_df.index[0]:opt_result_df.index[-1], 'P_ev_opt_sum_const_mi'] \
+#         += opt_result_df['P_ev_opt_const_mi']
+#     opt_sum_df.loc[opt_result_df.index[0]:opt_result_df.index[-1], 'P_ev_opt_sum_const'] \
+#         += opt_result_df['P_ev_opt_const']
+#     opt_sum_df.loc[opt_result_df.index[0]:opt_result_df.index[-1], 'P_ev_opt_sum_rtp'] \
+#         += opt_result_df['P_ev_opt_rtp']
+#     opt_sum_df.loc[opt_result_df.index[0]:opt_result_df.index[-1], 'n_veh_avail'] += 1
+#     # Flexible power addition
+#     flex_sum_df.loc[flex_result_df.index[0]:flex_result_df.index[-1], 'P_pos_sum_tou'] \
+#         += flex_result_df['P_pos_tou']
+#     flex_sum_df.loc[flex_result_df.index[0]:flex_result_df.index[-1], 'P_pos_sum_tou_mi'] \
+#         += flex_result_df['P_pos_tou_mi']
+#     flex_sum_df.loc[flex_result_df.index[0]:flex_result_df.index[-1], 'P_pos_sum_const'] \
+#         += flex_result_df['P_pos_const']
+#     flex_sum_df.loc[flex_result_df.index[0]:flex_result_df.index[-1], 'P_pos_sum_const_mi'] \
+#         += flex_result_df['P_pos_const_mi']
+#     flex_sum_df.loc[flex_result_df.index[0]:flex_result_df.index[-1], 'P_pos_sum_rtp'] \
+#         += flex_result_df['P_pos_rtp']
+#     flex_sum_df.loc[flex_result_df.index[0]:flex_result_df.index[-1], 'P_neg_sum_tou'] \
+#         += flex_result_df['P_neg_tou']
+#     flex_sum_df.loc[flex_result_df.index[0]:flex_result_df.index[-1], 'P_neg_sum_tou_mi'] \
+#         += flex_result_df['P_neg_tou_mi']
+#     flex_sum_df.loc[flex_result_df.index[0]:flex_result_df.index[-1], 'P_neg_sum_const'] \
+#         += flex_result_df['P_neg_const']
+#     flex_sum_df.loc[flex_result_df.index[0]:flex_result_df.index[-1], 'P_neg_sum_const_mi'] \
+#         += flex_result_df['P_neg_const_mi']
+#     flex_sum_df.loc[flex_result_df.index[0]:flex_result_df.index[-1], 'P_neg_sum_rtp'] \
+#         += flex_result_df['P_neg_rtp']
+#     # Flexible energy addition
+#     flex_sum_df.loc[flex_result_df.index[0]:flex_result_df.index[-1], 'E_pos_sum_tou'] \
+#         += flex_result_df['E_pos_tou']
+#     flex_sum_df.loc[flex_result_df.index[0]:flex_result_df.index[-1], 'E_pos_sum_tou_mi'] \
+#         += flex_result_df['E_pos_tou_mi']
+#     flex_sum_df.loc[flex_result_df.index[0]:flex_result_df.index[-1], 'E_pos_sum_const'] \
+#         += flex_result_df['E_pos_const']
+#     flex_sum_df.loc[flex_result_df.index[0]:flex_result_df.index[-1], 'E_pos_sum_const_mi'] \
+#         += flex_result_df['E_pos_const_mi']
+#     flex_sum_df.loc[flex_result_df.index[0]:flex_result_df.index[-1], 'E_pos_sum_rtp'] \
+#         += flex_result_df['E_pos_rtp']
+#     flex_sum_df.loc[flex_result_df.index[0]:flex_result_df.index[-1], 'E_neg_sum_tou'] \
+#         += flex_result_df['E_neg_tou']
+#     flex_sum_df.loc[flex_result_df.index[0]:flex_result_df.index[-1], 'E_neg_sum_tou_mi'] \
+#         += flex_result_df['E_neg_tou_mi']
+#     flex_sum_df.loc[flex_result_df.index[0]:flex_result_df.index[-1], 'E_neg_sum_const'] \
+#         += flex_result_df['E_neg_const']
+#     flex_sum_df.loc[flex_result_df.index[0]:flex_result_df.index[-1], 'E_neg_sum_const_mi'] \
+#         += flex_result_df['E_neg_const_mi']
+#     flex_sum_df.loc[flex_result_df.index[0]:flex_result_df.index[-1], 'E_neg_sum_rtp'] \
+#         += flex_result_df['E_neg_rtp']
+#
+# # Save data to hdf files for further analysis
+# flex_sum_df.to_hdf(output_path + 'Aggregated Data/flex_sum_data.h5', mode='w', key='df')
+# opt_sum_df.to_hdf(output_path + 'Aggregated Data/opt_sum_data.h5', mode='w', key='df')
 
-    opt_result_df = pd.DataFrame({'P_ev_opt_tou_mi': my_ems_tou_mi['optplan']['EV_power'],
-                                  'P_ev_opt_tou': my_ems_tou['optplan']['EV_power'],
-                                  'P_ev_opt_const_mi': my_ems_const_mi['optplan']['EV_power'],
-                                  'P_ev_opt_const': my_ems_const['optplan']['EV_power'],
-                                  'P_ev_opt_rtp': my_ems_rtp['optplan']['EV_power']},
-                                 index=pd.date_range(start=my_ems_tou_mi['time_data']['time_slots'][0],
-                                                     end=my_ems_tou_mi['time_data']['time_slots'][-1],
-                                                     freq='15Min'))
-    flex_result_df = pd.DataFrame({'P_pos_tou': my_ems_tou['flexopts']['ev']['Pos_P'],
-                                   'P_pos_tou_mi': my_ems_tou_mi['flexopts']['ev']['Pos_P'],
-                                   'P_pos_const': my_ems_const['flexopts']['ev']['Pos_P'],
-                                   'P_pos_const_mi': my_ems_const_mi['flexopts']['ev']['Pos_P'],
-                                   'P_pos_rtp': my_ems_rtp['flexopts']['ev']['Pos_P'],
-                                   'P_neg_tou': my_ems_tou['flexopts']['ev']['Neg_P'],
-                                   'P_neg_tou_mi': my_ems_tou_mi['flexopts']['ev']['Neg_P'],
-                                   'P_neg_const': my_ems_const['flexopts']['ev']['Neg_P'],
-                                   'P_neg_const_mi': my_ems_const_mi['flexopts']['ev']['Neg_P'],
-                                   'P_neg_rtp': my_ems_rtp['flexopts']['ev']['Neg_P'],
-                                   'E_pos_tou': my_ems_tou['flexopts']['ev']['Pos_E'],
-                                   'E_pos_tou_mi': my_ems_tou_mi['flexopts']['ev']['Pos_E'],
-                                   'E_pos_const': my_ems_const['flexopts']['ev']['Pos_E'],
-                                   'E_pos_const_mi': my_ems_const_mi['flexopts']['ev']['Pos_E'],
-                                   'E_pos_rtp': my_ems_rtp['flexopts']['ev']['Pos_E'],
-                                   'E_neg_tou': my_ems_tou['flexopts']['ev']['Neg_E'],
-                                   'E_neg_tou_mi': my_ems_tou_mi['flexopts']['ev']['Neg_E'],
-                                   'E_neg_const': my_ems_const['flexopts']['ev']['Neg_E'],
-                                   'E_neg_const_mi': my_ems_const_mi['flexopts']['ev']['Neg_E'],
-                                   'E_neg_rtp': my_ems_rtp['flexopts']['ev']['Neg_E']
-                                   },
-                                  index=pd.date_range(start=my_ems_tou_mi['time_data']['time_slots'][0],
-                                                      end=my_ems_tou_mi['time_data']['time_slots'][-1],
-                                                      freq='15Min'))
-    # Optimal charging power addition
-    opt_sum_df.loc[opt_result_df.index[0]:opt_result_df.index[-1], 'P_ev_opt_sum_tou_mi'] \
-        += opt_result_df['P_ev_opt_tou_mi']
-    opt_sum_df.loc[opt_result_df.index[0]:opt_result_df.index[-1], 'P_ev_opt_sum_tou'] \
-        += opt_result_df['P_ev_opt_tou']
-    opt_sum_df.loc[opt_result_df.index[0]:opt_result_df.index[-1], 'P_ev_opt_sum_const_mi'] \
-        += opt_result_df['P_ev_opt_const_mi']
-    opt_sum_df.loc[opt_result_df.index[0]:opt_result_df.index[-1], 'P_ev_opt_sum_const'] \
-        += opt_result_df['P_ev_opt_const']
-    opt_sum_df.loc[opt_result_df.index[0]:opt_result_df.index[-1], 'P_ev_opt_sum_rtp'] \
-        += opt_result_df['P_ev_opt_rtp']
-    opt_sum_df.loc[opt_result_df.index[0]:opt_result_df.index[-1], 'n_veh_avail'] += 1
-    # Flexible power addition
-    flex_sum_df.loc[flex_result_df.index[0]:flex_result_df.index[-1], 'P_pos_sum_tou'] \
-        += flex_result_df['P_pos_tou']
-    flex_sum_df.loc[flex_result_df.index[0]:flex_result_df.index[-1], 'P_pos_sum_tou_mi'] \
-        += flex_result_df['P_pos_tou_mi']
-    flex_sum_df.loc[flex_result_df.index[0]:flex_result_df.index[-1], 'P_pos_sum_const'] \
-        += flex_result_df['P_pos_const']
-    flex_sum_df.loc[flex_result_df.index[0]:flex_result_df.index[-1], 'P_pos_sum_const_mi'] \
-        += flex_result_df['P_pos_const_mi']
-    flex_sum_df.loc[flex_result_df.index[0]:flex_result_df.index[-1], 'P_pos_sum_rtp'] \
-        += flex_result_df['P_pos_rtp']
-    flex_sum_df.loc[flex_result_df.index[0]:flex_result_df.index[-1], 'P_neg_sum_tou'] \
-        += flex_result_df['P_neg_tou']
-    flex_sum_df.loc[flex_result_df.index[0]:flex_result_df.index[-1], 'P_neg_sum_tou_mi'] \
-        += flex_result_df['P_neg_tou_mi']
-    flex_sum_df.loc[flex_result_df.index[0]:flex_result_df.index[-1], 'P_neg_sum_const'] \
-        += flex_result_df['P_neg_const']
-    flex_sum_df.loc[flex_result_df.index[0]:flex_result_df.index[-1], 'P_neg_sum_const_mi'] \
-        += flex_result_df['P_neg_const_mi']
-    flex_sum_df.loc[flex_result_df.index[0]:flex_result_df.index[-1], 'P_neg_sum_rtp'] \
-        += flex_result_df['P_neg_rtp']
-    # Flexible energy addition
-    flex_sum_df.loc[flex_result_df.index[0]:flex_result_df.index[-1], 'E_pos_sum_tou'] \
-        += flex_result_df['E_pos_tou']
-    flex_sum_df.loc[flex_result_df.index[0]:flex_result_df.index[-1], 'E_pos_sum_tou_mi'] \
-        += flex_result_df['E_pos_tou_mi']
-    flex_sum_df.loc[flex_result_df.index[0]:flex_result_df.index[-1], 'E_pos_sum_const'] \
-        += flex_result_df['E_pos_const']
-    flex_sum_df.loc[flex_result_df.index[0]:flex_result_df.index[-1], 'E_pos_sum_const_mi'] \
-        += flex_result_df['E_pos_const_mi']
-    flex_sum_df.loc[flex_result_df.index[0]:flex_result_df.index[-1], 'E_pos_sum_rtp'] \
-        += flex_result_df['E_pos_rtp']
-    flex_sum_df.loc[flex_result_df.index[0]:flex_result_df.index[-1], 'E_neg_sum_tou'] \
-        += flex_result_df['E_neg_tou']
-    flex_sum_df.loc[flex_result_df.index[0]:flex_result_df.index[-1], 'E_neg_sum_tou_mi'] \
-        += flex_result_df['E_neg_tou_mi']
-    flex_sum_df.loc[flex_result_df.index[0]:flex_result_df.index[-1], 'E_neg_sum_const'] \
-        += flex_result_df['E_neg_const']
-    flex_sum_df.loc[flex_result_df.index[0]:flex_result_df.index[-1], 'E_neg_sum_const_mi'] \
-        += flex_result_df['E_neg_const_mi']
-    flex_sum_df.loc[flex_result_df.index[0]:flex_result_df.index[-1], 'E_neg_sum_rtp'] \
-        += flex_result_df['E_neg_rtp']
+# Read data if already processed
+flex_sum_df = pd.read_hdf(output_path + 'Aggregated Data/flex_sum_data.h5')
+opt_sum_df = pd.read_hdf(output_path + 'Aggregated Data/opt_sum_data.h5')
 
-# Save data to hdf files for further analysis
-flex_sum_df.to_hdf(output_path + 'Aggregated Data/flex_sum_data.h5', mode='w', key='df')
-opt_sum_df.to_hdf(output_path + 'Aggregated Data/opt_sum_data.h5', mode='w', key='df')
+# Calculate average, minimal and maximal number of vehicles
+n_veh_avail_mean = opt_sum_df['n_veh_avail'].mean()
+n_veh_avail_max = opt_sum_df['n_veh_avail'].max()
+n_veh_avail_min = opt_sum_df['n_veh_avail'].min()
 
 """
 ####################################################################
@@ -203,6 +212,21 @@ opt_per_daytime = opt_per_daytime.append(opt_per_daytime_temp.iloc[384:480, :])
 opt_per_daytime = opt_per_daytime.append(opt_per_daytime_temp.iloc[0:96, :])
 opt_per_daytime = opt_per_daytime.append(opt_per_daytime_temp.iloc[192:384, :])
 opt_per_daytime = opt_per_daytime.reset_index()
+
+# Calculate weekday and weekend optimal schedule averages per daytime
+weekday_opt_per_daytime = (opt_per_daytime_temp.iloc[96:192, :] +
+                           opt_per_daytime_temp.iloc[480:576, :].values +
+                           opt_per_daytime_temp.iloc[576:, :].values +
+                           opt_per_daytime_temp.iloc[384:480, :].values +
+                           opt_per_daytime_temp.iloc[0:96, :].values) / 5
+weekday_opt_per_daytime = weekday_opt_per_daytime.set_index('Weekday, ' + pd.date_range(start='00:00',
+                                                                                        end='23:45',
+                                                                                        freq='15Min').strftime('%H:%M'))
+weekend_opt_per_daytime = (opt_per_daytime_temp.iloc[192:288, :] +
+                           opt_per_daytime_temp.iloc[288:384, :].values) / 2
+weekend_opt_per_daytime = weekend_opt_per_daytime.set_index('Weekend, ' + pd.date_range(start='00:00',
+                                                                                        end='23:45',
+                                                                                        freq='15Min').strftime('%H:%M'))
 # Calculate percentiles per daytime
 opt_per_daytime_qt = pd.DataFrame()
 n_percentiles = 11           # Define number of percentiles
@@ -224,10 +248,29 @@ flex_per_daytime = flex_per_daytime.append(flex_per_daytime_temp.iloc[0:96, :])
 flex_per_daytime = flex_per_daytime.append(flex_per_daytime_temp.iloc[192:384, :])
 flex_per_daytime = flex_per_daytime.reset_index()
 
+# Calculate weekday and weekend flexibility averages per daytime
+weekday_flex_per_daytime = (flex_per_daytime_temp.iloc[96:192, :] +
+                            flex_per_daytime_temp.iloc[480:576, :].values +
+                            flex_per_daytime_temp.iloc[576:, :].values +
+                            flex_per_daytime_temp.iloc[384:480, :].values +
+                            flex_per_daytime_temp.iloc[0:96, :].values) / 5
+weekday_flex_per_daytime = weekday_flex_per_daytime.set_index('Weekday, ' + pd.date_range(start='00:00',
+                                                                                          end='23:45',
+                                                                                          freq='15Min').strftime('%H:%M'))
+weekend_flex_per_daytime = (flex_per_daytime_temp.iloc[192:288, :] +
+                            flex_per_daytime_temp.iloc[288:384, :].values) / 2
+weekend_flex_per_daytime = weekend_flex_per_daytime.set_index('Weekend, ' + pd.date_range(start='00:00',
+                                                                                          end='23:45',
+                                                                                          freq='15Min').strftime('%H:%M'))
+
 # Save data to hdf files for further analysis
 opt_per_daytime.to_hdf(output_path + 'Aggregated Data/opt_per_daytime_data.h5', mode='w', key='df')
 opt_per_daytime_qt.to_hdf(output_path + 'Aggregated Data/opt_per_daytime_qt_data.h5', mode='w', key='df')
 flex_per_daytime.to_hdf(output_path + 'Aggregated Data/flex_per_daytime_data.h5', mode='w', key='df')
+weekday_opt_per_daytime.to_hdf(output_path + 'Aggregated Data/weekday_opt_per_daytime_data.h5', mode='w', key='df')
+weekend_opt_per_daytime.to_hdf(output_path + 'Aggregated Data/weekend_opt_per_daytime_data.h5', mode='w', key='df')
+weekday_flex_per_daytime.to_hdf(output_path + 'Aggregated Data/weekday_flex_per_daytime_data.h5', mode='w', key='df')
+weekend_flex_per_daytime.to_hdf(output_path + 'Aggregated Data/weekend_flex_per_daytime_data.h5', mode='w', key='df')
 
 # prepare df for week heat map
 P_pos_tou_hm = pd.DataFrame(0, index=pd.date_range(start='00:00', end='23:45', freq='15Min').strftime('%H:%M'),
@@ -265,6 +308,7 @@ for i in range(7):
     P_neg_tou_mi_hm[days[i]].iloc[:] = flex_per_daytime['P_neg_sum_tou_mi'].iloc[i * 96:i * 96 + 96].values
     P_neg_const_mi_hm[days[i]].iloc[:] = flex_per_daytime['P_neg_sum_const_mi'].iloc[i * 96:i * 96 + 96].values
     P_neg_rtp_hm[days[i]].iloc[:] = flex_per_daytime['P_neg_sum_rtp'].iloc[i * 96:i * 96 + 96].values
+    n_avail_veh_hm[days[i]].iloc[:] = opt_per_daytime['n_veh_avail'].iloc[i * 96:i * 96 + 96].values
 
 # Save heat map dataframes to files
 P_pos_tou_hm.to_hdf(output_path + 'Aggregated Data/P_pos_tou_hm_data.h5', mode='w', key='df')
@@ -277,3 +321,4 @@ P_neg_const_hm.to_hdf(output_path + 'Aggregated Data/P_neg_const_hm_data.h5', mo
 P_neg_tou_mi_hm.to_hdf(output_path + 'Aggregated Data/P_neg_tou_mi_hm_data.h5', mode='w', key='df')
 P_neg_const_mi_hm.to_hdf(output_path + 'Aggregated Data/P_neg_const_mi_hm_data.h5', mode='w', key='df')
 P_neg_rtp_hm.to_hdf(output_path + 'Aggregated Data/P_neg_rtp_hm_data.h5', mode='w', key='df')
+n_avail_veh_hm.to_hdf(output_path + 'Aggregated Data/n_veh_avail_hm_data.h5', mode='w', key='df')
