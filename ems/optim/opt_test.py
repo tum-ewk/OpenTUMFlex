@@ -178,7 +178,7 @@ def run_hp_opt(ems_local, plot_fig=True, prnt_pgr=False, plot_temp=True, result_
         12: 'blue',
         13: 'darkgreen'}
 
-    if plot_temp is True:
+    if plot_fig is True:
         fig0 = plt.figure()
         plt.plot(HP_room_temp)
         plt.xlabel('Timesteps [-]', fontsize=16)

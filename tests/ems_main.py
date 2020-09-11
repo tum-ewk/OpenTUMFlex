@@ -17,6 +17,9 @@ from ems.devices.devices import devices
 from ems.devices.devices import device_write
 from ems.ems_mod import read_xl_input
 
+# Initialize device parameters
+from ems.ems_mod import initialize_devices
+
 # import forecast model for weather and price data
 from forecast.fcst import load_data
 
@@ -47,25 +50,25 @@ from ems.offers.gen_offers import alf_markt
 plt.close('all')
 
 def run_ems(path= None):
-    # Read input data from excel                      
-    my_ems = read_xl_input(path)  
     
     # Change the time interval
-    my_ems['time_data'] = {}
+    my_ems = {'time_data': {}}
     my_ems['time_data']['t_inval'] = 15
     my_ems['time_data']['d_inval'] = 15
     my_ems['time_data']['start_time'] = '2019-12-18 00:00'
     my_ems['time_data']['end_time'] = '2019-12-18 23:45'
     my_ems['time_data']['days'] = 1
     my_ems.update(update_time_data(my_ems))    
-        
+    
     # load the weather and price data
-    my_ems['fcst'] = load_data(my_ems, path)   
+    my_ems['fcst'] = load_data(my_ems, path) 
+    initialize_devices(my_ems)          
+    read_xl_input(my_ems, path)
     
     # add or change the utility/devices
-    my_ems['devices']['boiler']['maxpow'] = 2
-    my_ems['devices']['chp']['maxpow'] = 0
-    my_ems['devices'].update(devices(device_name='hp', minpow=0, maxpow=2, supply_temp=45))   
+    my_ems['devices']['boiler']['maxpow'] = 4
+    # my_ems['devices']['chp']['maxpow'] = 0
+    # my_ems['devices'].update(devices(device_name='hp', minpow=0, maxpow=2, supply_temp=45))   
     my_ems['devices'].update(devices(device_name='ev_new', minpow=0, maxpow=2, 
                                       stocap=3, eta=0.98, timesetting = my_ems['time_data'],
                                       ev_aval=my_ems['fcst']['ev_aval']))
@@ -90,7 +93,7 @@ def run_ems(path= None):
     
     # Reoptimization
     # Selected offer - Device and timestep
-    my_ems['reoptim']['device'] = 'hp'  # Ues pv/bat
+    my_ems['reoptim']['device'] = 'bat'  # Ues pv/bat
     my_ems['reoptim']['timestep'] = 20
     my_ems['reoptim']['flextype'] = 'Neg' # Use Neg/Pos
     my_ems = reoptimize(my_ems)
