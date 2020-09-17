@@ -5,11 +5,12 @@ from ems.ems_mod import ems as ems_loc
 from ems.ems_mod import ems_write
 from ems.ems_mod import update_time_data
 from ems.devices.devices import devices
+from ems.ems_mod import read_xl_input
 
 from forecast.fcst import load_data
 from forecast.price_fcst import get_elect_price_fcst
 
-from ems.optim.opt_test import run_opt as opt
+from ems.optim.opt_test import run_hp_opt as opt
 from ems.optim.optimize_EV_charging import create_ev_model
 
 from pyomo.opt import SolverFactory
@@ -39,6 +40,8 @@ n_veh = len(veh_availability['vehID'].unique())
 
 # load the predefined ems data, initialization by user input is also possible:
 my_ems = ems_loc(initialize=True, path='data/ev_ems_sa_constant_price_incl_error.txt')
+# Read input data from excel
+my_ems = read_xl_input('data/input_data.xlsx')
 
 # Counter for keeping track of insufficient time differences
 t_insufficient_count = 0
@@ -59,6 +62,9 @@ my_ems['time_data']['start_time'] = t_arrival_ceiled.strftime('%Y-%m-%d %H:%M')
 my_ems['time_data']['end_time'] = t_departure_floored.strftime('%Y-%m-%d %H:%M')
 my_ems['time_data']['days'] = 1
 my_ems.update(update_time_data(my_ems))
+
+# load the weather and price data
+my_ems['fcst'] = load_data(my_ems, 'data/input_data.xlsx')
 
 # Get price forecast for given time period
 price_fcst = get_elect_price_fcst(t_start=t_arrival_ceiled, t_end=t_departure_floored, pr_constant=0.19)

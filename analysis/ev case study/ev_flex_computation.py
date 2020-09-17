@@ -9,7 +9,7 @@ from ems.devices.devices import devices
 from forecast.fcst import load_data
 from forecast.price_fcst import get_elect_price_fcst
 
-from ems.optim.opt_test import run_opt as opt
+from ems.optim.opt_test import run_hp_opt as opt
 from ems.optim.optimize_EV_charging import create_ev_model
 
 from pyomo.opt import SolverFactory
