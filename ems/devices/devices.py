@@ -10,8 +10,8 @@ import datetime
 from scipy.interpolate import UnivariateSpline
 
 
-def devices(device_name, minpow=0, maxpow=0, stocap=None, eta=None, init_soc=None, end_soc=None, ev_aval=None,
-            supply_temp=None, timesetting=96, sto_volume=0, path=None):
+def devices(device_name, minpow=0, maxpow=0, stocap=0, eta=1, init_soc=20, end_soc=40, ev_aval=None,
+            supply_temp=45, timesetting=96, sto_volume=0, path=None):
     # define general unit parameters
     unit = {'minpow': minpow,
             'maxpow': maxpow,
