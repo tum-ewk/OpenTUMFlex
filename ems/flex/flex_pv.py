@@ -23,7 +23,6 @@ def calc_flex_pv(my_ems, reopt):
     PV_flex = pd.DataFrame(0, index=range(nsteps), columns=range(7))
     PV_flex.columns = ['Sch_P', 'Neg_P', 'Pos_P', 'Neg_E', 'Pos_E', 'Neg_Pr', 'Pos_Pr']
 
-
     # PV negative flexibility
     for i in range(0, nsteps):
         PV_flex.iloc[i, 0] = dat2[i]
@@ -37,15 +36,9 @@ def calc_flex_pv(my_ems, reopt):
     # PV negative flexibility pricing
     for i in range(0, nsteps):
         if PV_flex.iloc[i, 1] < 0:
-            flex_steps = int(round(ntsteps * PV_flex.iloc[i, 3] / PV_flex.iloc[i, 1]))
             net_income = 0
-            net_payable = 0
-            for j in range(flex_steps):
-                net_income = net_income + dat1[i + j] * my_ems['fcst']['ele_price_out'][i + j] / ntsteps
-                # if abs(PV_flex.iloc[i + j, 1]) > dat1[i + j]:
-                #     net_payable = net_payable + (abs(PV_flex.iloc[i + j, 1]) - dat1[i + j]) * \
-                #                   my_ems['fcst']['ele_price_in'][i + j] / ntsteps
-            PV_flex.iloc[i, 5] = (net_income + net_payable) / PV_flex.iloc[i, 3]
+            net_income = net_income + dat1[i] * -my_ems['fcst']['ele_price_out'][i] / ntsteps
+            PV_flex.iloc[i, 5] = net_income * ntsteps / PV_flex.iloc[i, 1]
             
     # Insert time column
     # temp = my_ems['time_data']['time_slots'][:]
