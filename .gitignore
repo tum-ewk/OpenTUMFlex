@@ -10,6 +10,7 @@
 *.pot
 __pycache__/*
 *.xlsx
+*.csv
 *.mat
 .cache/*
 .*.swp
@@ -50,11 +51,12 @@ MANIFEST
 
 # Input data
 !tests/data/input_data.xlsx
+!tests/data/input_data.csv
 
 # Per-project virtualenvs
 .venv*/
 venv/
 tests/results/SA_ems_results/ev_ems_0.txt
 *.txt
-*.csv
+
 
