@@ -19,7 +19,8 @@ Input file formats
 ===========
 OpenTUMflex accepts two different file formats (.xlsx/.csv) as input. An example input file is available inside the folder test->data. CSV files reduces the overall optimization time. THe model converts Excel file into CSV files for future use.  
 
-## License
+License
+===========
 OpenTUMFlex can be used to optimize and calculate a households flexibility potential and price it. 
 Copyright (C) 2020 TUM-EWK 
 
