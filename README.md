@@ -24,8 +24,8 @@ Features
 Installation
 ===========
 1. First of all you need to install python distrubution as follows:
-  * (recommend) [Pycharm](https://www.jetbrains.com/pycharm/) include all the tools needed in OpenTUMFlex exceplt the solver. You can follow the instuctions in the offcial website and install it easily.
-  * [Anaconda](https://www.anaconda.com/) is also widely used as Python editor. 
+   * (recommend) [Pycharm](https://www.jetbrains.com/pycharm/) include all the tools needed in OpenTUMFlex exceplt the solver. You can follow the instuctions in the offcial website and install it easily.
+   * [Anaconda](https://www.anaconda.com/) is also widely used as Python editor. 
 2. [download](https://github.com/tum-ewk/OpenTUMFlex.py/archive/master.zip) or clone (with [git](https://github.com/tum-ewk/OpenTUMFlex.py)) this repository to a directory of your choice.
 
 Input file formats
