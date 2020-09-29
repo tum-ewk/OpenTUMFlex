@@ -1,3 +1,17 @@
+"""
+The get_RTP_data module requests real time prices ComED, an energy supplier from Illinois and
+resamples them to a 15 minute resolution.
+"""
+
+__author__ = "Michel Zadé"
+__copyright__ = "2020 TUM-EWK"
+__credits__ = []
+__license__ = "GPL v3.0"
+__version__ = "1.0"
+__maintainer__ = "Michel Zadé"
+__email__ = "michel.zade@tum.de"
+__status__ = "Development"
+
 import requests
 import json
 import pandas as pd

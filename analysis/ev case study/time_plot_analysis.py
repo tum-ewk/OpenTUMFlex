@@ -1,3 +1,16 @@
+"""
+The time_plot_analysis module visualizes the optimal charging schedules and flexibility potentials over time.
+"""
+
+__author__ = "Michel Zadé"
+__copyright__ = "2020 TUM-EWK"
+__credits__ = []
+__license__ = "GPL v3.0"
+__version__ = "1.0"
+__maintainer__ = "Michel Zadé"
+__email__ = "michel.zade@tum.de"
+__status__ = "Development"
+
 import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib import cm as cmap

@@ -58,3 +58,4 @@ tests/results/SA_ems_results/ev_ems_0.txt
 *.txt
 *.csv
 
+analysis/ev case study/data/rtp_mean.h5

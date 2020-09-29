@@ -1,3 +1,16 @@
+"""
+The flex_ev module calculates the flexibility and prices of an ev based on an optimal charging schedule.
+"""
+
+__author__ = "Michel Zadé"
+__copyright__ = "2020 TUM-EWK"
+__credits__ = []
+__license__ = "GPL v3.0"
+__version__ = "1.0"
+__maintainer__ = "Michel Zadé"
+__email__ = "michel.zade@tum.de"
+__status__ = "Development"
+
 import pandas as pd
 import math
 

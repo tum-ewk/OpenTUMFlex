@@ -1,3 +1,16 @@
+"""
+The calc_overall_cost module calculates and plots the overall costs of all calculated optimal charging procedures.
+"""
+
+__author__ = "Michel Zadé"
+__copyright__ = "2020 TUM-EWK"
+__credits__ = []
+__license__ = "GPL v3.0"
+__version__ = "1.0"
+__maintainer__ = "Michel Zadé"
+__email__ = "michel.zade@tum.de"
+__status__ = "Development"
+
 import os
 import matplotlib.pyplot as plt
 from ems.ems_mod import ems as ems_loc

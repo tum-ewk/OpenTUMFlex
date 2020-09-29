@@ -3,9 +3,9 @@ The ev_flex_computation module calculates the flexibility of a list of vehicle a
 """
 
 __author__ = "Michel Zadé"
-__copyright__ = "Copyright 2020, OpenTUMFlex.py"
+__copyright__ = "2020 TUM-EWK"
 __credits__ = []
-__license__ = ""
+__license__ = "GPL v3.0"
 __version__ = "1.0"
 __maintainer__ = "Michel Zadé"
 __email__ = "michel.zade@tum.de"
