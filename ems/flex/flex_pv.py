@@ -1,8 +1,15 @@
-# -*- coding: utf-8 -*-
 """
-Created on Tue Oct 29 17:08:47 2019
-@author: ga47jes
+The "flex_pv.py" quantifies the flexibility of photovoltaic
 """
+
+__author__ = "Babu Kumaran Nalini"
+__copyright__ = "2020 TUM-EWK"
+__credits__ = []
+__license__ = "GPL v3.0"
+__version__ = "1.0"
+__maintainer__ = "Babu Kumaran Nalini"
+__email__ = "babu.kumaran-nalini@tum.de"
+__status__ = "Development"
 
 from ems.ems_mod import ems as ems_loc
 # from ems.flex.flex_draw import plot_flex as plot_flex

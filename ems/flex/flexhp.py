@@ -1,9 +1,15 @@
-# -*- coding: utf-8 -*-
 """
-Created on Thu Oct 17 14:24:53 2019
+The "flexhp.py" quantifies the flexibility of heat pump
+"""
 
-@author: ge57vam
-"""
+__author__ = "Zhengjie You"
+__copyright__ = "2020 TUM-EWK"
+__credits__ = []
+__license__ = "GPL v3.0"
+__version__ = "1.0"
+__maintainer__ = "Zhengjie You"
+__email__ = "zhengjie.you@tum.de"
+__status__ = "Development"
 
 import pandas as pd
 import numpy as np

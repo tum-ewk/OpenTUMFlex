@@ -9,7 +9,7 @@ Created on Tue May  5 10:30:42 2020
 # import pandas as pd
 
 # import optimization module
-from ems.optim.opt_test import run_hp_opt as opt
+from ems.optim.opt import run_opentumflex
 
 # import flex devices modules
 from ems.flex.flex_pv import calc_flex_pv
@@ -33,7 +33,7 @@ def reoptimize(my_ems, plot_fig=False):
         
     if my_ems['reoptim']['status'] == 1:    
         if plot_fig: print('Reoptimization Possible')
-        my_ems['reoptim']['optplan'] = opt(my_ems, plot_fig=plot_fig, result_folder='data/')
+        my_ems['reoptim']['optplan'] = run_opentumflex(my_ems, plot_fig=plot_fig, result_folder='data/')
         my_ems['reoptim']['flexopts'] = {}
         my_ems['reoptim']['flexopts']['pv'] = calc_flex_pv(my_ems, reopt=1)
         my_ems['reoptim']['flexopts']['bat'] = calc_flex_bat(my_ems, reopt=1)

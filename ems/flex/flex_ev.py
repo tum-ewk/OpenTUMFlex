@@ -15,7 +15,7 @@ import pandas as pd
 import math
 
 
-def calc_flex_ev(my_ems):
+def calc_flex_ev(my_ems, reopt=0):
     #print('EV Flex Calculation ...')
     # Time Data ###########################
     n_time_steps = my_ems['time_data']['nsteps']

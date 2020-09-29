@@ -1,7 +1,15 @@
 """
-devices module will  document the device parameters (general and specific for each device). All the data will
-be sorted in an adequate serving other modules like optplan and flexopts.
+The "devices.py" module can initialize devices with default or customized parameters
 """
+
+__author__ = "Zhengjie You"
+__copyright__ = "2020 TUM-EWK"
+__credits__ = []
+__license__ = "GPL v3.0"
+__version__ = "1.0"
+__maintainer__ = "Zhengjie You"
+__email__ = "zhengjie.you@tum.de"
+__status__ = "Development"
 
 import pandas as pd
 import json as js

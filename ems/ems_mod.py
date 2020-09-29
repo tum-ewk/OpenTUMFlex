@@ -83,7 +83,7 @@ def update_time_data(dict_ems):
     return dict_time_data
 
 
-def read_data(my_ems, path=None, to_csv=1):
+def read_data(my_ems, path=None, to_csv=False):
     # Initialize EMS
     initialize(my_ems)    
     # Check for the file type 
@@ -95,7 +95,7 @@ def read_data(my_ems, path=None, to_csv=1):
         read_properties(my_ems, prop)
         my_ems['fcst'] = read_forecast(ts)
         # Save excel file as CSV
-        if to_csv == 1:
+        if to_csv:
             basename = os.path.basename(path)
             filename = os.path.splitext(basename)[0] + '.csv'
             if not os.path.exists('data'):

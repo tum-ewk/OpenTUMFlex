@@ -1,8 +1,16 @@
-# -*- coding: utf-8 -*-
 """
-Created on Mon Oct 28 13:12:54 2019
-@author: ga47jes
+The "fcst.py" read the input data (xlsx) regarding predefined time settings
 """
+
+__author__ = "Babu Kumaran Nalini"
+__copyright__ = "2020 TUM-EWK"
+__credits__ = []
+__license__ = "GPL v3.0"
+__version__ = "1.0"
+__maintainer__ = "Babu Kumaran Nalini"
+__email__ = "babu.kumaran-nalini@tum.de"
+__status__ = "Development"
+
 
 import pandas as pd
 

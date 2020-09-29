@@ -1,8 +1,16 @@
-# -*- coding: utf-8 -*-
 """
-Created on Tue Oct 29 14:06:33 2019
-@author: Babu Kumaran Nalini
+The "flex_draw.py" can visualize the results of OpenTUMFlex/ems
 """
+
+__author__ = "Babu Kumaran Nalini"
+__copyright__ = "2020 TUM-EWK"
+__credits__ = []
+__license__ = "GPL v3.0"
+__version__ = "1.0"
+__maintainer__ = "Babu Kumaran Nalini"
+__email__ = "babu.kumaran-nalini@tum.de"
+__status__ = "Development"
+
 
 import pandas as pd
 import matplotlib.pyplot as plt

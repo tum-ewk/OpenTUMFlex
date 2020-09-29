@@ -1,8 +1,16 @@
-# -*- coding: utf-8 -*-
 """
-Created on Mon Nov  4 10:14:14 2019
-@author: ga47jes
+The "flex_pv.py" quantifies the flexibility of battery
 """
+
+__author__ = "Babu Kumaran Nalini"
+__copyright__ = "2020 TUM-EWK"
+__credits__ = []
+__license__ = "GPL v3.0"
+__version__ = "1.0"
+__maintainer__ = "Babu Kumaran Nalini"
+__email__ = "babu.kumaran-nalini@tum.de"
+__status__ = "Development"
+
 
 import pandas as pd
 import statistics
