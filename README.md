@@ -27,6 +27,23 @@ Installation
    * (recommend) [Pycharm](https://www.jetbrains.com/pycharm/) include all the tools needed in OpenTUMFlex exceplt the solver. You can follow the instuctions in the offcial website and install it easily.
    * [Anaconda](https://www.anaconda.com/) is also widely used as Python editor. 
 2. [download](https://github.com/tum-ewk/OpenTUMFlex.py/archive/master.zip) or clone (with [git](https://github.com/tum-ewk/OpenTUMFlex.py)) this repository to a directory of your choice.
+3. install [Pyomo](http://www.pyomo.org/), which is a Python-based, open-source optimization modeling language.
+4. install solver [GLPK](http://www.osemosys.org/uploads/1/8/5/0/18504136/glpk_installation_guide_for_windows10_-_201702.pdf) which offers higher speed than built-in solver in Pyomo. You can also use Gurobi and other solvers. 
+
+Get started
+===========
+1. Run the given **example.py** in the **tests** folder. 
+2. You will learn how to: 
+    * set up the time interval, start and end time.
+    * read input data from **tests/data/input_data.xlsx**
+    * change/add device parameters (boiler and heat pump) by using **update(devices(device_name))**
+    * obtain the optimal plans of each device
+    * calculate the flexibility offers of battery and heat pump
+    * visualize the results
+3. If you install all the packages and solver properly, you will get results (e.g. electricity balance and flexibility of battery) as follows:
+<img src="https://github.com/zxc8063898/emstest/blob/master/Figure_1-1.png" alt="electricity balance" width="380" height="250"> <img src="https://github.com/zxc8063898/emstest/blob/master/Figure_6.png" alt="electricity balance" width="380" height="250">
+
+4. For more information refer to our [documentaion](https://github.com/tum-ewk/OpenTUMFlex.py/wiki/Usage-and-Functions-in-OpenTUMFlex)
 
 Input file formats
 ===========
