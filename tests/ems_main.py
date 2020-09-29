@@ -15,13 +15,9 @@ from ems.ems_mod import ems_write
 from ems.ems_mod import update_time_data
 from ems.devices.devices import devices
 from ems.devices.devices import device_write
-from ems.ems_mod import read_xl_input
 
-# Initialize device parameters
-from ems.ems_mod import initialize_devices
-
-# import forecast model for weather and price data
-from forecast.fcst import load_data
+# Get data
+from ems.ems_mod import read_data
 
 # import optimization module
 from ems.optim.opt_test import run_hp_opt as opt
@@ -60,19 +56,13 @@ def run_ems(path= None):
     my_ems['time_data']['days'] = 1
     my_ems.update(update_time_data(my_ems))    
     
-    # load the weather and price data
-    my_ems['fcst'] = load_data(my_ems, path) 
-    initialize_devices(my_ems)          
-    read_xl_input(my_ems, path)
-    
+    # Initialize EMS and load data
+    read_data(my_ems, path, to_csv=1) 
+       
     # add or change the utility/devices
     my_ems['devices']['boiler']['maxpow'] = 4
     # my_ems['devices']['chp']['maxpow'] = 0
     # my_ems['devices'].update(devices(device_name='hp', minpow=0, maxpow=2, supply_temp=45))   
-    my_ems['devices'].update(devices(device_name='ev_new', minpow=0, maxpow=2, 
-                                      stocap=3, eta=0.98, timesetting = my_ems['time_data'],
-                                      ev_aval=my_ems['fcst']['ev_aval']))
-
     
     # calculate the timetable for all the devices    
     my_ems['optplan'] = opt(my_ems, plot_fig=False, prnt_pgr=False, result_folder='data/')
@@ -96,20 +86,19 @@ def run_ems(path= None):
     my_ems['reoptim']['device'] = 'bat'  # Ues pv/bat
     my_ems['reoptim']['timestep'] = 20
     my_ems['reoptim']['flextype'] = 'Neg' # Use Neg/Pos
-    my_ems = reoptimize(my_ems)
+    my_ems = reoptimize(my_ems, plot_fig=False)
     
     # Plot reoptimization
-    my_ems['reoptim']['nsteps_reopt'] = 97
-    if my_ems['reoptim']['status'] == 1:
-        plot_reopt(my_ems)
-        plot_com(my_ems)
-        plot_reopt_price(my_ems)
+    # if my_ems['reoptim']['status'] == 1:
+    #     plot_reopt(my_ems)
+    #     plot_com(my_ems)
+    #     plot_reopt_price(my_ems)
 
     return my_ems
 
 if __name__ == "__main__":
     base_dir = os.path.abspath(os.getcwd())
-    # sub_dir = r'test_files\flex_house_16.xlsx'
-    sub_dir = r'data\input_data.xlsx'
+    sub_dir = r'data\input_data.csv'    
     directory = os.path.join(base_dir, sub_dir)
     my_ems = run_ems(path=directory)
+    print('Completed')

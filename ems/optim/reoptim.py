@@ -19,7 +19,7 @@ from ems.flex.flexhp import calc_flex_hp
 # import plot module
 from ems.plot.flex_draw import plot_flex as plot
 
-def reoptimize(my_ems):    
+def reoptimize(my_ems, plot_fig=False):    
     device = my_ems['reoptim']['device']
     # Make relevant changes for flexibility
     if device == 'pv':
@@ -31,9 +31,9 @@ def reoptimize(my_ems):
     elif device == 'hp':
         my_ems = reflex_hp(my_ems)
         
-    if my_ems['reoptim']['status'] == 1:        
-        print('Reoptimization')
-        my_ems['reoptim']['optplan'] = opt(my_ems, plot_fig=True, result_folder='data/')
+    if my_ems['reoptim']['status'] == 1:    
+        if plot_fig: print('Reoptimization Possible')
+        my_ems['reoptim']['optplan'] = opt(my_ems, plot_fig=plot_fig, result_folder='data/')
         my_ems['reoptim']['flexopts'] = {}
         my_ems['reoptim']['flexopts']['pv'] = calc_flex_pv(my_ems, reopt=1)
         my_ems['reoptim']['flexopts']['bat'] = calc_flex_bat(my_ems, reopt=1)
@@ -120,11 +120,11 @@ def reflex_bat(my_ems):
             
     if my_ems['reoptim']['status'] == 1:         
         # Update initial steps for reoptimization
-        my_ems['time_data']['isteps'] = rstep+f_steps+1
+        my_ems['time_data']['isteps'] = rstep+f_steps
         
         # Battery SOC at flexibility time step
         # s_bSOC = my_ems['optplan']['bat_SOC'][rstep]
-        e_bSOC = my_ems['optplan']['bat_SOC'][rstep+f_steps]    
+        e_bSOC = my_ems['optplan']['bat_SOC'][rstep+f_steps-1]    
         bat_max_e = my_ems['devices']['bat']['stocap']
         
         if f_type == 'Neg':
