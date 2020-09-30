@@ -103,7 +103,7 @@ def run_ems(path= None):
     #     plot_reopt_price(my_ems)
     
     # Save flex offers
-    save_offers(my_ems, 'pv', type='.xlsx')
+    # save_offers(my_ems, 'pv', type='.xlsx')
 
     return my_ems
 

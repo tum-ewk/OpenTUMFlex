@@ -102,10 +102,10 @@ def read_data(my_ems, path=None, to_csv=False):
                 os.mkdir('data')
             directory = os.path.join(r'data', filename)
             with open(directory, 'w') as f:
-                pd.concat([prop, ts], sort=False).to_csv(f)
+                pd.concat([prop, ts], sort=False).to_csv(f, sep=';')
                 
     elif path.endswith('.csv') == True:
-        csv_data = pd.read_csv(path, index_col=0)
+        csv_data = pd.read_csv(path, sep=';', index_col=0)
         prop = csv_data.iloc[:,0:2].dropna(how='all')    
         ts = csv_data.iloc[:,2:].dropna(how='all')   
         read_properties(my_ems, prop)
