@@ -1,9 +1,15 @@
-# -*- coding: utf-8 -*-
 """
-Created on Thu Mar 19 12:47:59 2020
+The "gen_offers.py" generates flexibility offers in different formats
+"""
 
-@author: ga47jes
-"""
+__author__ = "Babu Kumaran Nalini"
+__copyright__ = "2020 TUM-EWK"
+__credits__ = []
+__license__ = "GPL v3.0"
+__version__ = "1.0"
+__maintainer__ = "Babu Kumaran Nalini"
+__email__ = "babu.kumaran-nalini@tum.de"
+__status__ = "Development"
 
 import pandas as pd
 from datetime import datetime 
