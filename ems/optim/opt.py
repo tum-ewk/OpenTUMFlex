@@ -31,7 +31,7 @@ import scipy.io
 from ems.ems_mod import ems as ems_loc
 
 
-def run_opentumflex(ems_local, plot_fig=True, prnt_pgr=False, plot_temp=True, result_folder='C:'):
+def run_opentumflex(ems_local, plot_fig=False, prnt_pgr=False, opt_fig=False, plot_temp=True, result_folder='C:'):
     #    input_file = 'C:\Optimierung\Eingangsdaten_hp.xlsx'
     #    data = read_xlsdata(input_file);
     if prnt_pgr: print('Optimization')
@@ -169,7 +169,7 @@ def run_opentumflex(ems_local, plot_fig=True, prnt_pgr=False, plot_temp=True, re
     #     plt.ylabel('temperature [C]', fontsize=16)
     #     plt.title('room temperature', fontsize=20)
 
-    if plot_fig is True:
+    if plot_fig or opt_fig is True:
         # figure properties
         fig = plt.figure(figsize=(10, 6))
         plt.rc('font', family='serif')
@@ -209,33 +209,34 @@ def run_opentumflex(ems_local, plot_fig=True, prnt_pgr=False, plot_temp=True, re
         plt.tight_layout(rect=[0, 0, 1, 1])
         plt.margins(x=0)
         plt.show()
-
-        fig1 = plt.figure()
-        ax2 = plt.subplot()
-        # p8 = plt.plot(ind, bat_cont/bat_max_cont*100,linewidth=1,color='red')
-
-        p8 = plt.step(ind, SOC_elec, linewidth=1, color='red', where='mid')
-        plt.xlabel('time [h]', fontsize=font_size)
-        plt.ylabel('SOC [%]', fontsize=font_size)
-        plt.title('SOC of Battery', fontsize=font_size)
-        plt.xticks(ind[idx_plt], ts[idx_plt], rotation=20)
-        ax2.set_xlim(0, len(timesteps) - 1)
-        plt.show()
-
-        # plot EV soc
-        fig1 = plt.figure()
-        ax3 = plt.subplot()
-        # p8 = plt.plot(ind, bat_cont/bat_max_cont*100,linewidth=1,color='red')
-
-        p8 = plt.step(ind, ev_soc, linewidth=1, color='red', where='mid')
-        plt.xlabel('time [h]', fontsize=font_size)
-        plt.ylabel('SOC [%]', fontsize=font_size)
-        plt.title('SOC of EV', fontsize=font_size)
-        plt.xticks(ind[idx_plt], ts[idx_plt], rotation=20)
-        ax2.set_xlim(0, len(timesteps) - 1)
-        # for i in np.arange(0, len(ev_node), 2):
-        #     plt.axvspan(ev_node[i], ev_node[i + 1], facecolor='#b9ebeb', alpha=0.5)
-        plt.show()
+        
+        if plot_fig == True:
+            fig1 = plt.figure()
+            ax2 = plt.subplot()
+            # p8 = plt.plot(ind, bat_cont/bat_max_cont*100,linewidth=1,color='red')
+    
+            p8 = plt.step(ind, SOC_elec, linewidth=1, color='red', where='mid')
+            plt.xlabel('time [h]', fontsize=font_size)
+            plt.ylabel('SOC [%]', fontsize=font_size)
+            plt.title('SOC of Battery', fontsize=font_size)
+            plt.xticks(ind[idx_plt], ts[idx_plt], rotation=20)
+            ax2.set_xlim(0, len(timesteps) - 1)
+            plt.show()
+    
+            # plot EV soc
+            fig1 = plt.figure()
+            ax3 = plt.subplot()
+            # p8 = plt.plot(ind, bat_cont/bat_max_cont*100,linewidth=1,color='red')
+    
+            p8 = plt.step(ind, ev_soc, linewidth=1, color='red', where='mid')
+            plt.xlabel('time [h]', fontsize=font_size)
+            plt.ylabel('SOC [%]', fontsize=font_size)
+            plt.title('SOC of EV', fontsize=font_size)
+            plt.xticks(ind[idx_plt], ts[idx_plt], rotation=20)
+            ax2.set_xlim(0, len(timesteps) - 1)
+            # for i in np.arange(0, len(ev_node), 2):
+            #     plt.axvspan(ev_node[i], ev_node[i + 1], facecolor='#b9ebeb', alpha=0.5)
+            plt.show()
 
     #  plot heat balance
     # plots

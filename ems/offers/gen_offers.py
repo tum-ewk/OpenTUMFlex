@@ -1,13 +1,38 @@
-# -*- coding: utf-8 -*-
 """
-Created on Thu Mar 19 12:47:59 2020
+The "gen_offers.py" generates flexibility offers in different formats
+"""
 
-@author: ga47jes
-"""
+__author__ = "Babu Kumaran Nalini"
+__copyright__ = "2020 TUM-EWK"
+__credits__ = []
+__license__ = "GPL v3.0"
+__version__ = "1.0"
+__maintainer__ = "Babu Kumaran Nalini"
+__email__ = "babu.kumaran-nalini@tum.de"
+__status__ = "Development"
 
 import pandas as pd
 from datetime import datetime 
 import os
+
+def save_offers(my_ems, device, type='xlsx'):
+    # Save as CSV file
+    cwd = os.getcwd()
+    mdir = "results" 
+    path = os.path.join(cwd,mdir)
+    if not os.path.exists(path):
+        os.mkdir(path)
+    file_name = device+'_flex_offers'
+    new_cwd = os.path.join(path,file_name)
+    
+    if type == '.xlsx':
+        my_ems['flexopts'][device].to_excel(new_cwd+'.xlsx')
+        print("Excel file generated! Available on " + path)
+    elif type == 'csv':
+        my_ems['flexopts'][device].to_csv(new_cwd+'.csv', sep=';', decimal='.', index=False)
+        print("CSV file generated! Available on " + path)
+    else:
+        print('Unknown file format - .xlsx/.csv supported')
 
 def alf_markt(my_ems,device):
     df = pd.DataFrame(columns=['Uhrzeit','Leistung_Plan','Leistung-','Leistung+','Energie-',

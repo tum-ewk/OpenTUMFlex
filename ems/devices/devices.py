@@ -27,7 +27,7 @@ def devices(device_name, minpow=0, maxpow=0, stocap=0, eta=1, init_soc=20, end_s
             'initSOC': init_soc,
             'eta': eta
             }
-
+    
     # use case for heat pump
     if device_name == 'hp':
 
@@ -296,6 +296,20 @@ def devices(device_name, minpow=0, maxpow=0, stocap=0, eta=1, init_soc=20, end_s
             dict_unit_sto = {device_name: dict_sto}
 
         return dict_unit_sto
+    
+    # Update device: PV
+    elif device_name == 'pv':
+        df_unit_pv = {"maxpow": maxpow,
+                    "minpow": minpow,
+                    "eta": eta }                   
+        dict_pv = {device_name: df_unit_pv}    
+        return dict_pv
+    
+    # Update device: Bat
+    elif device_name == 'bat':
+        df_unit_bat = unit                  
+        dict_bat = {device_name: df_unit_bat}    
+        return dict_bat
 
     # for other situations: battery, chp, pv
     else:
