@@ -28,7 +28,8 @@ from ems.devices.devices import device_write
 from ems.ems_mod import read_data
 
 # import optimization module
-from ems.optim.opt import run_opentumflex
+from ems.optim.opt import run_opt
+from ems.optim.opt import opt
 
 # import flex devices modules
 from ems.flex.flexhp import calc_flex_hp
@@ -64,7 +65,9 @@ my_ems['devices'].update(devices(device_name='boiler', maxpow=4))  # change the 
 my_ems['devices'].update(devices(device_name='hp', minpow=0, maxpow=2, supply_temp=45))  # add heat pump
 
 # calculate the timetable for all the devices
-my_ems['optplan'] = run_opentumflex(my_ems, plot_fig=True, result_folder='data/')  # obtain the optimal plans
+opt_res = opt(my_ems)  # obtain the optimization results
+# analyse the results regarding the settings in ems, plot the figures
+my_ems['optplan'] = run_opt(opt_res, my_ems, plot_fig=True, result_folder='data/')
 
 # calculate the flexibility of one device
 my_ems['flexopts']['bat'] = calc_flex_bat(my_ems, reopt=False)  # calculate the flexibility of ev, no reoptimization
