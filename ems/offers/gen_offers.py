@@ -34,7 +34,7 @@ def save_offers(my_ems, device, type='xlsx'):
     else:
         print('Unknown file format - .xlsx/.csv supported')
 
-def alf_markt(my_ems,device):
+def save_alf_offers(my_ems,device):
     df = pd.DataFrame(columns=['Uhrzeit','Leistung_Plan','Leistung-','Leistung+','Energie-',
                                'Energie+','Preis-','Preis+', 'Teilabruf', 
                                'max_Anzahl_Abrufe_pro_Tag', 'max_Dauer_pro_Tag_in_h',
@@ -75,5 +75,5 @@ def alf_markt(my_ems,device):
     df.to_csv(new_cwd, sep=';', index=False)
     print("CSV file generated - flex offers for alf markt! Available on " + new_cwd)
     
-    return df
+    # return df
     
