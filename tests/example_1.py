@@ -17,14 +17,14 @@ import matplotlib.pyplot as plt
 import os
 
 # import ems and devices modules
-from ems.ems_mod import ems as ems_loc
-from ems.ems_mod import ems_write
-from ems.ems_mod import update_time_data
+from ems.init_ems import ems as ems_loc
+from ems.init_ems import ems_write
+from ems.init_ems import update_time_data
 from ems.devices.devices import devices
 from ems.devices.devices import device_write
 
 # Get data
-from ems.ems_mod import read_data
+from ems.init_ems import read_data
 
 # import optimization module
 from ems.optim.opt import run_opt
