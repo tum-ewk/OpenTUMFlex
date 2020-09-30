@@ -27,15 +27,14 @@ import time as tm
 from pyomo.environ import *
 import matplotlib.pyplot as plt
 import scipy.io
+from datetime import datetime
 
-from ems.ems_mod import ems as ems_loc
 
-
-def run_opentumflex(ems_local, plot_fig=False, prnt_pgr=False, opt_fig=False, plot_temp=True, result_folder='C:'):
+def run_opt(prob, ems_local, plot_fig=False, prnt_pgr=False, opt_fig=False, result_folder='C:'):
     #    input_file = 'C:\Optimierung\Eingangsdaten_hp.xlsx'
     #    data = read_xlsdata(input_file);
-    if prnt_pgr: print('Optimization')
-    prob, timesteps = run_opt(ems_local, prnt_pgr)
+
+    results = opt(ems_local, prnt_pgr)
 
     # chece if the results have been initialized
     try:
@@ -46,6 +45,7 @@ def run_opentumflex(ems_local, plot_fig=False, prnt_pgr=False, opt_fig=False, pl
         raise ImportError(
             'the solver can not find a solution, try to change the device parameters to fulfill the requirements')
 
+    timesteps = np.arange(ems_local['time_data']['isteps'], ems_local['time_data']['nsteps'])
     length = len(timesteps)
 
     # print('Load Results ...\n')
@@ -244,12 +244,12 @@ def run_opentumflex(ems_local, plot_fig=False, prnt_pgr=False, opt_fig=False, pl
         fig = plt.figure()
         ax1 = fig.add_subplot(111)
         ax1.axhline(linewidth=2, color="black")
-        p1 = plt.bar(ind, boiler_cap, width, bottom=sto_e_pow_pos, color='burlywood')
+        p1 = plt.bar(ind, boiler_cap, width, bottom=sto_e_pow_pos, color='grey')
         p2 = plt.bar(ind, CHP_heat_run, width,
                      bottom=boiler_cap + sto_e_pow_pos, color='skyblue')
-        p3 = plt.bar(ind, HP_heat_cap, width, bottom=boiler_cap + CHP_heat_run + sto_e_pow_pos, color='#a79b94')
-        p4 = plt.bar(ind, sto_e_pow_pos, width, color='#ff5a60')
-        p5 = plt.bar(ind, sto_e_pow_neg, width, color='#ff5a60')
+        p3 = plt.bar(ind, HP_heat_cap, width, bottom=boiler_cap + CHP_heat_run + sto_e_pow_pos, color='wheat')
+        p4 = plt.bar(ind, sto_e_pow_pos, width, color='indianred')
+        p5 = plt.bar(ind, sto_e_pow_neg, width, color='indianred')
         p6 = plt.step(ind, lastprofil_heat, linewidth=2, where='mid', color='k')
 
         plt.xlabel('time [1/4 h]', fontsize=font_size)
@@ -271,6 +271,7 @@ def run_opentumflex(ems_local, plot_fig=False, prnt_pgr=False, opt_fig=False, pl
         plt.ylabel('SOC [%]', fontsize=font_size)
         plt.xticks(ind[idx_plt], ts[idx_plt], rotation=20)
         ax2.set_xlim(0, len(timesteps) - 1)
+        plt.grid(color='lightgrey', linewidth=0.75)
         plt.title('SOC of heat storage', fontsize=font_size)
         plt.show()
 
@@ -297,10 +298,17 @@ def run_opentumflex(ems_local, plot_fig=False, prnt_pgr=False, opt_fig=False, pl
                   'HP_COP': list(HP_cop),
                   'opt_ele_price': list(opt_ele_price)}
 
+    now = datetime.now().strftime('%Y%m%dT%H%M')
+    resultfile = os.path.join(result_folder, 'result_optimization_{}.xlsx'.format(now))
+    writer = pd.ExcelWriter(resultfile)
+    df = pd.DataFrame(data=data_input)
+    df.to_excel(writer, 'operation_plan', merge_cells=False)
+    writer.save()  # save
+
     return data_input
 
 
-def run_opt(ems_local, prnt_pgr):
+def opt(ems_local, prnt_pgr=False):
     # record the time
     t0 = tm.time()
     # get all the data from the external file
@@ -730,7 +738,7 @@ def run_opt(ems_local, prnt_pgr):
     # m.solutions.load_from(result);
 
     if prnt_pgr: print('Model Solved in: ' + "{:.1f}".format(tm.time() - t0) + 's (time)')
-    return m, timesteps
+    return m
 
 
 def read_xlsdata(input_file):

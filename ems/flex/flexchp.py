@@ -16,7 +16,7 @@ import numpy as np
 import heapq
 
 
-from ems.ems_mod import ems as ems_loc
+from ems.init_ems import ems as ems_loc
 
 
 def calc_flex_chp(ems):  # datafram open and break it down
