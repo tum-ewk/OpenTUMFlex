@@ -15,6 +15,25 @@ import pandas as pd
 from datetime import datetime 
 import os
 
+def save_offers(my_ems, device, type='xlsx'):
+    # Save as CSV file
+    cwd = os.getcwd()
+    mdir = "results" 
+    path = os.path.join(cwd,mdir)
+    if not os.path.exists(path):
+        os.mkdir(path)
+    file_name = device+'_flex_offers'
+    new_cwd = os.path.join(path,file_name)
+    
+    if type == '.xlsx':
+        my_ems['flexopts'][device].to_excel(new_cwd+'.xlsx')
+        print("Excel file generated! Available on " + path)
+    elif type == 'csv':
+        my_ems['flexopts'][device].to_csv(new_cwd+'.csv', sep=';', decimal='.', index=False)
+        print("CSV file generated! Available on " + path)
+    else:
+        print('Unknown file format - .xlsx/.csv supported')
+
 def alf_markt(my_ems,device):
     df = pd.DataFrame(columns=['Uhrzeit','Leistung_Plan','Leistung-','Leistung+','Energie-',
                                'Energie+','Preis-','Preis+', 'Teilabruf', 

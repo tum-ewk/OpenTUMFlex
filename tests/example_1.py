@@ -46,8 +46,9 @@ from ems.plot.reopt_draw import plot_reopt_price as plot_reopt_price
 # import reoptimization
 from ems.optim.reoptim import reoptimize
 
-# import offers
+# export offers
 from ems.offers.gen_offers import alf_markt
+from ems.offers.gen_offers import save_offers
 
 # Close all figures
 plt.close('all')
@@ -72,7 +73,7 @@ def run_ems(path= None):
     my_ems['devices'].update(devices(device_name='hp', minpow=0, maxpow=2, supply_temp=45))
     
     # calculate the timetable for all the devices    
-    my_ems['optplan'] = run_opentumflex(my_ems, opt_fig=True, result_folder='data/')
+    my_ems['optplan'] = run_opentumflex(my_ems, opt_fig=False, result_folder='data/')
         
     # # calculate the flexibility of one device
     my_ems['flexopts']['pv'] = calc_flex_pv(my_ems, reopt=0)
@@ -100,6 +101,9 @@ def run_ems(path= None):
     #     plot_reopt(my_ems)
     #     plot_com(my_ems)
     #     plot_reopt_price(my_ems)
+    
+    # Save flex offers
+    save_offers(my_ems, 'pv', type='.xlsx')
 
     return my_ems
 
