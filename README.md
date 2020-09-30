@@ -39,7 +39,7 @@ Get started
     * obtain the optimal plans of each device
     * calculate the flexibility offers of battery and heat pump
     * visualize the results
-3. If you have installed all the packages and solver, you will get results (e.g. electricity balance and flexibility of battery) as follows:
+3. If you have installed all the packages/solver, you will get results (e.g. electricity balance and flexibility of battery) as follows:
 <img src="https://github.com/zxc8063898/emstest/blob/master/Figure_1-1.png" alt="electricity balance" width="380" height="250"> <img src="https://github.com/zxc8063898/emstest/blob/master/Figure_6.png" alt="electricity balance" width="380" height="250">
 
 4. For more information refer to our [documentaion](https://github.com/tum-ewk/OpenTUMFlex.py/wiki/Usage-and-Functions-in-OpenTUMFlex)
