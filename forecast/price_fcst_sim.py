@@ -15,9 +15,19 @@ import pandas as pd
 import numpy as np
 
 
-def get_elect_price_fcst(t_start=pd.Timestamp('2020-1-1 00:00'),
-                         t_end=pd.Timestamp('2020-1-1 23:45'),
-                         pr_constant=0.20):
+def simulate_elect_price_fcst(t_start=pd.Timestamp('2020-1-1 00:00'),
+                              t_end=pd.Timestamp('2020-1-1 23:45'),
+                              pr_constant=0.20):
+    """
+    This function simulates an electricity price forecast. ToU tariffs are from Southern California Edison, RTP from
+     ComEd, Illinois, Constant prices can be inserted.
+
+    :param t_start: Start time in quarter hours as pandas time stamp
+    :param t_end:   end time in quarter hours as pandas time stamp
+    :param pr_constant: constant electricity price, default is 20 ct/kWh
+
+    :return: returns a data frame with ToU, Constant and RTP prices
+    """
     # Check whether start time is before end time otherwise return
     if t_start >= t_end:
         return
@@ -85,9 +95,9 @@ def get_elect_price_fcst(t_start=pd.Timestamp('2020-1-1 00:00'),
 
 
 if __name__ == '__main__':
-    test = get_elect_price_fcst(t_start=pd.Timestamp('2020-03-03 00:00'),
-                                t_end=pd.Timestamp('2020-03-03 23:00'),
-                                pr_constant=0.25)
+    test = simulate_elect_price_fcst(t_start=pd.Timestamp('2020-03-03 00:00'),
+                                     t_end=pd.Timestamp('2020-03-03 23:00'),
+                                     pr_constant=0.25)
 
     test.plot()
 
