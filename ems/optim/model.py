@@ -1,314 +1,15 @@
-"""
-The "opt.py" module reads all the input data and optimize the operational plans of each household device
-"""
-
-__author__ = "Zhengjie You"
-__copyright__ = "2020 TUM-EWK"
-__credits__ = []
-__license__ = "GPL v3.0"
-__version__ = "1.0"
-__maintainer__ = "Zhengjie You"
-__email__ = "zhengjie.you@tum.de"
-__status__ = "Development"
-import sys
 import pyomo.core as pyen
-# import pyomo.environ
-# from pyomo.core import *
 from pyomo.opt import SolverFactory
-from pyomo.opt import SolverManagerFactory
+from pyomo.environ import value as get_value
+from pyomo.environ import *
 import pandas as pd
 import numpy as np
-from decimal import Decimal
-import pyomo.core as py
-import os
 from scipy.interpolate import UnivariateSpline
 import time as tm
-
-from pyomo.environ import *
-import matplotlib.pyplot as plt
-import scipy.io
 from datetime import datetime
 
 
-def run_opt(prob, ems_local, plot_fig=False, prnt_pgr=False, opt_fig=False, result_folder='C:'):
-    #    input_file = 'C:\Optimierung\Eingangsdaten_hp.xlsx'
-    #    data = read_xlsdata(input_file);
-
-    # chece if the results have been initialized
-    try:
-        # value(prob.ev_power[0])
-        value(prob.ev_power[ems_local['time_data']['isteps']])
-    except ValueError as error:
-        print(error)
-        raise ImportError(
-            'the solver can not find a solution, try to change the device parameters to fulfill the requirements')
-
-    timesteps = np.arange(ems_local['time_data']['isteps'], ems_local['time_data']['nsteps'])
-    length = len(timesteps)
-
-    # print('Load Results ...\n')
-
-    # ev parameters
-    ev_node = ems_local['devices']['ev']['node']
-
-    # electricity variable
-    HP_ele_cap, HP_ele_run, elec_import, elec_export, lastprofil_elec, ev_pow, ev_soc, CHP_cap, pv_power, bat_cont, \
-    bat_power, pv_pv2demand, pv_pv2grid, bat_grid2bat, \
-    bat_power_pos, bat_power_neg, CHP_elec_run, CHP_operation, elec_supply_price, opt_ele_price = \
-        (np.zeros(length) for i in range(20))
-    # heat variable
-    boiler_cap, CHP_heat_run, HP_heat_run, HP_heat_cap, CHP_operation, HP_operation, lastprofil_heat, sto_e_pow, sto_e_pow_pos, \
-    CHP_gas_run, sto_e_pow_neg, sto_e_cont, HP_room_temp = \
-        (np.zeros(length) for i in range(13))
-
-    # COP - HP
-    HP_cop = np.zeros(length)
-
-    # final cost
-    cost_min = np.zeros(length)
-    # heat balance
-
-    bat_max_cont = value(prob.bat_cont_max)
-    sto_cont_max = value(prob.sto_cont)
-    bat_cont_init = bat_max_cont * 0.5
-    sto_cont_init = sto_cont_max * 0.5
-
-    i = 0
-
-    # timesteps = sorted(get_entity(prob, 't').index)
-    # demand, ext, pro, sto = get_timeseries(prob, timesteps
-
-    for idx in timesteps:
-        # electricity balance
-
-        ev_pow[i] = value(prob.ev_power[idx])
-        ev_soc[i] = value(prob.ev_cont[idx]) / value(prob.ev_sto_cap) * 100 if value(prob.ev_sto_cap) > 0 else 0
-        elec_import[i] = value(prob.elec_import[idx])
-        elec_export[i] = value(prob.elec_export[idx])
-        lastprofil_elec[i] = value(prob.lastprofil_elec[idx])
-        pv_power[i] = value(prob.PV_cap[idx] * prob.pv_effic * prob.solar[idx])
-
-        bat_cont[i] = value(prob.bat_cont[idx])
-        bat_power_pos[i] = value(prob.bat_pow_neg[idx])
-        bat_power_neg[i] = -value(prob.bat_pow_pos[idx])
-        pv_pv2demand[i] = min(pv_power[i], lastprofil_elec[i])
-        pv_pv2grid[i] = max(0, min(pv_power[i] - pv_pv2demand[i] + bat_power_neg[i], elec_export[i]))
-        bat_grid2bat[i] = min(elec_import[i], -bat_power_neg[i])
-
-        ##heat balance
-        boiler_cap[i] = value(prob.boiler_cap[idx])
-        # CHP
-        if value(prob.chp_elec_run[idx]) > 0:
-            CHP_operation[i] = value(prob.CHP_run[idx])
-            CHP_cap[i] = value(prob.CHP_run[idx] * prob.chp_elec_run[idx])
-            CHP_heat_run[i] = value(prob.chp_heat_run[idx])
-            CHP_elec_run[i] = value(prob.chp_elec_run[idx])
-            CHP_gas_run[i] = value(prob.chp_gas_run[idx])
-        # HP
-        if value(prob.hp_ther_pow[idx]) > 0:
-            HP_operation[i] = value(prob.hp_run[idx])
-            HP_heat_cap[i] = value(prob.hp_run[idx] * prob.hp_ther_pow[idx])
-            HP_ele_cap[i] = value(prob.hp_run[idx] * prob.hp_elec_pow[idx])
-            HP_heat_run[i] = value(prob.hp_ther_pow[idx])
-            HP_ele_run[i] = value(prob.hp_elec_pow[idx])
-            # HP_room_temp[i] = value(prob.roomtemp[idx])
-
-        # supply prices
-
-        elec_supply_price[i] = (elec_import[i] * value(prob.ele_price_in[idx]) + pv_power[i] * value(
-            prob.ele_price_out[idx]) + CHP_gas_run[i] * CHP_operation[i] * value(prob.gas_price[idx]) + 0.000011) / \
-                               (elec_import[i] + pv_power[i] + CHP_cap[i] + 0.0001)
-        lastprofil_heat[i] = value(prob.lastprofil_heat[idx])
-        sto_e_pow[i] = value(prob.sto_e_pow[idx])
-        sto_e_cont[i] = value(prob.sto_e_cont[idx])
-
-        # Optimized electricity price (Import - Export)                      
-        opt_ele_price[i] = elec_import[i] * value(prob.ele_price_in[idx]) - pv_pv2grid[i] \
-                           * value(prob.ele_price_out[idx]) - (elec_export[i] - pv_pv2grid[i]) * value(
-            prob.gas_price[idx])
-
-        # COP heat
-        HP_cop[i] = value(prob.hp_COP[idx])
-
-        # the total cost
-        cost_min[i] = value(prob.costs[idx])
-
-        i += 1
-
-    SOC_heat = sto_e_cont / sto_cont_max * 100 if sto_cont_max > 0 else 0 * sto_e_cont
-    SOC_elec = bat_cont / bat_max_cont * 100 if bat_max_cont > 0 else 0 * bat_cont
-    # battery_power
-
-    # heat storage power
-    for i in range(length):
-        if sto_e_pow[i] > 0:
-            sto_e_pow_neg[i] = -sto_e_pow[i]
-        else:
-            sto_e_pow_pos[i] = -sto_e_pow[i]
-
-    # plot electricity balance
-    N = len(timesteps)
-    ind = np.arange(N)  # the x locations for the groups
-    # ts = ems_local['time_data']['time_slots'].tolist()
-    isteps = ems_local['time_data']['isteps']
-    nsteps = ems_local['time_data']['nsteps']
-    ts = ems_local['time_data']['time_slots'][isteps:nsteps]
-    ts = np.asarray(ts)
-    # ind = ems_local['time_data']['time_slots'].tolist()
-    width = 1  # the width of the bars: can also be len(x) sequence
-
-    if prnt_pgr: print('Optimized electricity net cost (€):', sum(opt_ele_price))
-    if prnt_pgr: print('Results Loaded.' + '\n')
-
-    # if plot_fig is True:
-    #     fig0 = plt.figure()
-    #     plt.plot(HP_room_temp)
-    #     plt.xlabel('Timesteps [-]', fontsize=16)
-    #     plt.ylabel('temperature [C]', fontsize=16)
-    #     plt.title('room temperature', fontsize=20)
-
-    if plot_fig or opt_fig is True:
-        # figure properties
-        fig = plt.figure(figsize=(10, 6))
-        plt.rc('font', family='serif')
-        font_size = 16
-        # plots
-        p1 = plt.bar(ind, CHP_cap, width, bottom=bat_power_pos, color='skyblue', align='edge')
-        p2 = plt.bar(ind, pv_power, width,
-                     bottom=bat_power_pos + CHP_cap, color='goldenrod', align='edge')
-        p3 = plt.bar(ind, bat_power_pos, width, color='indianred', align='edge')
-        p4 = plt.bar(ind, bat_power_neg, width, color='indianred', align='edge')
-        p5 = plt.bar(ind, elec_import, width, bottom=bat_power_pos +
-                                                     CHP_cap + pv_power, color='grey', align='edge')
-        p6 = plt.bar(ind, -elec_export, width, bottom=bat_power_neg, color='darkseagreen', align='edge')
-        # p7 = plt.plot(ind, lastprofil_elec,linewidth=3,color='k', align='edge')
-        p7 = plt.step(ind, lastprofil_elec, linewidth=2, where='post', color='k')
-        p8 = plt.bar(ind, -ev_pow, width, bottom=bat_power_neg - elec_export, color='plum', align='edge')
-        p9 = plt.bar(ind, -HP_ele_cap, width, bottom=bat_power_neg -
-                                                     elec_export - ev_pow, color='wheat', align='edge')
-        # xticks
-        ax = plt.gca()
-        ax.axhline(linewidth=2, color="black")
-        idx_plt = np.arange(0, len(timesteps), int(len(timesteps) / 5))
-        plt.xticks(ind[idx_plt], ts[idx_plt], rotation=20)
-        plt.tick_params(axis="x", labelsize=font_size - 2)
-        plt.tick_params(axis="y", labelsize=font_size - 2)
-        # plt.yticks(np.arange(-10, 10, 2))
-        # ax1.set_xlim(0, len(timesteps) - 1)
-        # labels
-        plt.xlabel('Time [h]', fontsize=font_size)
-        plt.ylabel('Electrical demand [kW]', fontsize=font_size)
-        plt.title('Electricity Balance', fontsize=20)
-        plt.legend((p1[0], p2[0], p3[0], p4[0], p5[0], p6[0], p7[0], p8[0], p9[0]),
-                   ('CHP', 'PV', 'Bat_Discharge', 'Bat_Charge', 'Import', 'Export', 'E_Demand', 'EV_charge', 'HP'),
-                   prop={'size': font_size - 2}, bbox_to_anchor=(1.01, 0), loc="lower left")
-        # plot properties
-        plt.grid(color='lightgrey', linewidth=0.75)
-        plt.tight_layout(rect=[0, 0, 1, 1])
-        plt.margins(x=0)
-        plt.show()
-        
-        if plot_fig == True:
-            fig1 = plt.figure()
-            ax2 = plt.subplot()
-            # p8 = plt.plot(ind, bat_cont/bat_max_cont*100,linewidth=1,color='red')
-    
-            p8 = plt.step(ind, SOC_elec, linewidth=1, color='red', where='mid')
-            plt.xlabel('time [h]', fontsize=font_size)
-            plt.ylabel('SOC [%]', fontsize=font_size)
-            plt.title('SOC of Battery', fontsize=font_size)
-            plt.xticks(ind[idx_plt], ts[idx_plt], rotation=20)
-            ax2.set_xlim(0, len(timesteps) - 1)
-            plt.show()
-    
-            # plot EV soc
-            fig1 = plt.figure()
-            ax3 = plt.subplot()
-            # p8 = plt.plot(ind, bat_cont/bat_max_cont*100,linewidth=1,color='red')
-    
-            p8 = plt.step(ind, ev_soc, linewidth=1, color='red', where='mid')
-            plt.xlabel('time [h]', fontsize=font_size)
-            plt.ylabel('SOC [%]', fontsize=font_size)
-            plt.title('SOC of EV', fontsize=font_size)
-            plt.xticks(ind[idx_plt], ts[idx_plt], rotation=20)
-            ax2.set_xlim(0, len(timesteps) - 1)
-            # for i in np.arange(0, len(ev_node), 2):
-            #     plt.axvspan(ev_node[i], ev_node[i + 1], facecolor='#b9ebeb', alpha=0.5)
-            plt.show()
-
-    #  plot heat balance
-    # plots
-    if plot_fig is True:
-        fig = plt.figure(figsize=(15, 6))
-        ax1 = fig.add_subplot(111)
-        ax1.axhline(linewidth=2, color="black")
-        p1 = plt.bar(ind, boiler_cap, width, bottom=sto_e_pow_pos, color='grey')
-        p2 = plt.bar(ind, CHP_heat_run, width,
-                     bottom=boiler_cap + sto_e_pow_pos, color='skyblue')
-        p3 = plt.bar(ind, HP_heat_cap, width, bottom=boiler_cap + CHP_heat_run + sto_e_pow_pos, color='wheat')
-        p4 = plt.bar(ind, sto_e_pow_pos, width, color='indianred')
-        p5 = plt.bar(ind, sto_e_pow_neg, width, color='indianred')
-        p6 = plt.step(ind, lastprofil_heat, linewidth=2, where='mid', color='k')
-
-        plt.xlabel('time [1/4 h]', fontsize=font_size)
-        plt.ylabel('Heat Load [kW]', fontsize=font_size)
-        plt.title('Heat Balance', fontsize=font_size)
-        plt.xticks([0, 24, 2, 2], fontsize=font_size)
-        plt.yticks(fontsize=font_size)
-        idx_plt = np.arange(0, len(timesteps), int(len(timesteps) / 5))
-        plt.xticks(ind[idx_plt], ts[idx_plt], rotation=20)
-        # ax1.set_xlim(0, len(timesteps) - 1)
-        # plt.yticks(np.arange(-10, 10, 2))
-        plt.grid(color='lightgrey', linewidth=0.75)
-        plt.tight_layout(rect=[0, 0, 1, 1])
-        plt.margins(x=0)
-        plt.legend((p1[0], p2[0], p3[0], p4[0], p6[0]), ('boiler', 'CHP', 'HP', 'heat storage', 'heat demand'),
-                   prop={'size': font_size}, bbox_to_anchor=(1.01, 0), loc='lower left')
-        fig1 = plt.figure()
-        ax2 = plt.subplot()
-
-        p7 = plt.step(ind, SOC_heat, linewidth=1, where='mid', color='red')
-        plt.xlabel('time [h]', fontsize=font_size)
-        plt.ylabel('SOC [%]', fontsize=font_size)
-        plt.xticks(ind[idx_plt], ts[idx_plt], rotation=20)
-        ax2.set_xlim(0, len(timesteps) - 1)
-        plt.show()
-
-
-    data_input = {'HP_operation': list(HP_operation), 'HP_heat_power': list(HP_heat_cap),
-                  'HP_heat_run': list(HP_heat_run),
-                  'HP_ele_run': list(HP_ele_run),
-                  'CHP_operation': list(CHP_operation),
-                  'CHP_heat_run': list(CHP_heat_run),
-                  'CHP_elec_run': list(CHP_elec_run),
-                  'CHP_gas_run': list(CHP_gas_run),
-                  'SOC_heat': list(SOC_heat),
-                  'SOC_elec': list(SOC_elec),
-                  'PV_power': list(pv_power), 'pv_pv2demand': list(pv_pv2demand), 'pv_pv2grid': list(pv_pv2grid),
-                  'grid_import': list(elec_import),
-                  'Last_elec': list(lastprofil_elec), 'grid_export': list(elec_export),
-                  'bat_grid2bat': list(bat_grid2bat),
-                  'bat_input_power': list(-bat_power_neg), 'bat_output_power': list(bat_power_pos),
-                  'bat_SOC': list(SOC_elec),
-                  'EV_power': list(ev_pow),
-                  'EV_SOC': list(ev_soc),
-                  'elec_supply_price': list(elec_supply_price),
-                  'min cost': list(cost_min),
-                  'HP_COP': list(HP_cop),
-                  'opt_ele_price': list(opt_ele_price)}
-
-    now = datetime.now().strftime('%Y%m%dT%H%M')
-    resultfile = os.path.join(result_folder, 'result_optimization_{}.xlsx'.format(now))
-    writer = pd.ExcelWriter(resultfile)
-    df = pd.DataFrame(data=data_input)
-    df.to_excel(writer, 'operation_plan', merge_cells=False)
-    writer.save()  # save
-
-    return data_input
-
-
-def opt(ems_local, prnt_pgr=False):
-
+def create_model(ems_local):
     # record the time
     t0 = tm.time()
     # get all the data from the external file
@@ -616,7 +317,6 @@ def opt(ems_local, prnt_pgr=False):
     # m.hp_min_still_t_def = pyen.Constraint(m.t_DN, rule=hp_min_still_t_rule)
 
     def hp_min_lauf_t_rule(m, t):
-
         return (m.hp_run[t] - m.hp_run[t - 1]) * m.T_UP <= m.hp_run[t] + m.hp_run[t + 1] \
                + m.hp_run[t + 2] + m.hp_run[t + 3]
 
@@ -626,11 +326,9 @@ def opt(ems_local, prnt_pgr=False):
         return (m.CHP_run[t - 1] - m.CHP_run[t]) * m.T_DN <= m.T_DN - (
                 m.CHP_run[t] + m.CHP_run[t + 1])
 
-
     # m.chp_min_still_t_def = pyen.Constraint(m.t_DN, rule=chp_min_still_t_rule)
 
     def chp_min_lauf_t_rule(m, t):
-
         return (m.CHP_run[t] - m.CHP_run[t - 1]) * m.T_UP <= m.CHP_run[t] + m.CHP_run[t + 1]
 
     # m.chp_min_lauf_t_def = pyen.Constraint(m.t_UP, rule=chp_min_lauf_t_rule)
@@ -728,27 +426,154 @@ def opt(ems_local, prnt_pgr=False):
         rule=obj_rule,
         doc='Sum costs by cost type')
 
-    # print('Model Defined. time: ' + "{:.1f}".format(tm.time() - t0) + ' s\n')
-    # print('Solve Model ...\n')
-    optimizer = SolverFactory('glpk')
-    solver_opt = dict()
-    # solver_opt['SolTimeLimit'] = 50
-    solver_opt['mipgap'] = 0.001
-    optimizer.solve(m, load_solutions=True, options=solver_opt, timelimit=15)
-    # m.solutions.load_from(result);
-
-    if prnt_pgr: print('Model Solved in: ' + "{:.1f}".format(tm.time() - t0) + 's (time)')
     return m
 
 
-def read_xlsdata(input_file):
-    # read sheets of excel file and put them in one dictionary xls_data
-    xls = pd.ExcelFile(input_file)  # read excel file
+def solve_model(m, solver, time_limit=100, min_gap=0.001):
+    optimizer = SolverFactory(solver)
+    solver_opt = dict()
+    solver_opt['mipgap'] = min_gap
+    # optimizer.solve(m, load_solutions=True, options=solver_opt, tee=True)
+    optimizer.solve(m, load_solutions=True, options=solver_opt, tee=True, timelimit=time_limit)
 
-    xls_data = {}  # create dictionary
-    xls_data.update({'input_file': input_file})
-    xls_data.update({'time_series': xls.parse('time_series').set_index(['time'])})
-    xls_data.update({'parameter': xls.parse('Einstellung').set_index(['process'])})
 
-    return xls_data
+def extract_res(m, ems):
 
+    # check if the results are available
+    try:
+        get_value(m.ev_power[ems['time_data']['isteps']])
+    except ValueError as error:
+        print(error)
+        raise ImportError(
+            'the solver can not find a solution, try to change the device parameters to fulfill the requirements')
+    timesteps = np.arange(ems['time_data']['isteps'], ems['time_data']['nsteps'])
+    length = len(timesteps)
+
+    # print('Load Results ...\n')
+
+    # electricity variable
+    HP_ele_cap, HP_ele_run, elec_import, elec_export, lastprofil_elec, ev_pow, ev_soc, CHP_cap, pv_power, bat_cont, \
+    bat_power, pv_pv2demand, pv_pv2grid, bat_grid2bat, \
+    bat_power_pos, bat_power_neg, CHP_elec_run, CHP_operation, elec_supply_price, opt_ele_price = \
+        (np.zeros(length) for i in range(20))
+    # heat variable
+    boiler_cap, CHP_heat_run, HP_heat_run, HP_heat_cap, CHP_operation, HP_operation, lastprofil_heat, sto_e_pow, sto_e_pow_pos, \
+    CHP_gas_run, sto_e_pow_neg, sto_e_cont, HP_room_temp = \
+        (np.zeros(length) for i in range(13))
+
+    # COP - HP
+    HP_cop = np.zeros(length)
+
+    # final cost
+    cost_min = np.zeros(length)
+    # heat balance
+
+    bat_max_cont = get_value(m.bat_cont_max)
+    sto_cont_max = get_value(m.sto_cont)
+    bat_cont_init = bat_max_cont * 0.5
+    sto_cont_init = sto_cont_max * 0.5
+
+    i = 0
+
+    # timesteps = sorted(get_entity(prob, 't').index)
+    # demand, ext, pro, sto = get_timeseries(prob, timesteps
+
+    for idx in timesteps:
+        # electricity balance
+
+        ev_pow[i] = get_value(m.ev_power[idx])
+        ev_soc[i] = get_value(m.ev_cont[idx]) / get_value(m.ev_sto_cap) * 100 if get_value(m.ev_sto_cap) > 0 else 0
+        elec_import[i] = get_value(m.elec_import[idx])
+        elec_export[i] = get_value(m.elec_export[idx])
+        lastprofil_elec[i] = get_value(m.lastprofil_elec[idx])
+        pv_power[i] = get_value(m.PV_cap[idx] * m.pv_effic * m.solar[idx])
+
+        bat_cont[i] = get_value(m.bat_cont[idx])
+        bat_power_pos[i] = get_value(m.bat_pow_neg[idx])
+        bat_power_neg[i] = -get_value(m.bat_pow_pos[idx])
+        pv_pv2demand[i] = min(pv_power[i], lastprofil_elec[i])
+        pv_pv2grid[i] = max(0, min(pv_power[i] - pv_pv2demand[i] + bat_power_neg[i], elec_export[i]))
+        bat_grid2bat[i] = min(elec_import[i], -bat_power_neg[i])
+
+        ##heat balance
+        boiler_cap[i] = get_value(m.boiler_cap[idx])
+        # CHP
+        if get_value(m.chp_elec_run[idx]) > 0:
+            CHP_operation[i] = get_value(m.CHP_run[idx])
+            CHP_cap[i] = get_value(m.CHP_run[idx] * m.chp_elec_run[idx])
+            CHP_heat_run[i] = get_value(m.chp_heat_run[idx])
+            CHP_elec_run[i] = get_value(m.chp_elec_run[idx])
+            CHP_gas_run[i] = get_value(m.chp_gas_run[idx])
+        # HP
+        if get_value(m.hp_ther_pow[idx]) > 0:
+            HP_operation[i] = get_value(m.hp_run[idx])
+            HP_heat_cap[i] = get_value(m.hp_run[idx] * m.hp_ther_pow[idx])
+            HP_ele_cap[i] = get_value(m.hp_run[idx] * m.hp_elec_pow[idx])
+            HP_heat_run[i] = get_value(m.hp_ther_pow[idx])
+            HP_ele_run[i] = get_value(m.hp_elec_pow[idx])
+            # HP_room_temp[i] = value(prob.roomtemp[idx])
+
+        # supply prices
+
+        elec_supply_price[i] = (elec_import[i] * get_value(m.ele_price_in[idx]) + pv_power[i] * get_value(
+            m.ele_price_out[idx]) + CHP_gas_run[i] * CHP_operation[i] * get_value(m.gas_price[idx]) + 0.000011) / \
+                               (elec_import[i] + pv_power[i] + CHP_cap[i] + 0.0001)
+        lastprofil_heat[i] = get_value(m.lastprofil_heat[idx])
+        sto_e_pow[i] = get_value(m.sto_e_pow[idx])
+        sto_e_cont[i] = get_value(m.sto_e_cont[idx])
+
+        # Optimized electricity price (Import - Export)
+        opt_ele_price[i] = elec_import[i] * get_value(m.ele_price_in[idx]) - pv_pv2grid[i] \
+                           * get_value(m.ele_price_out[idx]) - (elec_export[i] - pv_pv2grid[i]) * get_value(
+            m.gas_price[idx])
+
+        # COP heat
+        HP_cop[i] = get_value(m.hp_COP[idx])
+
+        # the total cost
+        cost_min[i] = get_value(m.costs[idx])
+
+        i += 1
+
+    SOC_heat = sto_e_cont / sto_cont_max * 100 if sto_cont_max > 0 else 0 * sto_e_cont
+    SOC_elec = bat_cont / bat_max_cont * 100 if bat_max_cont > 0 else 0 * bat_cont
+    # battery_power
+
+    # heat storage power
+    for i in range(length):
+        if sto_e_pow[i] > 0:
+            sto_e_pow_neg[i] = -sto_e_pow[i]
+        else:
+            sto_e_pow_pos[i] = -sto_e_pow[i]
+
+    data_input = {'HP_operation': list(HP_operation),
+                  'HP_heat_power': list(HP_heat_cap),
+                  'HP_elec_power': list(HP_ele_cap),
+                  'HP_heat_run': list(HP_heat_run),
+                  'HP_ele_run': list(HP_ele_run),
+                  'CHP_operation': list(CHP_operation),
+                  'CHP_elec_pow': list(CHP_operation * CHP_elec_run),
+                  'CHP_heat_pow': list(CHP_operation * CHP_heat_run),
+                  'CHP_heat_run': list(CHP_heat_run),
+                  'CHP_elec_run': list(CHP_elec_run),
+                  'CHP_gas_run': list(CHP_gas_run),
+                  'boiler_heat_power': list(boiler_cap),
+                  'sto_heat_power_neg': list(sto_e_pow_neg),
+                  'sto_heat_power_pos': list(sto_e_pow_pos),
+                  'Last_heat': list(lastprofil_heat),
+                  'SOC_heat': list(SOC_heat),
+                  'SOC_elec': list(SOC_elec),
+                  'PV_power': list(pv_power), 'pv_pv2demand': list(pv_pv2demand), 'pv_pv2grid': list(pv_pv2grid),
+                  'grid_import': list(elec_import),
+                  'Last_elec': list(lastprofil_elec), 'grid_export': list(elec_export),
+                  'bat_grid2bat': list(bat_grid2bat),
+                  'bat_input_power': list(-bat_power_neg), 'bat_output_power': list(bat_power_pos),
+                  'bat_SOC': list(SOC_elec),
+                  'EV_power': list(ev_pow),
+                  'EV_SOC': list(ev_soc),
+                  'elec_supply_price': list(elec_supply_price),
+                  'min cost': list(cost_min),
+                  'HP_COP': list(HP_cop),
+                  'opt_ele_price': list(opt_ele_price)}
+
+    ems['optplan'] = data_input

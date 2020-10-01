@@ -21,7 +21,7 @@ from ems.plot.flex_draw import plot_flex as plot_flex
 from ems.plot.flex_draw import save_results as save_results
 
 
-def calc_flex_hp(ems, reopt):  # datafram open and break it down
+def calc_flex_hp(ems, reopt):  # datafram open and br   eak it down
 
     # week = pd.DataFrame(index=pd.date_range(start="00:00", end="23:59", freq='15min').strftime('%H:%M'),
     #                     columns={'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'})
@@ -163,9 +163,9 @@ def calc_flex_hp(ems, reopt):  # datafram open and break it down
             'Pos_Pr': cost_diff_pos,
             }
     flexopts = pd.DataFrame(data)
-    # flexopts.set_index('Sch_P')
+    ems['flexopts']['hp'] = flexopts
 
-    return flexopts
+
 
 
 if __name__ == '__main__':
