@@ -1,6 +1,6 @@
 """
-The get_RTP_data module requests real time prices ComED, an energy supplier from Illinois and
-resamples them to a 15 minute resolution.
+The get_RTP_data module requests real time prices from ComED, an energy supplier from Illinois and
+resamples them from a 5 to a 15 minute resolution.
 """
 
 __author__ = "Michel Zadé"
@@ -12,12 +12,15 @@ __maintainer__ = "Michel Zadé"
 __email__ = "michel.zade@tum.de"
 __status__ = "Development"
 
+
 import requests
 import json
 import pandas as pd
 import datetime
 import matplotlib.pyplot as plt
 from pandas.plotting import register_matplotlib_converters
+
+
 register_matplotlib_converters()
 
 # Define start and end date
