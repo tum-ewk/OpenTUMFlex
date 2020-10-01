@@ -83,16 +83,17 @@ def update_time_data(dict_ems):
     return dict_time_data
 
 
-def read_data(my_ems, path=None, to_csv=False):
+def read_data(my_ems, path=None, to_csv=False, fcst_only=True):
     # Initialize EMS
-    initialize(my_ems)    
+    initialize_ems(my_ems)
     # Check for the file type 
-    if path.endswith('.xlsx') == True:
+    if path.endswith('.xlsx'):
         print('Reading your excel file, please wait!')
-        xls = pd.ExcelFile(path)
-        prop = pd.read_excel(xls, sheet_name='properties', index_col=0, usecols=range(0, 3))
+        if not fcst_only:
+            xls = pd.ExcelFile(path)
+            prop = pd.read_excel(xls, sheet_name='properties', index_col=0, usecols=range(0, 3))
+            read_properties(my_ems, prop)
         ts = pd.read_excel(xls, sheet_name='time_series', usecols='B:I', nrows=my_ems['time_data']['nsteps'])
-        read_properties(my_ems, prop)
         my_ems['fcst'] = read_forecast(ts)
         # Save excel file as CSV
         if to_csv:
@@ -104,18 +105,19 @@ def read_data(my_ems, path=None, to_csv=False):
             with open(directory, 'w') as f:
                 pd.concat([prop, ts], sort=False).to_csv(f, sep=';')
                 
-    elif path.endswith('.csv') == True:
+    elif path.endswith('.csv'):
         csv_data = pd.read_csv(path, sep=';', index_col=0)
-        prop = csv_data.iloc[:,0:2].dropna(how='all')    
-        ts = csv_data.iloc[:,2:].dropna(how='all')   
-        read_properties(my_ems, prop)
+        prop = csv_data.iloc[:, 0:2].dropna(how='all')
+        ts = csv_data.iloc[:, 2:].dropna(how='all')
+        if not fcst_only:
+            read_properties(my_ems, prop)
         my_ems['fcst'] = read_forecast(ts)
         
     else:
         print('Input file format is not accepted, Exit call')
       
         
-def initialize(my_ems):
+def initialize_ems(my_ems):
     key_new = {'devices': {}, 'flexopts': {}, 'optplan': {}, 'reoptim': {}}
     my_ems.update(key_new)
     dict_devices_normal = ['hp', 'boiler', 'pv', 'sto', 'bat']
