@@ -16,6 +16,14 @@ import math
 
 
 def calc_flex_ev(my_ems, reopt=0):
+    """
+    Calculates the flexibility of an electric vehicle based on the optimal charging schedule.
+
+    :param my_ems:  an ems object that contains time settings, optimal charging schedules and electricity prices
+    :param reopt:   ???
+
+    :return:        an ems object with the calculated ev flexibility
+    """
     #print('EV Flex Calculation ...')
     # Time Data ###########################
     n_time_steps = my_ems['time_data']['nsteps']
