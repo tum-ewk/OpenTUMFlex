@@ -1,5 +1,5 @@
 """
-The price_fcst.py module simulates an artificial price forecast for a specific time.
+The price_fcst_sim.py module simulates an artificial price forecast for a specific time.
 """
 
 __author__ = "Michel Zadé"
