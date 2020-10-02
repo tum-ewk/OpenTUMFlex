@@ -10,6 +10,13 @@ from datetime import datetime
 
 
 def create_model(ems_local):
+    """ create one optimization instance and parameterize it with the input data in ems model
+    Args:
+        - ems_local:  ems model which has been parameterized
+
+    Return:
+        - m: optimization model instance created according to ems model
+    """
     # record the time
     t0 = tm.time()
     # get all the data from the external file
@@ -430,6 +437,15 @@ def create_model(ems_local):
 
 
 def solve_model(m, solver, time_limit=100, min_gap=0.001):
+    """ solve the optimization problem and save the results in instance m
+    Args:
+        - m: optimization model instance
+        - solver: solver to be used, e.g. "glpk", "gurobi", "cplex"...
+        - time_limit: time limit (in seconds) terminating the optimization
+        - min_gap: solver will terminate (with an optimal result) when the gap between the lower and upper objective
+          bound is less than min_gap times the absolute value of the upper bound.
+
+    """
     optimizer = SolverFactory(solver)
     solver_opt = dict()
     solver_opt['mipgap'] = min_gap
@@ -438,6 +454,12 @@ def solve_model(m, solver, time_limit=100, min_gap=0.001):
 
 
 def extract_res(m, ems):
+    """ extract the results from instance m and save it into ems model
+    Args:
+        - m: optimization model instance with results
+        - ems: ems model to be filled with optimization results
+
+    """
 
     # check if the results are available
     try:
@@ -453,13 +475,11 @@ def extract_res(m, ems):
 
     # electricity variable
     HP_ele_cap, HP_ele_run, elec_import, elec_export, lastprofil_elec, ev_pow, ev_soc, CHP_cap, pv_power, bat_cont, \
-    bat_power, pv_pv2demand, pv_pv2grid, bat_grid2bat, \
-    bat_power_pos, bat_power_neg, CHP_elec_run, CHP_operation, elec_supply_price, opt_ele_price = \
-        (np.zeros(length) for i in range(20))
+    bat_power, pv_pv2demand, pv_pv2grid, bat_grid2bat, bat_power_pos, bat_power_neg, CHP_elec_run, CHP_operation, \
+    elec_supply_price, opt_ele_price = (np.zeros(length) for i in range(20))
     # heat variable
-    boiler_cap, CHP_heat_run, HP_heat_run, HP_heat_cap, CHP_operation, HP_operation, lastprofil_heat, sto_e_pow, sto_e_pow_pos, \
-    CHP_gas_run, sto_e_pow_neg, sto_e_cont, HP_room_temp = \
-        (np.zeros(length) for i in range(13))
+    boiler_cap, CHP_heat_run, HP_heat_run, HP_heat_cap, CHP_operation, HP_operation, lastprofil_heat, sto_e_pow, \
+    sto_e_pow_pos, CHP_gas_run, sto_e_pow_neg, sto_e_cont, HP_room_temp = (np.zeros(length) for i in range(13))
 
     # COP - HP
     HP_cop = np.zeros(length)

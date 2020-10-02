@@ -4,11 +4,12 @@ import pandas as pd
 
 
 def save_results(ems, path):
-    """
+    """ save the optimization results in given path as spreadsheet
+    Args:
 
-    :param ems:
-    :param path:
-    :return:
+        - ems: ems model instance
+        - path: path where the results data is to be saved, e.g. path= r'tests\data'
+
     """
     now = datetime.now().strftime('%Y%m%dT%H%M')
     resultfile = os.path.join(path, 'result_optimization_{}.xlsx'.format(now))

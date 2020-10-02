@@ -3,6 +3,12 @@ import numpy as np
 
 
 def plot_results(ems, prnt_pgr=False):
+    """ visualize the optimization results based on ems model
+    Args:
+        - ems: ems model with optimization results
+        - prnt_pgr: (to be finished by Babu)
+
+    """
     # plot electricity balance
     # ts = ems_local['time_data']['time_slots'].tolist()
     isteps = ems['time_data']['isteps']

@@ -2,9 +2,13 @@ from ems.devices.devices import devices
 
 
 def scenario_hp01(ems):
+    """ change the device parameters according to scenario heat pump 01
+
+    Args:
+        - ems: ems model instance
+
     """
-    :param ems: ems model as input
-    """
+
     ems['devices']['sto']['maxpow'] = 10
     ems['devices']['sto']['stocap'] = 15
     ems['devices']['boiler']['maxpow'] = 3
