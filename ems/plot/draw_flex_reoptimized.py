@@ -7,21 +7,32 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib import gridspec
 
-def plot_reopt(my_ems):
-    print('Reoptimization Plot')
+def plot_cumm_energy_reoptimized(my_ems):
+    """
     
+
+    Parameters
+    ----------
+    my_ems : Dictionary
+        Dictionary file of the ems model with flex offer dataframe.
+
+    Returns
+    -------
+    None.
+
+    """
+    
+    # Select data of the reoptimized device
+    # print('Reoptimization Plot')    
     device=my_ems['reoptim']['device']
     nsteps = my_ems['time_data']['nsteps']
-    # nsteps = my_ems['reoptim']['nsteps_reopt']
     ntsteps = my_ems['time_data']['ntsteps']
-    t_intval = my_ems['time_data']['t_inval']
     dat1 = pd.DataFrame.from_dict(my_ems['flexopts'][device])
     dat2 =  pd.DataFrame.from_dict(my_ems['reoptim']['flexopts'][device])
-    time_step = my_ems['reoptim']['timestep']
     index_re=my_ems['time_data']['isteps']
     ts = my_ems['time_data']['time_slots']
       
-    # Initialize    
+    # Initialize figure
     neg_leg = 0
     pos_leg = 0
     font_size = 20
@@ -41,6 +52,7 @@ def plot_reopt(my_ems):
         theta = cum_data.iloc[i + 1, 0]
     p1 = plt_cum.plot(cum_data.iloc[:, 0], linewidth=3, color='k')
     
+    # Plot negative and positive flexibility
     for x in range(nsteps-1):
         # Negative flexibility plots
         if dat1['Neg_E'][x] < 0:
@@ -71,9 +83,8 @@ def plot_reopt(my_ems):
 
     theta = 0
     cum_data_reopt=cum_data
-    timestep = my_ems['reoptim']['timestep']
     
-    #Check Flexibility offer is Negative or Poitive
+    #Check Flexibility offer is Negative or Positive
     Energy = my_ems['reoptim']['flextype']+'_E'
     Power = my_ems['reoptim']['flextype']+'_P' 
     i=my_ems['reoptim']['timestep']
@@ -175,16 +186,28 @@ def plot_reopt(my_ems):
     return 
 
 
-def plot_reopt_compare(my_ems):
+def plot_compare_optim_reoptim(my_ems):
+    """
+    
+
+    Parameters
+    ----------
+    my_ems : Dictionary
+        Dictionary file of the ems model with flex offer dataframe.
+
+    Returns
+    -------
+    None.
+
+    """
+    
+    # Select data of the reoptimized device
     print('Reoptimization comparison Plot')
     device=my_ems['reoptim']['device']
     nsteps = my_ems['time_data']['nsteps']
-    # nsteps = my_ems['reoptim']['nsteps_reopt']
     ntsteps = my_ems['time_data']['ntsteps']
-    t_intval = my_ems['time_data']['t_inval']
     dat1 = pd.DataFrame.from_dict(my_ems['flexopts'][device])
     dat2 =  pd.DataFrame.from_dict(my_ems['reoptim']['flexopts'][device])
-    time_step = my_ems['reoptim']['timestep']
     index_re=my_ems['time_data']['isteps']
     ts = my_ems['time_data']['time_slots']
       
@@ -234,14 +257,6 @@ def plot_reopt_compare(my_ems):
            
     theta = 0   
     cum_data_reopt=cum_data  
-    timestep = my_ems['reoptim']['timestep']
-    
-    # if my_ems['reoptim']['flextype'] == 'Neg':
-    #     Energy = 'Neg_E'
-    #     Power = 'Neg_P'
-    # elif my_ems['reoptim']['flextype'] == 'Pos':
-    #     Energy = 'Pos_E'
-    #     Power = 'Pos_P'  
     Energy = my_ems['reoptim']['flextype']+'_E'
     Power = my_ems['reoptim']['flextype']+'_P'
     i=my_ems['reoptim']['timestep']
@@ -254,15 +269,17 @@ def plot_reopt_compare(my_ems):
                     p9 = plt_cum.plot([ts[i + y - 1], ts[i + y]], [theta, cum_data.iloc[i + y, 0] + (slot_flex * y)],
                                       linewidth=3,color='r') 
                     theta = cum_data.iloc[i + y, 0] + (slot_flex * y)
-                    cum_data_reopt.iloc[i+y, 0]=cum_data.iloc[i + y, 0] + (slot_flex * y)             # created new data set for cumulative flexibility
-
+                    cum_data_reopt.iloc[i+y, 0]=cum_data.iloc[i + y, 0] + (slot_flex * y)             
+    
+    # created new data set for cumulative flexibility                 
     for i in range(nsteps - 1):    
         if i>my_ems['reoptim']['timestep']+slots and dat2['Neg_E'][i - index_re] <= 0 and dat2['Pos_E'][i - index_re] >= 0:
             cum_data_reopt.iloc[i, 0] = theta + dat2['Sch_P'][i - index_re]/ntsteps
             theta = cum_data_reopt.iloc[i, 0]
-    p8 = plt_cum.plot(cum_data_reopt.iloc[my_ems['reoptim']['timestep']+slots:(nsteps-1), 0], linewidth=3, color='y')
-     
+    p8 = plt_cum.plot(cum_data_reopt.iloc[my_ems['reoptim']['timestep']+slots:(nsteps-1), 0], linewidth=3, color='y')     
     p10 = plt_cum_reopt.plot(cum_data_reopt.iloc[0:nsteps-1, 0], linewidth=3, color='k') 
+    
+    # Plot negative and positive flexibility
     for x in range(nsteps-1):
         if x>=index_re:
             
@@ -297,13 +314,9 @@ def plot_reopt_compare(my_ems):
     elif neg_leg == 1:
         plt_cum.legend((p1[0], p2[0],p8[0],p9[0]), ('Cummulative', 'Neg_flex','New Optimal','Called Offer'),
                        prop={'size': font_size}, bbox_to_anchor=(1.01, 0), loc="lower left") 
-                       # prop={'size': font_size}, bbox_to_anchor=(1.01, 0), loc="lower left")
-    
     elif neg_leg == 1:
         plt_cum.legend((p1[0], p2[0],p8[0],p9[0]), ('Cummulative', 'Neg_flex','New Optimal','Called Offer'),
-                       prop={'size': font_size}, bbox_to_anchor=(1.01, 0), loc="lower left")
-     
-# >>>>>>> 17a81413f9dc4ca801d83e647af56d8378a141c8
+                       prop={'size': font_size}, bbox_to_anchor=(1.01, 0), loc="lower left")     
     elif pos_leg == 1:
         plt_cum.legend((p1[0], p3[0],p8[0],p9[0]), ('Cummulative', 'Pos_flex','New Optimal','Called Offer'),
                        prop={'size': font_size}, bbox_to_anchor=(1.01, 0), loc="lower left")
@@ -312,9 +325,7 @@ def plot_reopt_compare(my_ems):
                        prop={'size': font_size}, bbox_to_anchor=(1.01, 0), loc="lower left")
           
     # Labels            
-
     # plt_cum.set_title('Flexibility comparison', fontsize=font_size, pad=20)
-
     plt_cum.set_ylabel('$CE\ [kWh]$', fontsize=font_size+2)
     plt_cum.tick_params(axis="x", labelsize=font_size, labelbottom=False)
     plt_cum.tick_params(axis="y", labelsize=font_size)
@@ -343,16 +354,28 @@ def plot_reopt_compare(my_ems):
     return 
 
 
-def plot_reopt_price(my_ems):
+def plot_flex_reoptimized(my_ems):
+    """
+    
+
+    Parameters
+    ----------
+    my_ems : Dictionary
+        Dictionary file of the ems model with flex offer dataframe.
+
+    Returns
+    -------
+    None.
+
+    """
+
+    # Select flex offers to plot
     print('New CE Plot')
     device=my_ems['reoptim']['device']
     nsteps = my_ems['time_data']['nsteps']
-    # nsteps = my_ems['reoptim']['nsteps_reopt']
     ntsteps = my_ems['time_data']['ntsteps']
-    t_intval = my_ems['time_data']['t_inval']
     dat1 = pd.DataFrame.from_dict(my_ems['flexopts'][device])
     dat2 =  pd.DataFrame.from_dict(my_ems['reoptim']['flexopts'][device])
-    time_step = my_ems['reoptim']['timestep']
     index_re=my_ems['time_data']['isteps']
     ts = my_ems['time_data']['time_slots']
     cum_data_reopt=my_ems['reoptim']['cum_data_reopt']
@@ -365,10 +388,10 @@ def plot_reopt_price(my_ems):
     spec = gridspec.GridSpec(ncols=1, nrows=4, figure=fig)
     plt_prc = fig.add_subplot(spec[3, 0])
     plt_pow = fig.add_subplot(spec[2, 0], sharex=plt_prc)
-    plt_cum_reopt = fig.add_subplot(spec[0:2, 0], sharex=plt_prc)
-    
+    plt_cum_reopt = fig.add_subplot(spec[0:2, 0], sharex=plt_prc)    
     p10 = plt_cum_reopt.plot(cum_data_reopt.iloc[0:nsteps-1, 0], linewidth=3, color='k')
     
+    # Plot negative and positive flexibility
     for x in range(nsteps-1):
         plt_prc.bar(ts[x], 0, color='tab:blue', width=1.0, align='edge', edgecolor='k', zorder=3)
         plt_pow.bar(ts[x], 0, color='tab:blue', width=1.0, align='edge', edgecolor='k', zorder=3)

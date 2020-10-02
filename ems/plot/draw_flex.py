@@ -16,10 +16,25 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib import gridspec
 
+
 def plot_flex(my_ems, device):  
+    """
+    
+
+    Parameters
+    ----------
+    my_ems : Dictionary
+        Dictionary of the ems model with flex offer dataframe.
+    device : String,  e.g. 'ev'/'pv'
+        Device whose offers need to be plotted.
+
+    Returns
+    -------
+    None.
+
+    """
     nsteps = my_ems['time_data']['nsteps']
     ntsteps = my_ems['time_data']['ntsteps']
-    t_intval = my_ems['time_data']['t_inval']
     dat1 = pd.DataFrame.from_dict(my_ems['flexopts'][device])
       
     # Initialize    
@@ -31,14 +46,10 @@ def plot_flex(my_ems, device):
     plt_prc = fig.add_subplot(spec[3, 0])
     plt_pow = fig.add_subplot(spec[2, 0], sharex=plt_prc)
     plt_cum = fig.add_subplot(spec[0:2, 0], sharex=plt_prc)
-    #ts = my_ems['time_data']['time_slots'].tolist()
     ts = my_ems['time_data']['time_slots']
 
     # Plotting cummulative energy exchange
     theta = 0
-    # cum_data = pd.DataFrame(
-    #     index=pd.date_range(start="00:00", end="23:59",
-    #     freq=str(t_intval) + 'min').strftime('%H:%M'), columns={'cumm'})
     cum_data = pd.DataFrame(
              index=my_ems['time_data']['time_slots'], columns={'cumm'})
     cum_data.iloc[0, 0] = 0
@@ -153,11 +164,3 @@ def plot_flex(my_ems, device):
     plt.margins(x=0)
     plt.show()   
     return 
-
-def save_results(dat1, nsteps, save_path):
-    dat1.to_excel("output.xlsx", sheet_name='flex_results')
-
-
-# from ems.plot.flex_draw1 import plot_flex as plot
-# if __name__ == "__main__":
-#    plot(my_ems, 'bat')

@@ -1,12 +1,16 @@
-# -*- coding: utf-8 -*-
 """
-Created on Tue May  5 10:30:42 2020
-
-@author: ga47jes
+The "example_1.py" module demonstrates an example to calculate flexibility assuming 
+the house to have all pv, battery, ev, hp, chp. 
 """
+__author__ = "Babu Kumaran Nalini"
+__copyright__ = "2020 TUM-EWK"
+__credits__ = []
+__license__ = "GPL v3.0"
+__version__ = "1.0"
+__maintainer__ = "Babu Kumaran Nalini"
+__email__ = "babu.kumaran-nalini@tum.de"
+__status__ = "Development"
 
-
-# import pandas as pd
 
 # import optimization module
 from ems.optim.opt import run_opt
@@ -17,34 +21,69 @@ from ems.flex.flex_pv import calc_flex_pv
 from ems.flex.flex_bat import calc_flex_bat
 from ems.flex.flexhp import calc_flex_hp
 
-# import plot module
-from ems.plot.flex_draw import plot_flex as plot
 
-def reoptimize(my_ems, plot_fig=False):    
+def run_reopt(my_ems, plot_fig=False):   
+    """
+    
+
+    Parameters
+    ----------
+    my_ems : Dictionary
+        Dictionary of the ems model.
+    plot_fig : Binary, optional
+        Select if reoptimization plots are required or not.
+        The default is False.
+
+    Returns
+    -------
+    my_ems : Dictionary
+        Updated dictionary of the ems model.
+
+    """
+    
+    # Select device under reoptimization
     device = my_ems['reoptim']['device']
-    # Make relevant changes for flexibility
+    
+    # Calculate device state changes before reoptimization
     if device == 'pv':
-        my_ems = reflex_pv(my_ems)    
+        my_ems = calc_flex_response_pv(my_ems)    
     elif device == 'bat':
-        my_ems = reflex_bat(my_ems)
+        my_ems = calc_flex_response_bat(my_ems)
     elif device == 'ev':
-        my_ems = reflex_ev(my_ems)
+        my_ems = calc_flex_response_ev(my_ems)
     elif device == 'hp':
-        my_ems = reflex_hp(my_ems)
-        
+        my_ems = calc_flex_response_hp(my_ems)
+    
+    # Check and start reoptimization if possible    
     if my_ems['reoptim']['status'] == 1:    
         if plot_fig: print('Reoptimization Possible')
-        opt_res = opt(my_ems)  # obtain the optimization results
-        my_ems['reoptim']['optplan'] = run_opt(opt_res, my_ems, plot_fig=plot_fig, result_folder='data/')
+        opt_res = opt(my_ems)  
+        my_ems['reoptim']['optplan'] = run_opt(opt_res, my_ems, plot_fig=plot_fig, result_folder='data/')        
+        
+        # Calculate flexibility after reoptimization
         my_ems['reoptim']['flexopts'] = {}
         my_ems['reoptim']['flexopts']['pv'] = calc_flex_pv(my_ems, reopt=1)
         my_ems['reoptim']['flexopts']['bat'] = calc_flex_bat(my_ems, reopt=1)
-        # my_ems['reoptim']['flexopts']['ev'] = calc_flex_ev(my_ems, reopt=1)
         my_ems['reoptim']['flexopts']['hp'] = calc_flex_hp(my_ems, reopt=1)
         
     return my_ems
 
-def reflex_pv(my_ems):
+
+def calc_flex_response_pv(my_ems):
+    """
+    
+
+    Parameters
+    ----------
+    my_ems : Dictionary
+        Dictionary of the ems model.
+
+    Returns
+    -------
+    my_ems : Dictionary
+        Updated dictionary of the ems model.
+
+    """
     device = my_ems['reoptim']['device']
     rstep = my_ems['reoptim']['timestep']
     f_type = my_ems['reoptim']['flextype']
@@ -72,7 +111,6 @@ def reflex_pv(my_ems):
             bat_max_e = my_ems['devices']['bat']['stocap']
         
             if s_bSOC >= e_bSOC:
-                # print('Scheduled battery discharging or none during flexibility \n')
                 tot_dis = 0
                 for i in range(rstep,rstep+f_steps):
                     tot_dis = tot_dis + my_ems['optplan']['bat_output_power'][i]
@@ -84,13 +122,11 @@ def reflex_pv(my_ems):
                         my_ems['devices']['bat']['initSOC'] = s_bSOC + e_bal_soc
                     else:
                         my_ems['devices']['bat']['initSOC'] = 100
-                        # rest_e = (s_bSOC+e_bal_soc-90)*bat_max_e/100
                 else:
                     soc_red = tot_dis - abs(f_ene)
                     soc_red = soc_red*100/bat_max_e    #in %
                     my_ems['devices']['bat']['initSOC'] = s_bSOC - soc_red      
             else:
-                # print('Scheduled battery charging during flexibility \n')    
                 SOC_added = abs(f_ene*100/bat_max_e)
                 if e_bSOC + SOC_added > 100: # Include SOC limits
                     my_ems['devices']['bat']['initSOC'] = 100
@@ -103,7 +139,22 @@ def reflex_pv(my_ems):
     
     return my_ems
 
-def reflex_bat(my_ems):
+def calc_flex_response_bat(my_ems):
+    """
+    
+
+    Parameters
+    ----------
+    my_ems : Dictionary
+        Dictionary of the ems model.
+
+    Returns
+    -------
+    my_ems : Dictionary
+        Updated dictionary of the ems model.
+
+    """
+    
     device = my_ems['reoptim']['device']
     rstep = my_ems['reoptim']['timestep']
     f_type = my_ems['reoptim']['flextype']
@@ -119,13 +170,12 @@ def reflex_bat(my_ems):
         f_steps = 0
         print('No flexibility found \n')    
         my_ems['reoptim']['status'] = 0
-            
-    if my_ems['reoptim']['status'] == 1:         
-        # Update initial steps for reoptimization
+    
+    # Update initial steps for reoptimization        
+    if my_ems['reoptim']['status'] == 1:               
         my_ems['time_data']['isteps'] = rstep+f_steps
         
         # Battery SOC at flexibility time step
-        # s_bSOC = my_ems['optplan']['bat_SOC'][rstep]
         e_bSOC = my_ems['optplan']['bat_SOC'][rstep+f_steps-1]    
         bat_max_e = my_ems['devices']['bat']['stocap']
         
@@ -145,7 +195,21 @@ def reflex_bat(my_ems):
        
     return my_ems  
 
-def reflex_ev(my_ems):
+def calc_flex_response_ev(my_ems):
+    """
+    
+
+    Parameters
+    ----------
+    my_ems : Dictionary
+        Dictionary of the ems model.
+
+    Returns
+    -------
+    my_ems : Dictionary
+        Updated dictionary of the ems model.
+
+    """
     device = my_ems['reoptim']['device']
     rstep = my_ems['reoptim']['timestep']
     f_type = my_ems['reoptim']['flextype']
@@ -187,7 +251,22 @@ def reflex_ev(my_ems):
                 
     return my_ems  
 
-def reflex_hp(my_ems):
+def calc_flex_response_hp(my_ems):
+    """
+    
+
+    Parameters
+    ----------
+    my_ems : Dictionary
+        Dictionary of the ems model.
+
+    Returns
+    -------
+    my_ems : Dictionary
+        Updated dictionary of the ems model.
+
+    """
+    
     device = my_ems['reoptim']['device']
     rstep = my_ems['reoptim']['timestep']
     f_type = my_ems['reoptim']['flextype']
@@ -231,6 +310,3 @@ def reflex_hp(my_ems):
                 
     return my_ems      
 
-if __name__ == '__main__':
-    print('update myems')
-    # my_ems = reoptimize(my_ems)

@@ -76,7 +76,7 @@ def run_ems(path= None):
     # calculate the timetable for all the devices
     opt_res = opt(my_ems)  # obtain the optimization results
     # analyse the results regarding the settings in ems, plot the figures
-    my_ems['optplan'] = run_opt(opt_res, my_ems, opt_fig=True, result_folder='data/')
+    my_ems['optplan'] = run_opt(opt_res, my_ems, plot_fig=True, result_folder='data/')
         
     # # calculate the flexibility of one device
     my_ems['flexopts']['pv'] = calc_flex_pv(my_ems, reopt=0)
