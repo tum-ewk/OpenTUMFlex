@@ -452,6 +452,8 @@ def solve_model(m, solver, time_limit=100, min_gap=0.001):
     # optimizer.solve(m, load_solutions=True, options=solver_opt, tee=True)
     optimizer.solve(m, load_solutions=True, options=solver_opt, tee=True, timelimit=time_limit)
 
+    return m
+
 
 def extract_res(m, ems):
     """ extract the results from instance m and save it into ems model
@@ -597,3 +599,5 @@ def extract_res(m, ems):
                   'opt_ele_price': list(opt_ele_price)}
 
     ems['optplan'] = data_input
+
+    return ems

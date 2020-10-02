@@ -10,6 +10,7 @@ import json as js
 from ems.devices.devices import devices
 import os
 
+
 def ems(emsid=000000, userpref=None, flexprodtype=None, timeintervall=15, days=1, dataintervall=15, start_time=None,
         end_time=None, initialize=False, path=None):
     # get the time index series
@@ -68,7 +69,8 @@ def ems_write(dict_ems, path):
             if not isinstance(dict_ems['flexopts'][key], dict):
                 dict_ems['flexopts'][key] = dict_ems['flexopts'][key].to_dict('dict')
         js.dump(dict_ems, f)
-    #print('complete saving EMS_data!!! ')
+    # print('complete saving EMS_data!!! ')
+
 
 def update_time_data(dict_ems):
     # update ems["time_data"], add new parameters: time_slots, nsteps, ntsteps
@@ -104,7 +106,7 @@ def read_data(my_ems, path=None, to_csv=False, fcst_only=True):
             directory = os.path.join(r'data', filename)
             with open(directory, 'w') as f:
                 pd.concat([prop, ts], sort=False).to_csv(f, sep=';')
-                
+
     elif path.endswith('.csv'):
         csv_data = pd.read_csv(path, sep=';', index_col=0)
         prop = csv_data.iloc[:, 0:2].dropna(how='all')
@@ -112,11 +114,14 @@ def read_data(my_ems, path=None, to_csv=False, fcst_only=True):
         if not fcst_only:
             read_properties(my_ems, prop)
         my_ems['fcst'] = read_forecast(ts)
-        
+
     else:
         print('Input file format is not accepted, Exit call')
-      
-        
+
+    return my_ems
+
+
+
 def initialize_ems(my_ems):
     key_new = {'devices': {}, 'flexopts': {}, 'optplan': {}, 'reoptim': {}}
     my_ems.update(key_new)
@@ -125,17 +130,19 @@ def initialize_ems(my_ems):
         my_ems['devices'].update(devices(device_name=device_name, minpow=0, maxpow=0))
         my_ems['devices'].update(devices(device_name='chp', minpow=0, maxpow=0, eta=[0.5, 0.5]))
         my_ems['devices'].update(devices(device_name='ev', minpow=0, maxpow=0, stocap=0, eta=0.98,
-                                            init_soc=[20], end_soc=[20],
-                                            ev_aval=[my_ems['time_data']['start_time'],
-                                                    my_ems['time_data']['end_time']],
-                                            timesetting=my_ems['time_data']))    
-        
+                                         init_soc=[20], end_soc=[20],
+                                         ev_aval=[my_ems['time_data']['start_time'],
+                                                  my_ems['time_data']['end_time']],
+                                         timesetting=my_ems['time_data']))
+
+
 def read_forecast(ts):
     dict_fcst = ts.to_dict('dict')
     for key in dict_fcst:
         dict_fcst[key] = list(dict_fcst[key].values())
-        
+
     return dict_fcst
+
 
 def read_properties(my_ems, prop):
     data_index = prop.index.unique()
@@ -146,10 +153,11 @@ def read_properties(my_ems, prop):
         dat_T.reset_index(inplace=True, drop=True)
         device_set[data_index[i]].update(dat_T.to_dict('records')[0])
     my_ems['devices'] = device_set
-    
+
     # Changing EV input to list
     my_ems['devices']['ev']['initSOC'] = [my_ems['devices']['ev']['initSOC']]
     my_ems['devices']['ev']['endSOC'] = [my_ems['devices']['ev']['endSOC']]
+
 
 if __name__ == '__main__':
     c = ems(initialize=True, path='../ems/ems_test_02_wopt.txt')

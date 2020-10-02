@@ -165,6 +165,8 @@ def calc_flex_hp(ems, reopt):  # datafram open and br   eak it down
     flexopts = pd.DataFrame(data)
     ems['flexopts']['hp'] = flexopts
 
+    return ems
+
 
 
 

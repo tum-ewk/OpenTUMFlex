@@ -36,19 +36,19 @@ def run_scenario(scenario, path_input, path_results, fcst_only=True, time_limit=
     my_ems = initialize_time_setting(t_inval=15, start_time='2019-12-18 00:00', end_time='2019-12-18 23:45')
 
     # read devices parameters and forecasting data from xlsx or csv file
-    read_data(my_ems, path_input, fcst_only=fcst_only, to_csv=True)
+    my_ems = read_data(my_ems, path_input, fcst_only=fcst_only, to_csv=True)
 
     # modify the ems regarding to predefined scenario
-    scenario(my_ems)
+    my_ems = scenario(my_ems)
 
     # create Pyomo model from ems data
     m = create_model(my_ems)
 
     # solve the optimization problem
-    solve_model(m, solver='glpk', time_limit=time_limit)
+    m = solve_model(m, solver='glpk', time_limit=time_limit)
 
     # extract the results from model and store them in ems['optplan'] dictionary
-    extract_res(m, my_ems)
+    my_ems = extract_res(m, my_ems)
 
     # visualize the optimization results
     plot_results(my_ems)
@@ -57,7 +57,7 @@ def run_scenario(scenario, path_input, path_results, fcst_only=True, time_limit=
     save_results(my_ems, path_results)
 
     # calculate the flexibility of heat pump
-    calc_flex_hp(my_ems, reopt=False)
+    my_ems = calc_flex_hp(my_ems, reopt=False)
 
     # plot the results of flexibility calculation
     plot_flex(my_ems, "hp")
