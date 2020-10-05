@@ -62,3 +62,6 @@ tests/results/SA_ems_results/ev_ems_0.txt
 
 analysis/ev case study/data/rtp_mean.h5
 tests/tester.py
+analysis/ev case study/figures/
+forecast/input/
+analysis/ev case study/output/

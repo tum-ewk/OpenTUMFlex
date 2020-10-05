@@ -24,8 +24,8 @@ from pandas.plotting import register_matplotlib_converters
 register_matplotlib_converters()
 
 # Define start and end date
-t_start = '201701010000'
-t_end = '201801010000'
+t_start = '201901010000'
+t_end = '202001010000'
 avg_price_california = 0.19
 # gets all data from website
 price_data = requests.get('https://hourlypricing.comed.com/api?type=5minutefeed&datestart=' + t_start +
@@ -83,7 +83,7 @@ rtp_per_daytime['price'].plot()
 plt.grid()
 
 # Save price df in hdf files
-rtp_15min.to_hdf('C:/Users/ga47num/PycharmProjects/GER MP - OpenTUMFlex - EV/Input/RTP/rtp_15min_' +
+rtp_15min.to_hdf('input/RTP/rtp_15min_' +
                  t_start + '-' + t_end + '.h5', mode='w', key='df')
-rtp_per_daytime.to_hdf('C:/Users/ga47num/PycharmProjects/GER MP - OpenTUMFlex - EV/Input/RTP/rtp_per_daytime_' +
+rtp_per_daytime.to_hdf('input/RTP/rtp_per_daytime_' +
                        t_start + '-' + t_end + '.h5', mode='w', key='df')
