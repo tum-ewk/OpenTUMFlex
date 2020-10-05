@@ -9,8 +9,6 @@
 *.log
 *.pot
 __pycache__/*
-*.xlsx
-*.csv
 *.mat
 .cache/*
 .*.swp
