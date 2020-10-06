@@ -48,8 +48,11 @@ cover/*
 MANIFEST
 
 # Input data
-!tests/data/input_data.xlsx
-!tests/data/input_data.csv
+*.csv
+*.xlsx
+!input/input_data.xlsx
+!input/input_data.csv
+!analysis/ev_case_study/input/chts_veh_availability.csv
 
 # Per-project virtualenvs
 .venv*/
@@ -59,7 +62,6 @@ tests/results/SA_ems_results/ev_ems_0.txt
 
 
 analysis/ev case study/data/rtp_mean.h5
-tests/tester.py
 analysis/ev case study/figures/
 forecast/input/
 analysis/ev case study/output/
