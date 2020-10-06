@@ -7,96 +7,89 @@ overview and quick search of the needed data.
 
 import pandas as pd
 import json as js
-from opentumflex.configuration.devices import devices
 import os
 
 
-def ems(emsid=000000, userpref=None, flexprodtype=None, timeintervall=15, days=1, dataintervall=15, start_time=None,
-        end_time=None, initialize=False, path=None):
-    # get the time index series
-    date = pd.date_range(start='00:00:00', periods=5, freq=str(timeintervall) + ' ' + 'T')
-    datestr = pd.Series(date.format())
+def save_ems(ems, path):
+    """ save all the data in ems object into one json file
 
-    # initialize the opentumflex by user input
-    if not initialize:
+    :param ems: ems object
+    :param path: path where the json file will be saved
+    :return: none
+    """
 
-        # DataFrame of forecasting for example
-        df_fcst = pd.DataFrame({}, index=datestr)
-        # DataFrame of optimal operational plan for example
-        df_optplan = pd.DataFrame({}, index=datestr)
-        # DataFrame of flexibility options for example
-        df_flexopts = {}
-
-        # convert the user input to time data
-        time_data = {'nsteps': int(24 * 60 / timeintervall),
-                     'ntsteps': int(60 / timeintervall),
-                     't_inval': timeintervall,
-                     'd_inval': dataintervall,
-                     'start_time': start_time,
-                     'end_time': end_time,
-                     'days': days}
-
-        # summary of all data in opentumflex dict
-        dic_ems = {'ID': emsid,
-                   'userpref': userpref,
-                   'flexprodtype': flexprodtype,
-                   'time_data': time_data,
-                   'timeintervall': timeintervall,
-                   'fcst': df_fcst.to_dict('dict'),
-                   'optplan': df_optplan.to_dict('dict'),
-                   'flexopts': df_flexopts,
-                   'reoptim': df_flexopts,
-                   'devices': None
-                   }
-
-    # initialize the opentumflex by csv import
-    else:
-        with open(path) as f:
-            dic_ems = js.load(f)
-            # convert flexopts from dict to dataframe
-            for key in dic_ems['flexopts']:
-                dic_ems['flexopts'][key] = pd.DataFrame.from_dict(dic_ems['flexopts'][key])
-
-    return dic_ems
-
-
-def ems_write(dict_ems, path):
     # change index to lists
-    dict_ems['time_data']['time_slots'] = list(dict_ems['time_data']['time_slots'])
+    ems['time_data']['time_slots'] = list(ems['time_data']['time_slots'])
     with open(path, 'w') as f:
         # change dataframe format to dict
-        for key in dict_ems['flexopts']:
-            if not isinstance(dict_ems['flexopts'][key], dict):
-                dict_ems['flexopts'][key] = dict_ems['flexopts'][key].to_dict('dict')
-        js.dump(dict_ems, f)
-    # print('complete saving EMS_data!!! ')
+        for key in ems['flexopts']:
+            if not isinstance(ems['flexopts'][key], dict):
+                ems['flexopts'][key] = ems['flexopts'][key].to_dict('dict')
+        js.dump(ems, f)
+    print('complete saving EMS_data!!! ')
 
 
-def update_time_data(dict_ems):
+def init_ems_js(path=None):
+    """ initialize the ems object by json file
+
+    :param path: path of the json file
+    :return: ems object
+    """
+    # initialize the opentumflex by user input
+    with open(path) as f:
+        ems = js.load(f)
+        # convert flexopts from dict to dataframe
+        for key in ems['flexopts']:
+            ems['flexopts'][key] = pd.DataFrame.from_dict(ems['flexopts'][key])
+
+    return ems
+
+
+def update_time_data(ems):
+    """ calculate the remaining time settings based on the user input
+
+    :param ems: ems object
+    :return:
+    """
     # update opentumflex["time_data"], add new parameters: time_slots, nsteps, ntsteps
-    dict_time = dict_ems['time_data']
+    dict_time = ems['time_data']
+    # form the time slots
     dict_time['time_slots'] = pd.date_range(start=dict_time['start_time'], end=dict_time['end_time'],
                                             freq=str(dict_time['t_inval']) + 'min').strftime('%Y-%m-%d %H:%M')
 
     dict_time['isteps'] = 0
+    # calculate the total time steps
     dict_time['nsteps'] = len(dict_time['time_slots'])
-    dict_time['ntsteps'] = int(60 / dict_ems['time_data']['t_inval'])
+    # calculate the time steps in each hour
+    dict_time['ntsteps'] = int(60 / ems['time_data']['t_inval'])
+
     dict_time_data = {'time_data': dict_time}
+
     return dict_time_data
 
 
-def read_data(my_ems, path=None, to_csv=False, fcst_only=True):
-    # Initialize EMS
-    initialize_ems(my_ems)
+def read_data(ems, path=None, to_csv=False, fcst_only=True):
+    """ read device parameters or forecasting data from input file
+
+    :param ems: ems object
+    :param path: path of the input data
+    :param to_csv: determine if csv data will be created
+    :param fcst_only: if False,  forecasting data and device parameters will be read, otherwise only forecasting data
+    :return: ems object updated by the input data
+    """
+
     # Check for the file type 
     if path.endswith('.xlsx'):
         print('Reading your excel file, please wait!')
         if not fcst_only:
+            # obtain the spreadsheet data
             xls = pd.ExcelFile(path)
+            # read device parameters
             prop = pd.read_excel(xls, sheet_name='properties', index_col=0, usecols=range(0, 3))
-            read_properties(my_ems, prop)
-        ts = pd.read_excel(xls, sheet_name='time_series', usecols='B:I', nrows=my_ems['time_data']['nsteps'])
-        my_ems['fcst'] = read_forecast(ts)
+            read_properties(ems, prop)
+        # read forecasting data and write it into ems object
+        ts = pd.read_excel(xls, sheet_name='time_series', usecols='B:I', nrows=ems['time_data']['nsteps'])
+        ems['fcst'] = read_forecast(ts)
         # Save excel file as CSV
         if to_csv:
             basename = os.path.basename(path)
@@ -111,60 +104,49 @@ def read_data(my_ems, path=None, to_csv=False, fcst_only=True):
         csv_data = pd.read_csv(path, sep=';', index_col=0)
         prop = csv_data.iloc[:, 0:2].dropna(how='all')
         ts = csv_data.iloc[:, 2:].dropna(how='all')
+        # read device parameters
         if not fcst_only:
-            read_properties(my_ems, prop)
-        my_ems['fcst'] = read_forecast(ts)
+            read_properties(ems, prop)
+        # read forecasting data and write it into ems object
+        ems['fcst'] = read_forecast(ts)
 
     else:
         print('Input file format is not accepted, Exit call')
 
-    return my_ems
+    return ems
 
 
+def read_forecast(excel_data):
+    """ read the forecasting data from spreadsheet
 
-def initialize_ems(my_ems):
-    key_new = {'devices': {}, 'flexopts': {}, 'optplan': {}, 'reoptim': {}}
-    my_ems.update(key_new)
-    dict_devices_normal = ['hp', 'boiler', 'pv', 'sto', 'bat']
-    for device_name in dict_devices_normal:
-        my_ems['devices'].update(devices(device_name=device_name, minpow=0, maxpow=0))
-        my_ems['devices'].update(devices(device_name='chp', minpow=0, maxpow=0, eta=[0.5, 0.5]))
-        my_ems['devices'].update(devices(device_name='ev', minpow=0, maxpow=0, stocap=0, eta=0.98,
-                                         init_soc=[20], end_soc=[20],
-                                         ev_aval=[my_ems['time_data']['start_time'],
-                                                  my_ems['time_data']['end_time']],
-                                         timesetting=my_ems['time_data']))
-
-
-def read_forecast(ts):
-    dict_fcst = ts.to_dict('dict')
+    :param excel_data: excel_data sheet 'time_series'
+    :return: dictionary of forecasting data
+    """
+    dict_fcst = excel_data.to_dict('dict')
     for key in dict_fcst:
         dict_fcst[key] = list(dict_fcst[key].values())
 
     return dict_fcst
 
 
-def read_properties(my_ems, prop):
+def read_properties(ems, prop):
+    """ read the device parameters from spreadsheet
+
+    :param ems: ems object
+    :param prop:  device parameters from input file
+    :return: None
+    """
     data_index = prop.index.unique()
-    device_set = my_ems['devices']
+    device_set = ems['devices']
+    # iterate through all the device parameters and write it into dictionary device_set
     for i in range(0, len(data_index)):
         dat = prop[prop.index == data_index[i]].set_index('parameter')
         dat_T = dat.T
         dat_T.reset_index(inplace=True, drop=True)
         device_set[data_index[i]].update(dat_T.to_dict('records')[0])
-    my_ems['devices'] = device_set
+    ems['devices'] = device_set
 
     # Changing EV input to list
-    my_ems['devices']['ev']['initSOC'] = [my_ems['devices']['ev']['initSOC']]
-    my_ems['devices']['ev']['endSOC'] = [my_ems['devices']['ev']['endSOC']]
+    ems['devices']['ev']['initSOC'] = [ems['devices']['ev']['initSOC']]
+    ems['devices']['ev']['endSOC'] = [ems['devices']['ev']['endSOC']]
 
-
-if __name__ == '__main__':
-    c = ems(initialize=True, path='../opentumflex/ems_test_02_wopt.txt')
-    c['time_data'] = {}
-    c['time_data']['nsteps'] = 24
-    c['time_data']['ntsteps'] = 1
-    c['time_data']['t_inval'] = 60
-    c['time_data']['d_inval'] = 15
-    c['time_data']['days'] = 1
-    ems_write(c, path='../opentumflex/test_time.txt')

@@ -11,7 +11,7 @@ __maintainer__ = "Babu Kumaran Nalini"
 __email__ = "babu.kumaran-nalini@tum.de"
 __status__ = "Development"
 
-from opentumflex.configuration.init_ems import ems as ems_loc
+from opentumflex.configuration.init_ems import init_ems_js as ems_loc
 # from opentumflex.flex.flex_draw import plot_flex as plot_flex
 import pandas as pd
 

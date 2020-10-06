@@ -1,3 +1,16 @@
+"""
+The "model.py" define functions which create and solve Pyomo models
+"""
+
+__author__ = "Zhengjie You"
+__copyright__ = "2020 TUM-EWK"
+__credits__ = []
+__license__ = "GPL v3.0"
+__version__ = "1.0"
+__maintainer__ = "Zhengjie You"
+__email__ = "zhengjie.you@tum.de"
+__status__ = "Development"
+
 import pyomo.core as pyen
 from pyomo.opt import SolverFactory
 from pyomo.environ import value as get_value
@@ -436,7 +449,7 @@ def create_model(ems_local):
     return m
 
 
-def solve_model(m, solver, time_limit=100, min_gap=0.001):
+def solve_model(m, solver, time_limit=100, min_gap=0.001, troubleshooting=True):
     """ solve the optimization problem and save the results in instance m
     Args:
         - m: optimization model instance
@@ -450,7 +463,7 @@ def solve_model(m, solver, time_limit=100, min_gap=0.001):
     solver_opt = dict()
     solver_opt['mipgap'] = min_gap
     # optimizer.solve(m, load_solutions=True, options=solver_opt, tee=True)
-    optimizer.solve(m, load_solutions=True, options=solver_opt, tee=True, timelimit=time_limit)
+    optimizer.solve(m, load_solutions=True, options=solver_opt, tee=troubleshooting, timelimit=time_limit)
 
     return m
 

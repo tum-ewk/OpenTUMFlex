@@ -11,6 +11,14 @@ def save_results(ems, path):
         - path: path where the results data is to be saved, e.g. path= r'tests\data'
 
     """
+
+    try:
+        os.mkdir(path)
+    except OSError:
+        print("Opmtization result are being saved in %s" % path)
+    else:
+        print("Successfully created the directory %s " % path)
+
     now = datetime.now().strftime('%Y%m%dT%H%M')
     resultfile = os.path.join(path, 'result_optimization_{}.xlsx'.format(now))
     writer = pd.ExcelWriter(resultfile)

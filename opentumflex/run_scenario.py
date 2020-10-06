@@ -5,7 +5,8 @@ import opentumflex
 import os
 
 
-def run_scenario(scenario, path_input, path_results, fcst_only=True, time_limit=30):
+def run_scenario(scenario, path_input, path_results, fcst_only=True, time_limit=30, troubleshooting=True,
+                 show_opt_res=True, show_flex_res=True):
     """ run an OpenTUMFlex model for given scenario
 
     Args:
@@ -35,13 +36,14 @@ def run_scenario(scenario, path_input, path_results, fcst_only=True, time_limit=
     m = opentumflex.create_model(my_ems)
 
     # solve the optimization problem
-    m = opentumflex.solve_model(m, solver='glpk', time_limit=time_limit)
+    m = opentumflex.solve_model(m, solver='glpk', time_limit=time_limit, troubleshooting=troubleshooting)
 
     # extract the results from model and store them in opentumflex['optplan'] dictionary
     my_ems = opentumflex.extract_res(m, my_ems)
 
     # visualize the optimization results
-    opentumflex.plot_optimal_results(my_ems)
+    if show_opt_res:
+        opentumflex.plot_optimal_results(my_ems)
 
     # save the data in .xlsx in given path
     opentumflex.save_results(my_ems, path_results)
@@ -54,11 +56,12 @@ def run_scenario(scenario, path_input, path_results, fcst_only=True, time_limit=
     my_ems = opentumflex.calc_flex_pv(my_ems, reopt=False)
 
     # plot the results of flexibility calculation
-    opentumflex.plot_flex(my_ems, "hp")
-    opentumflex.plot_flex(my_ems, "ev")
-    opentumflex.plot_flex(my_ems, "pv")
-    opentumflex.plot_flex(my_ems, "bat")
-    opentumflex.plot_flex(my_ems, "chp")
+    if show_flex_res:
+        opentumflex.plot_flex(my_ems, "hp")
+        opentumflex.plot_flex(my_ems, "ev")
+        opentumflex.plot_flex(my_ems, "pv")
+        opentumflex.plot_flex(my_ems, "bat")
+        opentumflex.plot_flex(my_ems, "chp")
 
     return my_ems
 
@@ -66,9 +69,9 @@ def run_scenario(scenario, path_input, path_results, fcst_only=True, time_limit=
 if __name__ == '__main__':
 
     base_dir = os.path.abspath(os.getcwd())
-    input_file = r'\..\tests\data\input_data.csv'
-    output_dir = r'\..\tests\results'
+    input_file = r'\..\input\input_data.csv'
+    output_dir = r'\..\results'
     path_input_data = base_dir + input_file
     path_results = base_dir + output_dir
 
-    ems = run_scenario(opentumflex.scenario_hp01, path_input_data, path_results, fcst_only=True, time_limit=10)
+    ems = run_scenario(opentumflex.scenario_hp01, path_input_data, path_results, fcst_only=True, time_limit=10, troubleshooting=True)
