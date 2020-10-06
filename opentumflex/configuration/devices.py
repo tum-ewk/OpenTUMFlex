@@ -18,8 +18,25 @@ import datetime
 from scipy.interpolate import UnivariateSpline
 
 
-def devices(device_name, minpow=0, maxpow=0, stocap=0, eta=1, init_soc=20, end_soc=40, ev_aval=None,
-            supply_temp=45, timesetting=96, sto_volume=0, path=None):
+def create_device(device_name, minpow=0, maxpow=0, stocap=0, eta=1, init_soc=20, end_soc=40, ev_aval=None,
+                  supply_temp=45, timesetting=None, sto_volume=0, path=None):
+    """ create_device will create one of five devices (hp, chp, ev, pv, bat) based on user input or json file
+
+    :param device_name: name of the device, e.g. hp, chp, ev...
+    :param minpow: minimum power
+    :param maxpow: maximum power
+    :param stocap: capacity of heat storage, battery or ev
+    :param eta: efficiency
+    :param init_soc: initial state of charge
+    :param end_soc:  end state of charge
+    :param ev_aval: availability of ev
+    :param supply_temp: supply temperature of hp
+    :param timesetting: time settings same as the ones of the ems object
+    :param sto_volume: the heat capacity of heat storage calculated by the storage volume (if stocap is None)
+    :param path: path of the json file which initialize the device by saved data instead of user input
+    :return: dictionary filled with parameters of one device
+    """
+
     # define general unit parameters
     unit = {'minpow': minpow,
             'maxpow': maxpow,
@@ -27,7 +44,7 @@ def devices(device_name, minpow=0, maxpow=0, stocap=0, eta=1, init_soc=20, end_s
             'initSOC': init_soc,
             'eta': eta
             }
-    
+
     # use case for heat pump
     if device_name == 'hp':
 
@@ -36,14 +53,6 @@ def devices(device_name, minpow=0, maxpow=0, stocap=0, eta=1, init_soc=20, end_s
             # typical heat pump power map
             temp_supply = [288.15, 308.15, 318.15, 328.15, 333.15]
             # 45 C supply temperature
-            # hp_q = pd.DataFrame({'266.15': [4.8, 4.8, 4.8],
-            #                      '275.15': [6.0, 6.0, 6.0],
-            #                      '280.15': [7.5, 7.5, 7.5],
-            #                      '288.15': [9.2, 9.2, 9.2],
-            #                      '293.15': [9.9, 9.9, 9.9],
-            #                      }, index=temp_supply
-            #                     )
-            # 20 C supply temperature
             hp_q = pd.DataFrame({'266.15': [6, 5.2, 4.8, 4.2, 3.9],
                                  '275.15': [7.5, 6.5, 6.0, 5.3, 5.0],
                                  '280.15': [9.0, 8.0, 7.5, 6.8, 6.5],
@@ -180,93 +189,93 @@ def devices(device_name, minpow=0, maxpow=0, stocap=0, eta=1, init_soc=20, end_s
             dict_unit_ev = {device_name: dict_ev}
 
         return dict_unit_ev
-    
+
     # use case for electric vehicle
-    #use ev_new when importing data from excel
-    elif device_name == 'ev_new':        
-        device_name = 'ev'   
+    # use ev_new when importing data from excel
+    elif device_name == 'ev_new':
+        device_name = 'ev'
         nsteps = timesetting['nsteps']
-        ev_aval_list = {'timeStamp':timesetting['time_slots'].to_list(),'ev_aval':ev_aval}
-        ev_aval = pd.DataFrame(ev_aval_list)               
+        ev_aval_list = {'timeStamp': timesetting['time_slots'].to_list(), 'ev_aval': ev_aval}
+        ev_aval = pd.DataFrame(ev_aval_list)
         aval = ev_aval['ev_aval'].values.tolist()
         init_soc_check = np.zeros(nsteps) + 100
         end_soc_check = np.zeros(nsteps)
-        node= []
-        
-        #checking no. of changes in the column: ev_aval from 0 to 1
+        node = []
+
+        # checking no. of changes in the column: ev_aval from 0 to 1
         change_toOne = 0
         ev_column = ev_aval['ev_aval']
         length = len(ev_column.index)
         for i in range(length):
-            if i<nsteps-1:
-                if ev_column[i] == 1 and i==0:
-                    change_toOne = change_toOne +1
+            if i < nsteps - 1:
+                if ev_column[i] == 1 and i == 0:
+                    change_toOne = change_toOne + 1
                     node.append(i)
-                elif ev_column[i] < ev_column[i+1]:
-                    change_toOne = change_toOne +1
+                elif ev_column[i] < ev_column[i + 1]:
+                    change_toOne = change_toOne + 1
                     node.append(i)
 
         # print(change_toOne)
-        init_soc= []
+        init_soc = []
         for p in range(change_toOne):
             init_soc.append(40)
         if change_toOne == 0:
-            init_soc.append(0)            
-            
-        #for change from 0 to 1: updating init_soc_check
-        j=0
-        aval_time_init =[]
-        for i in range(length):
-            if i<nsteps-1:
-                if ev_column[i] == 1 and i==0:
-                    init_soc_check[i]= init_soc[j]
-                    aval_time_init.append(ev_aval['timeStamp'][i])
-                    j+=1
-                elif ev_column[i] < ev_column[i+1]:
-                    init_soc_check[i]= init_soc[j]                      
-                    aval_time_init.append(ev_aval['timeStamp'][i+1])
-                    j+=1
-        if len(aval_time_init) == 0:
-            aval_time_init.append(ev_aval['timeStamp'][0]) ##edit
+            init_soc.append(0)
 
-        #checking no. of changes in the column: ev_aval from 1 to 0   
+            # for change from 0 to 1: updating init_soc_check
+        j = 0
+        aval_time_init = []
+        for i in range(length):
+            if i < nsteps - 1:
+                if ev_column[i] == 1 and i == 0:
+                    init_soc_check[i] = init_soc[j]
+                    aval_time_init.append(ev_aval['timeStamp'][i])
+                    j += 1
+                elif ev_column[i] < ev_column[i + 1]:
+                    init_soc_check[i] = init_soc[j]
+                    aval_time_init.append(ev_aval['timeStamp'][i + 1])
+                    j += 1
+        if len(aval_time_init) == 0:
+            aval_time_init.append(ev_aval['timeStamp'][0])  ##edit
+
+        # checking no. of changes in the column: ev_aval from 1 to 0
         change_toZero = 0
         for i in range(length):
-            if i<nsteps-1:
-                if ev_column[i] > ev_column[i+1]:
-                    change_toZero = change_toZero +1
-                    node.append(i+1)
-            elif ev_column[i]==1 and i==nsteps-1:
-                change_toZero = change_toZero +1
+            if i < nsteps - 1:
+                if ev_column[i] > ev_column[i + 1]:
+                    change_toZero = change_toZero + 1
+                    node.append(i + 1)
+            elif ev_column[i] == 1 and i == nsteps - 1:
+                change_toZero = change_toZero + 1
                 node.append(i)
 
         # print(change_toZero)
-        end_soc= []
+        end_soc = []
         for q in range(change_toZero):
             end_soc.append(60)
         if change_toZero == 0:
             end_soc.append(0)
-      
-        #for change from 1 to 0: updating end_soc_check
-        k=0
-        aval_time_end =[]
+
+        # for change from 1 to 0: updating end_soc_check
+        k = 0
+        aval_time_end = []
         for i in range(length):
-            if i<nsteps-1:
-                if ev_column[i] > ev_column[i+1]:
-                    end_soc_check[i]= end_soc[k]
-                    aval_time_end.append(ev_aval['timeStamp'][i+1])
+            if i < nsteps - 1:
+                if ev_column[i] > ev_column[i + 1]:
+                    end_soc_check[i] = end_soc[k]
+                    aval_time_end.append(ev_aval['timeStamp'][i + 1])
                     if k == change_toZero - 1:
                         end_soc_check[i:] = end_soc[k]
-                    k+=1 
+                    k += 1
         if len(aval_time_end) == 0:
             aval_time_end.append(ev_aval['timeStamp'][0])
         if len(aval_time_init) > len(aval_time_end):
-            end_soc_check[nsteps-1]= end_soc[k]
-            aval_time_end.append(ev_aval['timeStamp'][nsteps-1])
-            
+            end_soc_check[nsteps - 1] = end_soc[k]
+            aval_time_end.append(ev_aval['timeStamp'][nsteps - 1])
+
         node.sort()
-       
-        unit.update({'initSOC': init_soc,'endSOC': end_soc, 'aval': aval, 'aval_init': list(aval_time_init),
+
+        unit.update({'initSOC': init_soc, 'endSOC': end_soc, 'aval': aval, 'aval_init': list(aval_time_init),
                      'aval_end': list(aval_time_end),
                      'init_soc_check': list(init_soc_check),
                      'end_soc_check': list(end_soc_check), 'node': list(node)})
@@ -296,19 +305,19 @@ def devices(device_name, minpow=0, maxpow=0, stocap=0, eta=1, init_soc=20, end_s
             dict_unit_sto = {device_name: dict_sto}
 
         return dict_unit_sto
-    
+
     # Update device: PV
     elif device_name == 'pv':
         df_unit_pv = {"maxpow": maxpow,
-                    "minpow": minpow,
-                    "eta": eta }                   
-        dict_pv = {device_name: df_unit_pv}    
+                      "minpow": minpow,
+                      "eta": eta}
+        dict_pv = {device_name: df_unit_pv}
         return dict_pv
-    
+
     # Update device: Bat
     elif device_name == 'bat':
-        df_unit_bat = unit                  
-        dict_bat = {device_name: df_unit_bat}    
+        df_unit_bat = unit
+        dict_bat = {device_name: df_unit_bat}
         return dict_bat
 
     # for other situations: battery, chp, pv
@@ -327,34 +336,18 @@ def devices(device_name, minpow=0, maxpow=0, stocap=0, eta=1, init_soc=20, end_s
         return dict_unit
 
 
-def device_write(dict_ems, device_name, path):
+def save_device(ems, device_name, path):
+    """ save the device parameters data into json file
+
+    :param ems: ems object
+    :param device_name: name of the device, e.g. hp, chp, ev...
+    :param path: path in which the json file is to be saved
+    :return: None
+    """
+
     # write parameters of other devices in js file
-    device_unit = dict_ems['devices'][device_name]
+    device_unit = ems['devices'][device_name]
 
     # open the file and write in the data
     with open(path, 'w') as f:
         js.dump(device_unit, f)
-
-
-if __name__ == '__main__':
-    ev_aval_date = ["2019-11-30 11:15", "2019-12-02 8:45"]
-    ev_aval = [datetime.datetime.strptime(x, '%Y-%m-%d %H:%M') for x in ev_aval_date]
-    points = int(len(ev_aval) / 2)
-    xx = ev_aval[1] - ev_aval[0]
-    a = xx.seconds / 3600
-
-    # timesteps = 96
-    # aval = np.zeros(timesteps)
-    #
-    # idx = 0
-    # for i in range(points):
-    #     aval_start = int(ev_aval[idx].hour * 4 + ev_aval[idx].minute / 15)
-    #     aval_end = int(ev_aval[idx + 1].hour * 4 + ev_aval[idx + 1].minute / 15 - 1)
-    #     aval[aval_start:aval_end + 1] = 1
-    #     idx = idx + 2
-
-    # count = raw_input('Number of variables:')
-# for i in my_ems1['devices'].keys():
-#     exec('var_' + str(i) + ' = ' + str(my_ems1['devices'][i]))
-
-# device_write(my_ems1, 'bat', path='C:/Users/ge57vam/emsflex/opentumflex/bat01_ems.txt')
