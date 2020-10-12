@@ -1,3 +1,16 @@
+"""
+The "report.py" saves the optimization results in given path as spreadsheet
+"""
+
+__author__ = "Zhengjie You"
+__copyright__ = "2020 TUM-EWK"
+__credits__ = []
+__license__ = "GPL v3.0"
+__version__ = "1.0"
+__maintainer__ = "Zhengjie You"
+__email__ = "zhengjie.you@tum.de"
+__status__ = "Development"
+
 from datetime import datetime
 import os
 import pandas as pd

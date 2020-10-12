@@ -1,3 +1,17 @@
+"""
+The "run_scenarios.py" execute all the functional modules within opentumflex folder including initialization,
+optimization, flexibility calculation...
+"""
+
+__author__ = "Zhengjie You"
+__copyright__ = "2020 TUM-EWK"
+__credits__ = []
+__license__ = "GPL v3.0"
+__version__ = "1.0"
+__maintainer__ = "Zhengjie You"
+__email__ = "zhengjie.you@tum.de"
+__status__ = "Development"
+
 # new modules
 import opentumflex
 

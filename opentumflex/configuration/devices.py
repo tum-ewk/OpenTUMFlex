@@ -1,5 +1,6 @@
 """
-The "devices.py" module can initialize devices with default or customized parameters
+The "devices.py" module can initialize devices with default or customized parameters or save parameter data to local
+file
 """
 
 __author__ = "Zhengjie You"

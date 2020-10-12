@@ -1,3 +1,17 @@
+"""
+The "set_time.py" can initialize and configure the time settings. Besides, it can update all the devices with default
+values
+"""
+
+__author__ = "Zhengjie You"
+__copyright__ = "2020 TUM-EWK"
+__credits__ = []
+__license__ = "GPL v3.0"
+__version__ = "1.0"
+__maintainer__ = "Zhengjie You"
+__email__ = "zhengjie.you@tum.de"
+__status__ = "Development"
+
 from opentumflex.configuration.init_ems import update_time_data
 from opentumflex.configuration.devices import create_device
 

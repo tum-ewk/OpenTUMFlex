@@ -1,9 +1,20 @@
 # -*- coding: utf-8 -*-
 """
-opentumflex(energy management system) is the module to document the ems_ID, user_preference, flexibility_product_type and time interval.
-Besides, all the information from modules of devices parameters, optimal operational plan and flexibility shall also stored in the opentumflex module for a better
-overview and quick search of the needed data.
+init_ems.py is the module to initialize and save ems object. It also includes the functions reading forecasting data and
+device parameters.
+Besides, all the information from modules of devices parameters, optimal operational plan and flexibility shall also
+stored in the ems object for a better overview and quick search of the needed data.
 """
+
+__author__ = "Zhengjie You"
+__copyright__ = "2020 TUM-EWK"
+__credits__ = []
+__license__ = "GPL v3.0"
+__version__ = "1.0"
+__maintainer__ = "Zhengjie You"
+__email__ = "zhengjie.you@tum.de"
+__status__ = "Development"
+
 
 import pandas as pd
 import json as js
