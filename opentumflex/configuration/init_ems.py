@@ -81,9 +81,9 @@ def read_data(ems, path=None, to_csv=False, fcst_only=True):
     # Check for the file type 
     if path.endswith('.xlsx'):
         print('Reading your excel file, please wait!')
-        if not fcst_only:
-            # obtain the spreadsheet data
-            xls = pd.ExcelFile(path)
+        # obtain the spreadsheet data
+        xls = pd.ExcelFile(path)
+        if not fcst_only:            
             # read device parameters
             prop = pd.read_excel(xls, sheet_name='properties', index_col=0, usecols=range(0, 3))
             read_properties(ems, prop)
@@ -94,11 +94,14 @@ def read_data(ems, path=None, to_csv=False, fcst_only=True):
         if to_csv:
             basename = os.path.basename(path)
             filename = os.path.splitext(basename)[0] + '.csv'
-            if not os.path.exists('data'):
-                os.mkdir('data')
-            directory = os.path.join(r'data', filename)
+            if not os.path.exists('input'):
+                os.mkdir('input')
+            directory = os.path.join(r'input', filename)
             with open(directory, 'w') as f:
-                pd.concat([prop, ts], sort=False).to_csv(f, sep=';')
+                if not fcst_only:
+                    pd.concat([prop, ts], sort=False).to_csv(f, sep=';')
+                else:
+                    ts.to_csv(f, sep=';')
 
     elif path.endswith('.csv'):
         csv_data = pd.read_csv(path, sep=';', index_col=0)
