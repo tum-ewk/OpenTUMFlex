@@ -44,35 +44,39 @@ def run_scenario(scenario, path_input, path_results, fcst_only=True, time_limit=
     # visualize the optimization results
     if show_opt_res:
         opentumflex.plot_optimal_results(my_ems)
-    
+
     # save the data in .xlsx in given path
-    if save_opt_res:    
+    if save_opt_res:
         opentumflex.save_results(my_ems, path_results)
 
     # calculate the flexibility
-    my_ems = opentumflex.calc_flex_hp(my_ems, reopt=False)
-    my_ems = opentumflex.calc_flex_ev(my_ems, reopt=False)
-    my_ems = opentumflex.calc_flex_chp(my_ems)
-    my_ems = opentumflex.calc_flex_bat(my_ems, reopt=False)
-    my_ems = opentumflex.calc_flex_pv(my_ems, reopt=False)
+    # create a group of all flex calculators
+    calc_flex = {opentumflex.calc_flex_hp: 'hp',
+                 opentumflex.calc_flex_ev: 'ev',
+                 opentumflex.calc_flex_chp: 'chp',
+                 opentumflex.calc_flex_bat: 'bat',
+                 opentumflex.calc_flex_pv: 'pv'}
+
+    # iterate through all the flexibility functions
+    for function, device_name in calc_flex.items():
+        if my_ems['devices'][device_name]['maxpow'] != 0:
+            function(my_ems, reopt=False)
 
     # plot the results of flexibility calculation
     if show_flex_res:
-        opentumflex.plot_flex(my_ems, "hp")
-        opentumflex.plot_flex(my_ems, "ev")
-        opentumflex.plot_flex(my_ems, "pv")
-        opentumflex.plot_flex(my_ems, "bat")
-        opentumflex.plot_flex(my_ems, "chp")
+        for device_name in calc_flex.values():
+            if my_ems['devices'][device_name]['maxpow'] != 0:
+                opentumflex.plot_flex(my_ems, device_name)
 
     return my_ems
 
 
 if __name__ == '__main__':
-
     base_dir = os.path.abspath(os.getcwd())
     input_file = r'\..\input\input_data.csv'
     output_dir = r'\..\results'
     path_input_data = base_dir + input_file
     path_results = base_dir + output_dir
 
-    ems = run_scenario(opentumflex.scenario_hp01, path_input_data, path_results, fcst_only=True, time_limit=10, troubleshooting=True)
+    ems = run_scenario(opentumflex.scenario_hp01, path_input_data, path_results, fcst_only=True, time_limit=10,
+                       troubleshooting=True)

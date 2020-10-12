@@ -38,7 +38,7 @@ def calc_flex_hp(ems, reopt):  # datafram open and br   eak it down
     hp_operation = optm_df['HP_operation']
     hp_heat_ifrun = optm_df['HP_heat_run']
     hp_elec_ifrun = optm_df['HP_ele_run']
-    hp_p_map = pd.DataFrame.from_dict(ems['devices']['hp']['maxpow'])
+    hp_p_map = pd.DataFrame.from_dict(ems['devices']['hp']['powmap'])
     hp_cop_map = pd.DataFrame.from_dict(ems['devices']['hp']['COP'])
     hp_heat_pow = hp_operation * hp_heat_ifrun
     hp_elec_pow = hp_operation * hp_elec_ifrun

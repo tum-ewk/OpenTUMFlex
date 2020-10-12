@@ -105,7 +105,7 @@ def create_model(ems_local):
     chp_elec_cap = chp_param['maxpow']
     # heat pump
     hp_param = devices['hp']
-    hp_elec_cap = pd.DataFrame.from_dict(hp_param['maxpow'])
+    hp_elec_cap = pd.DataFrame.from_dict(hp_param['powmap'])
     hp_cop = pd.DataFrame.from_dict(hp_param['COP'])
     hp_supply_temp = hp_param['supply_temp']
     hp_themInertia = hp_param['thermInertia']

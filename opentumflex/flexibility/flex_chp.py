@@ -19,7 +19,7 @@ import heapq
 from opentumflex.configuration.init_ems import init_ems_js as ems_loc
 
 
-def calc_flex_chp(ems):  # datafram open and break it down
+def calc_flex_chp(ems, reopt=False):  # datafram open and break it down
 
     optm_df = pd.DataFrame.from_dict(ems['optplan'])
     timesteps = len(optm_df['CHP_operation'])

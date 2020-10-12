@@ -90,7 +90,9 @@ def create_device(device_name, minpow=0, maxpow=0, stocap=0, eta=1, init_soc=20,
             fact_p = maxpow / hp_p.loc[supply_temp, '275.15']  # obtain the scaling factor
 
             # change the DataFrame to Dict
-            unit.update({'maxpow': hp_p.multiply(fact_p).to_dict('dict'), 'COP': hp_cop.to_dict('dict'),
+            unit.update({'powmap': hp_p.multiply(fact_p).to_dict('dict'),
+                         'maxpow': maxpow,
+                         'COP': hp_cop.to_dict('dict'),
                          'supply_temp': supply_temp,
                          'thermInertia': 50, 'minTemp': 20, 'maxTemp': 26, 'heatgain': 0.1})
             df_unit_hp = unit
