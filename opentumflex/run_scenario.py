@@ -6,7 +6,7 @@ import os
 
 
 def run_scenario(scenario, path_input, path_results, fcst_only=True, time_limit=30, troubleshooting=True,
-                 show_opt_res=True, show_flex_res=True):
+                 show_opt_res=True, show_flex_res=True, save_opt_res=True, convert_input_tocsv=True):
     """ run an OpenTUMFlex model for given scenario
 
     Args:
@@ -27,7 +27,7 @@ def run_scenario(scenario, path_input, path_results, fcst_only=True, time_limit=
     my_ems = opentumflex.initialize_time_setting(t_inval=15, start_time='2019-12-18 00:00', end_time='2019-12-18 23:45')
 
     # read devices parameters and forecasting data from xlsx or csv file
-    my_ems = opentumflex.read_data(my_ems, path_input, fcst_only=fcst_only, to_csv=True)
+    my_ems = opentumflex.read_data(my_ems, path_input, fcst_only=fcst_only, to_csv=convert_input_tocsv)
 
     # modify the opentumflex regarding to predefined scenario
     my_ems = scenario(my_ems)
@@ -44,9 +44,10 @@ def run_scenario(scenario, path_input, path_results, fcst_only=True, time_limit=
     # visualize the optimization results
     if show_opt_res:
         opentumflex.plot_optimal_results(my_ems)
-
+    
     # save the data in .xlsx in given path
-    opentumflex.save_results(my_ems, path_results)
+    if save_opt_res:    
+        opentumflex.save_results(my_ems, path_results)
 
     # calculate the flexibility
     my_ems = opentumflex.calc_flex_hp(my_ems, reopt=False)

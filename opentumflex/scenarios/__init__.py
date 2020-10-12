@@ -2,5 +2,5 @@
 
 """
 
-from .scenarios import scenario_hp01
+from .scenarios import *
 
