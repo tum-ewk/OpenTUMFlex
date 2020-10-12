@@ -51,8 +51,10 @@ def create_device(device_name, minpow=0, maxpow=0, stocap=0, eta=1, init_soc=20,
         # if no predefined device data is available:
         if path is None:
             # typical heat pump power map
+            # supply temperature series
             temp_supply = [288.15, 308.15, 318.15, 328.15, 333.15]
-            # 45 C supply temperature
+
+            # thermal power map according to supply and ambient temperature
             hp_q = pd.DataFrame({'266.15': [6, 5.2, 4.8, 4.2, 3.9],
                                  '275.15': [7.5, 6.5, 6.0, 5.3, 5.0],
                                  '280.15': [9.0, 8.0, 7.5, 6.8, 6.5],
@@ -60,6 +62,7 @@ def create_device(device_name, minpow=0, maxpow=0, stocap=0, eta=1, init_soc=20,
                                  '293.15': [11.7, 10.5, 9.9, 9.2, 8.9],
                                  }, index=temp_supply
                                 )
+            # electric power map according to supply and ambient temperature
             hp_p = pd.DataFrame({'266.15': [1.5, 1.8, 1.9, 2.0, 2.1],
                                  '275.15': [1.6, 1.9, 2.1, 2.1, 2.1],
                                  '280.15': [1.6, 2.0, 2.3, 2.4, 2.4],
@@ -68,6 +71,7 @@ def create_device(device_name, minpow=0, maxpow=0, stocap=0, eta=1, init_soc=20,
                                  }, index=temp_supply
                                 )
 
+            # calculate and add new thermal and electric power data for heat pump under the supply temperature by input
             def modify_hp_data(data_original, temperature):
                 temp_data = data_original
                 value = np.zeros(temp_data.shape[1])
@@ -78,11 +82,12 @@ def create_device(device_name, minpow=0, maxpow=0, stocap=0, eta=1, init_soc=20,
                 temp_data.loc[temperature] = value
                 return temp_data.sort_index()
 
+            # modify the power map of HP by user input
             supply_temp = supply_temp + 273.15  # convert from grad celsius to kelvin
             hp_q = modify_hp_data(hp_q, supply_temp)
             hp_p = modify_hp_data(hp_p, supply_temp)
-            hp_cop = hp_q.div(hp_p)
-            fact_p = maxpow / hp_p.loc[supply_temp, '275.15']
+            hp_cop = hp_q.div(hp_p)  # calculate the COP
+            fact_p = maxpow / hp_p.loc[supply_temp, '275.15']  # obtain the scaling factor
 
             # change the DataFrame to Dict
             unit.update({'maxpow': hp_p.multiply(fact_p).to_dict('dict'), 'COP': hp_cop.to_dict('dict'),
@@ -91,7 +96,7 @@ def create_device(device_name, minpow=0, maxpow=0, stocap=0, eta=1, init_soc=20,
             df_unit_hp = unit
             dict_unit_hp = {device_name: df_unit_hp}
 
-        # load the device parameters directly from local data
+        # load the device parameters directly from local data if it is available
         else:
             with open(path) as f:
                 dict_hp = js.load(f)
@@ -117,7 +122,6 @@ def create_device(device_name, minpow=0, maxpow=0, stocap=0, eta=1, init_soc=20,
 
             # create aval with the same length of time steps
             # if aval[i] == 1 means availability is True
-
             aval = np.zeros(_timesteps)
 
             # arrays for inital and end soc check
@@ -132,9 +136,9 @@ def create_device(device_name, minpow=0, maxpow=0, stocap=0, eta=1, init_soc=20,
             # start_time is the first time step for the optimization
             start_time = datetime.datetime.strptime(timesetting['start_time'], '%Y-%m-%d %H:%M')
 
+            # modify the availability formats and prepare init_soc_check/end_soc_check time series
             idx = 0
             for i in range(_points):
-
                 # obtain the start and end time step index
                 timedelta_start = _ev_aval[idx] - start_time
                 timedelta_end = _ev_aval[idx + 1] - start_time
@@ -157,7 +161,6 @@ def create_device(device_name, minpow=0, maxpow=0, stocap=0, eta=1, init_soc=20,
                 idx = idx + 2
 
             idx = 0
-
             # some procedure to obatin the nodes for the periods when the EV is not available
             for j in range(_points - 1):
                 timedelta_end = _ev_aval[idx + 1] - start_time
