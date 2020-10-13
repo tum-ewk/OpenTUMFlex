@@ -100,7 +100,7 @@ def scenario_simple_house(ems):
 
     """
     ems['devices'].update(create_device(device_name='pv', minpow=0.5, maxpow=3, eta=0.95))
-    ems['devices'].update(create_device(device_name='bat', minpow=0, maxpow=0, stocap=0, init_soc=0, eta=0.95))
+    ems['devices'].update(create_device(device_name='bat', minpow=0, maxpow=3, stocap=5, init_soc=50, eta=0.95))
     ems['devices']['sto']['maxpow'] = 10
     ems['devices']['sto']['stocap'] = 15
     ems['devices']['boiler']['maxpow'] = 6
@@ -116,7 +116,7 @@ def scenario_residential_house(ems):
 
     """
     ems['devices'].update(create_device(device_name='pv', minpow=0.5, maxpow=3, eta=0.95))
-    ems['devices'].update(create_device(device_name='bat', minpow=0, maxpow=3, stocap=0, init_soc=0, eta=0.95))
+    ems['devices'].update(create_device(device_name='bat', minpow=0, maxpow=3, stocap=5, init_soc=5, eta=0.95))
     ems['devices']['sto']['maxpow'] = 10
     ems['devices']['sto']['stocap'] = 15
     ems['devices']['boiler']['maxpow'] = 3
@@ -133,7 +133,7 @@ def scenario_mini_apartment(ems):
 
     """
     ems['devices'].update(create_device(device_name='pv', minpow=0.5, maxpow=3, eta=0.95))
-    ems['devices'].update(create_device(device_name='bat', minpow=0, maxpow=0, stocap=0, init_soc=0, eta=0.95))
+    ems['devices'].update(create_device(device_name='bat', minpow=0, maxpow=3, stocap=5, init_soc=50, eta=0.95))
     ems['devices']['sto']['maxpow'] = 10
     ems['devices']['sto']['stocap'] = 15
     ems['devices']['boiler']['maxpow'] = 3
@@ -155,7 +155,7 @@ def scenario_apartment(ems):
 
     """
     ems['devices'].update(create_device(device_name='pv', minpow=0.5, maxpow=3, eta=0.95))
-    ems['devices'].update(create_device(device_name='bat', minpow=0, maxpow=0, stocap=0, init_soc=0, eta=0.95))
+    ems['devices'].update(create_device(device_name='bat', minpow=0, maxpow=0, stocap=5, init_soc=50, eta=0.95))
     ems['devices']['chp']['maxpow'] = 2
     ems['devices']['sto']['maxpow'] = 10
     ems['devices']['sto']['stocap'] = 15

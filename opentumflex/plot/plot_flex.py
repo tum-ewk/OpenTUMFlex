@@ -1,5 +1,5 @@
 """
-The "flex_draw.py" can visualize the results of OpenTUMFlex/opentumflex
+The "plot_flex.py" can visualize the results of OpenTUMFlex/opentumflex
 """
 
 __author__ = "Babu Kumaran Nalini"

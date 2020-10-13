@@ -20,7 +20,8 @@ import os
 
 
 def run_scenario(scenario, path_input, path_results, fcst_only=True, time_limit=30, troubleshooting=True,
-                 show_opt_res=True, show_flex_res=True, save_opt_res=True, convert_input_tocsv=True):
+                 show_opt_res=True, show_flex_res=True, save_opt_res=True, show_stacked_flex=True,
+                 convert_input_tocsv=True):
     """ run an OpenTUMFlex model for given scenario
 
     Args:
@@ -81,6 +82,10 @@ def run_scenario(scenario, path_input, path_results, fcst_only=True, time_limit=
         for device_name in calc_flex.values():
             if my_ems['devices'][device_name]['maxpow'] != 0:
                 opentumflex.plot_flex(my_ems, device_name)
+                
+    # plot stacked flexibility of all devices
+    if show_stacked_flex:
+        opentumflex.plot_stacked_flex(my_ems)
 
     return my_ems
 
