@@ -86,7 +86,7 @@ def run_scenario(scenario, path_input, path_results, fcst_only=True, time_limit=
     # plot stacked flexibility of all devices
     if show_stacked_flex:
         opentumflex.plot_stacked_flex(my_ems)
-
+        opentumflex.plot_stacked_flex_price(my_ems)
     return my_ems
 
 

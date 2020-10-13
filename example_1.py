@@ -12,6 +12,7 @@ path_results = base_dir + output_dir
 ems = opentumflex.run_scenario(opentumflex.scenario_residential_house,
                                path_input=path_input_data, path_results=path_results,
                                fcst_only=True, time_limit=10,
-                               show_flex_res=True, show_opt_res=False, save_opt_res=False,
-                               convert_input_tocsv=True,
+                               show_flex_res=False, show_opt_res=False, save_opt_res=False,
+                               convert_input_tocsv=True, show_stacked_flex=False,
                                troubleshooting=False)
+

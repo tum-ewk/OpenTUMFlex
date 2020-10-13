@@ -60,7 +60,7 @@ def plot_stacked_flex(ems, reopt=0):
         # Change xtick intervals    
         req_ticks = 12   # ticks needed
         if nsteps > req_ticks:
-            plt.xticks(ts[::int(round(nsteps/req_ticks))], rotation=-45, fontsize=font_size)
+            plt.xticks(ts[::int(round(nsteps/req_ticks))], rotation=-45, ha="left", fontsize=font_size)
         else:
             plt.xticks(ts, rotation=-45, ha="left", fontsize=font_size)       
             
@@ -70,3 +70,61 @@ def plot_stacked_flex(ems, reopt=0):
         # Axis labels
         plt.ylabel("Flexibility power [kW]", fontsize=font_size)
         plt.xlabel("Time", fontsize=font_size)
+        
+        
+def plot_stacked_flex_price(ems, reopt=0):
+    """
+    
+
+    Parameters
+    ----------
+    ems : dict
+        ems model.
+    reopt : binary, optional
+        Choose between optimization or reoptimization. The default is 0.
+
+    Returns
+    -------
+    None.
+
+    """  
+    
+    nsteps = ems['time_data']['nsteps']
+    ts = ems['time_data']['time_slots'].tolist()
+    plt.figure(figsize=(12, 8))
+    font_size = 14
+    
+    if not reopt:
+        # Get required defaults
+        device = list(ems['flexopts'].keys())  
+        pos_price_max = [0]*len(ts) 
+        neg_price_min = [0]*len(ts) 
+        
+        # Loop through the device list and area plot
+        for i in range(len(device)):
+            pos_price_max = [max(value) for value in zip(pos_price_max, ems['flexopts'][device[i]]['Pos_Pr'])]
+            neg_price_min = [min(value) for value in zip(neg_price_min, ems['flexopts'][device[i]]['Neg_Pr'])]
+            
+        pos_price_min = pos_price_max
+        neg_price_max = neg_price_min
+        
+        for i in range(len(device)):
+            pos_price_min = [min(value) for value in zip(pos_price_min, ems['flexopts'][device[i]]['Pos_Pr'])]
+            neg_price_max = [max(value) for value in zip(neg_price_max, ems['flexopts'][device[i]]['Neg_Pr'])]
+            
+        # plt.fill_between(ts, pos_price_max, pos_price_min)
+        # plt.fill_between(ts, neg_price_max, neg_price_min)
+        
+        plt.plot(ts, pos_price_max)
+        plt.plot(ts, neg_price_min)
+    
+        # Change xtick intervals    
+        req_ticks = 12   # ticks needed
+        if nsteps > req_ticks:
+            plt.xticks(ts[::int(round(nsteps/req_ticks))], rotation=-45, ha="left", fontsize=font_size)
+        else:
+            plt.xticks(ts, rotation=-45, ha="left", fontsize=font_size)     
+            
+        return pos_price_max, pos_price_min, neg_price_max, neg_price_min
+    
+    
