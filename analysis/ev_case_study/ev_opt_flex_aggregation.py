@@ -111,11 +111,11 @@ def aggregate_ev_flex(veh_availabilities, output_path='output/'):
         Path(output_path + str(power) + '/Aggregated Data').mkdir(parents=True, exist_ok=True)
         # Go through all files
         for result_name in file_names:
-            my_ems_tou_mi = opentumflex.ems(initialize=True, path=output_path + str(power) + '/ToU_mi/' + result_name)
-            my_ems_tou = opentumflex.ems(initialize=True, path=output_path + str(power) + '/ToU/' + result_name)
-            my_ems_const_mi = opentumflex.ems(initialize=True, path=output_path + str(power) + '/Con_mi/' + result_name)
-            my_ems_const = opentumflex.ems(initialize=True, path=output_path + str(power) + '/Constant/' + result_name)
-            my_ems_rtp = opentumflex.ems(initialize=True, path=output_path + str(power) + '/RTP/' + result_name)
+            my_ems_tou_mi = opentumflex.init_ems_js(path=output_path + str(power) + '/ToU_mi/' + result_name)
+            my_ems_tou = opentumflex.init_ems_js(path=output_path + str(power) + '/ToU/' + result_name)
+            my_ems_const_mi = opentumflex.init_ems_js(path=output_path + str(power) + '/Con_mi/' + result_name)
+            my_ems_const = opentumflex.init_ems_js(path=output_path + str(power) + '/Constant/' + result_name)
+            my_ems_rtp = opentumflex.init_ems_js(path=output_path + str(power) + '/RTP/' + result_name)
 
             opt_result_df = pd.DataFrame({'P_ev_opt_tou_mi': my_ems_tou_mi['optplan']['EV_power'],
                                           'P_ev_opt_tou': my_ems_tou['optplan']['EV_power'],
