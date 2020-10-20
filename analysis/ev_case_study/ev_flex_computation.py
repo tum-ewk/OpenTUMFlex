@@ -50,7 +50,7 @@ def calc_ev_flex_offers(veh_availabilities,
                                                  end_time='2012-01-01 23:00')
 
     # Initialize household devices
-    opentumflex.initialize_ems(my_ems)
+    opentumflex.read_data(my_ems, 'input/input_data.xlsx', fcst_only=False, to_csv=False)
     # Reset forecasts
     my_ems['fcst'] = {}
 
@@ -99,14 +99,14 @@ def calc_ev_flex_offers(veh_availabilities,
                 my_ems['fcst']['ele_price_in'] = price_fcst[price].to_list()
 
                 # Update EV parameters
-                my_ems['devices'].update(opentumflex.devices(device_name='ev', minpow=0, maxpow=power,
-                                                             stocap=round(veh_availabilities['d_travelled'][i] *
-                                                                          conversion_distance_2_km *
-                                                                          conversion_km_2_kwh),
-                                                             init_soc=[0], end_soc=[100], eta=0.98,
-                                                             ev_aval=[my_ems['time_data']['start_time'],
-                                                                      my_ems['time_data']['end_time']],
-                                                             timesetting=my_ems['time_data']))
+                my_ems['devices'].update(opentumflex.create_device(device_name='ev', minpow=0, maxpow=power,
+                                                                   stocap=round(veh_availabilities['d_travelled'][i] *
+                                                                                conversion_distance_2_km *
+                                                                                conversion_km_2_kwh),
+                                                                   init_soc=[0], end_soc=[100], eta=0.98,
+                                                                   ev_aval=[my_ems['time_data']['start_time'],
+                                                                            my_ems['time_data']['end_time']],
+                                                                   timesetting=my_ems['time_data']))
 
                 # create Pyomo model from opentumflex data
                 m = opentumflex.create_model(my_ems)
@@ -125,7 +125,7 @@ def calc_ev_flex_offers(veh_availabilities,
                     opentumflex.plot_flex(my_ems, 'ev')
 
                 # Save results to files
-                opentumflex.ems_write(my_ems, path=output_path + str(power) + '/' + price + '/ev_avail_' + str(i) + '.txt')
+                opentumflex.save_ems(my_ems, path=output_path + str(power) + '/' + price + '/ev_avail_' + str(i) + '.txt')
 
 
 if __name__ == '__main__':

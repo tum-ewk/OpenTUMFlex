@@ -21,25 +21,19 @@ import matplotlib.pyplot as plt
 import seaborn as sb
 
 
-def plot_flex_heatmap():
+def plot_flex_heatmap(output_path='output/', figure_path='figures/'):
     """
     This function plots the aggregated flexibility offers as heatmaps
 
     :return: None
     """
-    Path('figures').mkdir(parents=True, exist_ok=True)
+    Path(figure_path).mkdir(parents=True, exist_ok=True)
     # Set font style
     rcParams["font.family"] = "Times New Roman"
     font_size = rcParams["font.size"] = 10
     rcParams["figure.figsize"] = [9.5, 7.16]
 
-    """
-    ####################################################################
     # Read input from hdf files #########################################
-    ####################################################################
-    """
-    # Output and input path
-    output_path = 'output/'
     # Read vehicle availability data
     _11_n_veh_avail_hm = pd.read_hdf(output_path + '11/Aggregated Data/n_veh_avail_hm_data.h5', key='df')
     _37_n_veh_avail_hm = pd.read_hdf(output_path + '3.7/Aggregated Data/n_veh_avail_hm_data.h5', key='df')
@@ -152,7 +146,7 @@ def plot_flex_heatmap():
                  label='Negative flexible power per available vehicle $(kW \cdot EV^{-1})$')
     # plt.colorbar(mappable, ax=axs[:, 3:],  shrink=0.6, label='Negative flexible power [kW]', location='bottom')
     plt.subplots_adjust(left=0.08, bottom=0.28, right=0.98, top=0.95, wspace=0.25, hspace=0.2)
-    plt.savefig('figures\\' + 'Flexible_power.png', dpi=600)
+    plt.savefig(figure_path + 'Flexible_power.png', dpi=600)
 
 
     _37_p_neg_max_const = (_37_P_neg_const_hm / _37_n_veh_avail_hm).min().min()
