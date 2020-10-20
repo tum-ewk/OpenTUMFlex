@@ -67,3 +67,4 @@ forecast/input/
 analysis/ev case study/output/
 output/
 tester/
+*.png
