@@ -80,12 +80,13 @@ def plot_flex_heatmap(output_path='output/', figure_path='figures/'):
 
     # Charging power
     fig3, axs = plt.subplots(nrows=1, ncols=3, sharex=True, sharey=True)
-    im = sb.heatmap(_37_n_veh_avail_hm, ax=axs[0], cmap='Greens')
-    im = sb.heatmap(_11_n_veh_avail_hm, ax=axs[1], cmap='Greens')
-    im = sb.heatmap(_22_n_veh_avail_hm, ax=axs[2], cmap='Greens')
+    im1 = sb.heatmap(_37_n_veh_avail_hm, ax=axs[0], cmap='Greens', cbar_kws={'label': '3.7 kW - Number of available vehicles'})
+    im2 = sb.heatmap(_11_n_veh_avail_hm, ax=axs[1], cmap='Greens', cbar_kws={'label': '11 kW - Number of available vehicles'})
+    im3 = sb.heatmap(_22_n_veh_avail_hm, ax=axs[2], cmap='Greens', cbar_kws={'label': '22 kW - Number of available vehicles'})
+    plt.subplots_adjust(left=0.05, bottom=0.05, right=0.95, top=0.95, wspace=0.3, hspace=0.2)
 
     # Charging power
-    fig3, axs = plt.subplots(nrows=5, ncols=6, sharex=True, sharey=True)
+    fig, axs = plt.subplots(nrows=5, ncols=6, sharex=True, sharey=True)
     cm = ['Greens', 'Blues_r']
     # 3.7 kW
     im = sb.heatmap(_37_P_pos_const_hm / _37_n_veh_avail_hm, ax=axs[0, 0], cbar=False, vmin=p_pos_min, vmax=p_pos_max, cmap='Greens')
@@ -148,7 +149,6 @@ def plot_flex_heatmap(output_path='output/', figure_path='figures/'):
     plt.subplots_adjust(left=0.08, bottom=0.28, right=0.98, top=0.95, wspace=0.25, hspace=0.2)
     plt.savefig(figure_path + 'Flexible_power.png', dpi=600)
 
-
     _37_p_neg_max_const = (_37_P_neg_const_hm / _37_n_veh_avail_hm).min().min()
     _11_p_neg_max_const = (_11_P_neg_const_hm / _37_n_veh_avail_hm).min().min()
     _22_p_neg_max_const = (_22_P_neg_const_hm / _37_n_veh_avail_hm).min().min()
@@ -209,3 +209,7 @@ def plot_flex_heatmap(output_path='output/', figure_path='figures/'):
     _37_p_pos_mean_rtp = (_37_P_pos_rtp_hm / _37_n_veh_avail_hm).mean().mean()
     _11_p_pos_mean_rtp = (_11_P_pos_rtp_hm / _37_n_veh_avail_hm).mean().mean()
     _22_p_pos_mean_rtp = (_22_P_pos_rtp_hm / _37_n_veh_avail_hm).mean().mean()
+
+
+if __name__ == '__main__':
+    plot_flex_heatmap(output_path='../output/', figure_path='figures/')

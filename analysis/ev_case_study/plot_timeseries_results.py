@@ -16,8 +16,8 @@ import matplotlib.pyplot as plt
 from matplotlib import rcParams
 import numpy as np
 from pandas.plotting import register_matplotlib_converters
-register_matplotlib_converters()
 from pathlib import Path
+register_matplotlib_converters()
 
 
 def plot_n_avail_veh(chts_output_path, mp_output_path, figure_path='figures/'):
@@ -53,7 +53,7 @@ def plot_n_avail_veh(chts_output_path, mp_output_path, figure_path='figures/'):
     tick_range = np.linspace(start=0, stop=576, num=n_ticks)
     plt.xticks(tick_range, labels=chts_flex_per_daytime.loc[tick_range, 'Daytime_ID'], rotation=45)
     fig1.subplots_adjust(bottom=0.30, right=0.95, left=0.16, top=0.95)
-    plt.savefig(figure_path + 'Veh_availabilities_time.png', dpi=600)
+    plt.savefig(figure_path + 'veh_availabilities_time.png', dpi=600)
 
     print('mp_per_daytime[n_veh_avail]:', mp_opt_per_daytime['n_veh_avail'].max())
     print('chts_per_daytime[n_veh_avail]:', chts_opt_per_daytime['n_veh_avail'].max())
@@ -84,7 +84,7 @@ def plot_n_avail_veh(output_path, figure_path='figures/'):
     tick_range = np.linspace(start=0, stop=576, num=n_ticks)
     plt.xticks(tick_range, labels=flex_per_daytime.loc[tick_range, 'Daytime_ID'], rotation=45)
     fig1.subplots_adjust(bottom=0.30, right=0.95, left=0.16, top=0.95)
-    plt.savefig(figure_path + 'Veh_availabilities_time.png', dpi=600)
+    plt.savefig(figure_path + 'veh_availabilities_time.png', dpi=600)
 
     print('Maximum number of available vehicles:', opt_per_daytime['n_veh_avail'].max())
 
