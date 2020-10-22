@@ -16,13 +16,16 @@ import numpy as np
 import os
 
 
-def simulate_elect_price_fcst(t_start=pd.Timestamp('2020-1-1 00:00'),
+def simulate_elect_price_fcst(rtp_input_data_path='../analysis/input/RTP/',
+                              t_start=pd.Timestamp('2020-1-1 00:00'),
                               t_end=pd.Timestamp('2020-1-1 23:45'),
-                              pr_constant=0.20, pricing={'ToU', 'Constant', 'Con_mi', 'ToU_mi', 'RTP'}):
+                              pr_constant=0.20,
+                              pricing={'ToU', 'Constant', 'Con_mi', 'ToU_mi', 'RTP'}):
     """
     This function simulates an electricity price forecast. ToU tariffs are from Southern California Edison, RTP from
      ComEd, Illinois, Constant prices can be inserted.
 
+    :param rtp_input_data_path: path to rtp h5 files
     :param t_start: Start time in quarter hours as pandas time stamp
     :param t_end:   end time in quarter hours as pandas time stamp
     :param pr_constant: constant electricity price, default is 20 ct/kWh
@@ -96,14 +99,14 @@ def simulate_elect_price_fcst(t_start=pd.Timestamp('2020-1-1 00:00'),
 
     if 'RTP' in price_fcst.columns:
         # Read RTP data
-        rtp_files = os.listdir('input/RTP/')
+        rtp_files = os.listdir(rtp_input_data_path)
         # If time is 2012 then use data from 2017, because data from 2012 is insufficient
         if t_start.year == 2012:
-            rtp_price_forecast = pd.read_hdf('input/RTP/' + [i for i in rtp_files if 'rtp_15min_2017' in i][0], key='df')
+            rtp_price_forecast = pd.read_hdf(rtp_input_data_path + [i for i in rtp_files if 'rtp_15min_2017' in i][0], key='df')
             # Insert rtp prices into simulated price forecast
             price_fcst['RTP'] = rtp_price_forecast['price'].loc[t_start+pd.Timedelta('1826d'):t_end+pd.Timedelta('1826d')].values
         else:
-            rtp_price_forecast = pd.read_hdf('input/RTP/' + [i for i in rtp_files if 'rtp_15min_' + str(t_start.year) in i][0], key='df')
+            rtp_price_forecast = pd.read_hdf(rtp_input_data_path + [i for i in rtp_files if 'rtp_15min_' + str(t_start.year) in i][0], key='df')
             # Insert rtp prices into simulated price forecast
             price_fcst['RTP'] = rtp_price_forecast['price'].loc[t_start:t_end]
 
@@ -111,7 +114,8 @@ def simulate_elect_price_fcst(t_start=pd.Timestamp('2020-1-1 00:00'),
 
 
 if __name__ == '__main__':
-    test = simulate_elect_price_fcst(t_start=pd.Timestamp('2013-4-30 00:00'),
+    test = simulate_elect_price_fcst(rtp_input_data_path='../analysis/input/RTP/',
+                                     t_start=pd.Timestamp('2013-4-30 00:00'),
                                      t_end=pd.Timestamp('2013-5-30 23:00'),
                                      pr_constant=0.25, pricing={'ToU', 'Random', 'ToU_mi', 'RTP'})
 

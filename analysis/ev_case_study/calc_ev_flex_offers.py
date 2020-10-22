@@ -18,6 +18,8 @@ from pathlib import Path
 
 
 def calc_ev_flex_offers(veh_availabilities,
+                        input_data='input/input_data.csv',
+                        rtp_input_data_path='../analysis/input/RTP/',
                         output_path='output/',
                         power_levels=[3.7, 11, 22],
                         pricing_strategies={'ToU', 'Constant', 'Con_mi', 'ToU_mi', 'RTP'},
@@ -27,8 +29,10 @@ def calc_ev_flex_offers(veh_availabilities,
     """
     This function iteratively calculates the flexibility of each vehicle availability for every power level and pricing strategy.
 
+    :param input_path: input data path
     :param veh_availabilities: vehicle availabilities consisting of arrival and departure times, distance travelled
     :param output_path: path where output shall be stored
+    :param rtp_input_data_path: real time prices input file in h5 format
     :param power_levels: charging power levels
     :param pricing_strategies: pricing strategies for simulations
     :param conversion_distance_2_km: conversion rate, e.g. 1 mile = 1.61 km
@@ -50,7 +54,7 @@ def calc_ev_flex_offers(veh_availabilities,
                                                  end_time='2012-01-01 23:00')
 
     # Initialize household devices
-    opentumflex.read_data(my_ems, 'input/input_data.xlsx', fcst_only=False, to_csv=False)
+    opentumflex.read_data(my_ems, input_data, fcst_only=False, to_csv=True)
     # Reset forecasts
     my_ems['fcst'] = {}
 
@@ -82,7 +86,8 @@ def calc_ev_flex_offers(veh_availabilities,
         my_ems['fcst']['ele_price_out'] = [0] * my_ems['time_data']['nsteps']
 
         # Get simulated price forecast for given time period
-        price_fcst = forecast.simulate_elect_price_fcst(t_start=t_arrival_ceiled,
+        price_fcst = forecast.simulate_elect_price_fcst(rtp_input_data_path=rtp_input_data_path,
+                                                        t_start=t_arrival_ceiled,
                                                         t_end=t_departure_floored,
                                                         pr_constant=0.19,
                                                         pricing=pricing_strategies)
@@ -129,14 +134,15 @@ def calc_ev_flex_offers(veh_availabilities,
 
 
 if __name__ == '__main__':
-
     # Read veh availabilities from file
-    veh_availabilities = pd.read_csv('input/chts_veh_availability.csv')
+    veh_avail = pd.read_csv('../input/chts_veh_availability.csv')
     # Extract a subsample for testing
-    veh_availabilities = veh_availabilities[0:20]
+    veh_avail = veh_avail[0:20]
 
-    calc_ev_flex_offers(veh_availabilities,
-                        output_path='output/',
+    calc_ev_flex_offers(veh_avail,
+                        input_data='../input/input_data.csv',
+                        rtp_input_data_path='../input/RTP/',
+                        output_path='../output/',
                         power_levels=[3.7, 11, 22],
                         pricing_strategies={'ToU', 'Constant', 'Con_mi', 'ToU_mi', 'RTP'},
                         conversion_distance_2_km=1.61,
