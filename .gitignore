@@ -52,8 +52,8 @@ MANIFEST
 *.xlsx
 !input/input_data.xlsx
 !input/input_data.csv
-!analysis/ev_case_study/chts_veh_availability.csv
-!analysis/ev_case_study/input_data.csv
+!analysis/input/chts_veh_availability.csv
+!analysis/input/input_data.csv
 
 # Per-project virtualenvs
 .venv*/
