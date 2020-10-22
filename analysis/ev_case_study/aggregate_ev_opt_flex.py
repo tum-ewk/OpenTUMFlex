@@ -19,12 +19,13 @@ import forecast
 from pathlib import Path
 
 
-def aggregate_ev_flex(veh_availabilities, output_path='output/'):
+def aggregate_ev_flex(veh_availabilities, output_path='../output/', rtp_input_data_path='../input/RTP/'):
     """
     This function aggregates the flexibility offers
 
     :param veh_availabilities: vehicle availabilities
     :param output_path: path where aggregated results shall be stored
+    :param rtp_input_data_path: real time prices input file in h5 file format
     :return: None
     """
     # Extract min and max time
@@ -90,7 +91,10 @@ def aggregate_ev_flex(veh_availabilities, output_path='output/'):
                                                           'c_flex_neg_rtp',
                                                           'Daytime_ID'})
     # Get forecast electricity prices for each time step
-    price_forecast = forecast.simulate_elect_price_fcst(t_start=t_min, t_end=t_max, pr_constant=0.19)
+    price_forecast = forecast.simulate_elect_price_fcst(rtp_input_data_path=rtp_input_data_path,
+                                                        t_start=t_min,
+                                                        t_end=t_max,
+                                                        pr_constant=0.19)
     opt_sum_df.loc[:, 'c_elect_in_tou'] = price_forecast['ToU']
     opt_sum_df.loc[:, 'c_elect_in_const'] = price_forecast['Constant']
     opt_sum_df.loc[:, 'c_elect_in_tou_mi'] = price_forecast['ToU_mi']
@@ -345,9 +349,9 @@ def aggregate_ev_flex(veh_availabilities, output_path='output/'):
 
 if __name__ == '__main__':
     # Read veh availabilities from file
-    veh_availabilities = pd.read_csv('input/chts_veh_availability.csv')
+    veh_avail = pd.read_csv('../input/chts_veh_availability.csv')
     # Extract a subsample for testing
-    veh_availabilities = veh_availabilities[0:10]
+    veh_avail = veh_avail[68:88]
 
-    aggregate_ev_flex(veh_availabilities)
+    aggregate_ev_flex(veh_avail, output_path='../output/')
 

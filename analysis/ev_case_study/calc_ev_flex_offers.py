@@ -137,7 +137,8 @@ if __name__ == '__main__':
     # Read veh availabilities from file
     veh_avail = pd.read_csv('../input/chts_veh_availability.csv')
     # Extract a subsample for testing
-    veh_avail = veh_avail[0:20]
+    veh_avail = veh_avail[68:88]
+    veh_avail = veh_avail.reset_index()
 
     calc_ev_flex_offers(veh_avail,
                         input_data='../input/input_data.csv',

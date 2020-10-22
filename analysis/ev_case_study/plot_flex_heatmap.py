@@ -212,4 +212,4 @@ def plot_flex_heatmap(output_path='output/', figure_path='figures/'):
 
 
 if __name__ == '__main__':
-    plot_flex_heatmap(output_path='../output/', figure_path='figures/')
+    plot_flex_heatmap(output_path='../output/', figure_path='../figures/')

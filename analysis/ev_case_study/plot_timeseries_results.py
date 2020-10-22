@@ -59,7 +59,7 @@ def plot_n_avail_veh(chts_output_path, mp_output_path, figure_path='figures/'):
     print('chts_per_daytime[n_veh_avail]:', chts_opt_per_daytime['n_veh_avail'].max())
 
 
-def plot_n_avail_veh(output_path, figure_path='figures/'):
+def plot_n_avail_veh(output_path, figure_path='../figures/'):
     # Define figure path
     Path(figure_path).mkdir(parents=True, exist_ok=True)
     # Read data from files
@@ -89,7 +89,7 @@ def plot_n_avail_veh(output_path, figure_path='figures/'):
     print('Maximum number of available vehicles:', opt_per_daytime['n_veh_avail'].max())
 
 
-def plot_opt_flex_timeseries(chts_output_path, mp_output_path, figure_path='figures/'):
+def plot_opt_flex_timeseries(chts_output_path, mp_output_path, figure_path='../figures/'):
     """
     This function plots the aggregated flexibility results over time
 
@@ -794,9 +794,5 @@ def plot_opt_flex_timeseries(output_path, figure_path='figures/'):
 
 
 if __name__ == '__main__':
-    plot_n_avail_veh(chts_output_path='C:/Users/ga47num/PycharmProjects/US CHTS - OpenTUMFlex - EV/Output/3.7/',
-                     mp_output_path='C:/Users/ga47num/PycharmProjects/GER MP - OpenTUMFlex - EV/Output/3.7/',
-                     figure_path='X:/Projekte/SINTEG Csells/80 Veröffentlichungen/2020-05 - OpenTUMFlex - EV Case Study/Figures/')
-    plot_opt_flex_timeseries(output_path='C:/Users/ga47num/PycharmProjects/US CHTS - OpenTUMFlex - EV/Output/3.7/',
-                             mp_output_path='C:/Users/ga47num/PycharmProjects/GER MP - OpenTUMFlex - EV/Output/3.7/',
-                             figure_path='X:/Projekte/SINTEG Csells/80 Veröffentlichungen/2020-05 - OpenTUMFlex - EV Case Study/Figures/')
+    plot_n_avail_veh(output_path='../output/3.7/', figure_path='../figures/')
+    plot_opt_flex_timeseries(output_path='../output/3.7/', figure_path='../figures/')
