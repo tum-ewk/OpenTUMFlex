@@ -52,18 +52,18 @@ MANIFEST
 *.xlsx
 !input/input_data.xlsx
 !input/input_data.csv
-!analysis/ev_case_study/input/chts_veh_availability.csv
+!analysis/input/chts_veh_availability.csv
+!analysis/input/input_data.csv
 
 # Per-project virtualenvs
 .venv*/
 venv/
-tests/results/SA_ems_results/ev_ems_0.txt
 *.txt
 
 
-analysis/ev case study/data/rtp_mean.h5
 analysis/ev case study/figures/
-forecast/input/
 analysis/ev case study/output/
+forecast/input/
 output/
 tester/
+*.png

@@ -19,7 +19,7 @@ import datetime
 from scipy.interpolate import UnivariateSpline
 
 
-def create_device(device_name, minpow=0, maxpow=0, stocap=0, eta=1, init_soc=20, end_soc=40, ev_aval=None,
+def create_device(device_name, minpow=0, maxpow=0, stocap=0, eta=1, init_soc=60, end_soc=40, ev_aval=None,
                   supply_temp=45, timesetting=None, sto_volume=0, path=None):
     """ create_device will create one of five devices (hp, chp, ev, pv, bat) based on user input or json file
 

@@ -21,25 +21,19 @@ import matplotlib.pyplot as plt
 import seaborn as sb
 
 
-def plot_flex_heatmap():
+def plot_flex_heatmap(output_path='output/', figure_path='figures/'):
     """
     This function plots the aggregated flexibility offers as heatmaps
 
     :return: None
     """
-    Path('figures').mkdir(parents=True, exist_ok=True)
+    Path(figure_path).mkdir(parents=True, exist_ok=True)
     # Set font style
     rcParams["font.family"] = "Times New Roman"
     font_size = rcParams["font.size"] = 10
     rcParams["figure.figsize"] = [9.5, 7.16]
 
-    """
-    ####################################################################
     # Read input from hdf files #########################################
-    ####################################################################
-    """
-    # Output and input path
-    output_path = 'output/'
     # Read vehicle availability data
     _11_n_veh_avail_hm = pd.read_hdf(output_path + '11/Aggregated Data/n_veh_avail_hm_data.h5', key='df')
     _37_n_veh_avail_hm = pd.read_hdf(output_path + '3.7/Aggregated Data/n_veh_avail_hm_data.h5', key='df')
@@ -86,12 +80,13 @@ def plot_flex_heatmap():
 
     # Charging power
     fig3, axs = plt.subplots(nrows=1, ncols=3, sharex=True, sharey=True)
-    im = sb.heatmap(_37_n_veh_avail_hm, ax=axs[0], cmap='Greens')
-    im = sb.heatmap(_11_n_veh_avail_hm, ax=axs[1], cmap='Greens')
-    im = sb.heatmap(_22_n_veh_avail_hm, ax=axs[2], cmap='Greens')
+    im1 = sb.heatmap(_37_n_veh_avail_hm, ax=axs[0], cmap='Greens', cbar_kws={'label': '3.7 kW - Number of available vehicles'})
+    im2 = sb.heatmap(_11_n_veh_avail_hm, ax=axs[1], cmap='Greens', cbar_kws={'label': '11 kW - Number of available vehicles'})
+    im3 = sb.heatmap(_22_n_veh_avail_hm, ax=axs[2], cmap='Greens', cbar_kws={'label': '22 kW - Number of available vehicles'})
+    plt.subplots_adjust(left=0.05, bottom=0.05, right=0.95, top=0.95, wspace=0.3, hspace=0.2)
 
     # Charging power
-    fig3, axs = plt.subplots(nrows=5, ncols=6, sharex=True, sharey=True)
+    fig, axs = plt.subplots(nrows=5, ncols=6, sharex=True, sharey=True)
     cm = ['Greens', 'Blues_r']
     # 3.7 kW
     im = sb.heatmap(_37_P_pos_const_hm / _37_n_veh_avail_hm, ax=axs[0, 0], cbar=False, vmin=p_pos_min, vmax=p_pos_max, cmap='Greens')
@@ -152,8 +147,7 @@ def plot_flex_heatmap():
                  label='Negative flexible power per available vehicle $(kW \cdot EV^{-1})$')
     # plt.colorbar(mappable, ax=axs[:, 3:],  shrink=0.6, label='Negative flexible power [kW]', location='bottom')
     plt.subplots_adjust(left=0.08, bottom=0.28, right=0.98, top=0.95, wspace=0.25, hspace=0.2)
-    plt.savefig('figures\\' + 'Flexible_power.png', dpi=600)
-
+    plt.savefig(figure_path + 'flexible_power_heatmap.png', dpi=600)
 
     _37_p_neg_max_const = (_37_P_neg_const_hm / _37_n_veh_avail_hm).min().min()
     _11_p_neg_max_const = (_11_P_neg_const_hm / _37_n_veh_avail_hm).min().min()
@@ -215,3 +209,7 @@ def plot_flex_heatmap():
     _37_p_pos_mean_rtp = (_37_P_pos_rtp_hm / _37_n_veh_avail_hm).mean().mean()
     _11_p_pos_mean_rtp = (_11_P_pos_rtp_hm / _37_n_veh_avail_hm).mean().mean()
     _22_p_pos_mean_rtp = (_22_P_pos_rtp_hm / _37_n_veh_avail_hm).mean().mean()
+
+
+if __name__ == '__main__':
+    plot_flex_heatmap(output_path='../output/', figure_path='../figures/')
