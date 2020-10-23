@@ -1,52 +1,39 @@
 import matplotlib.pyplot as plt
-from matplotlib import rcParams, ticker
-from .calc_overall_cost import calc_overall_cost
+import pandas as pd
 
 
 def plot_overall_cost(overall_costs, figure_path='figures/'):
     # Create a bar plot showing the different prices
     # Set font/figure style
-    rcParams["font.family"] = "Times New Roman"
-    rcParams["font.size"] = 10
-    rcParams["figure.figsize"] = [6, 2.5]
-
-    # Subplots
-    fig = plt.figure()
-    w = 0.5
-    x = [3.7, 11, 22]
-    plt.bar([i - 2*w for i in x], [overall_costs['_37_total_cost_con'],
-                                  overall_costs['_11_total_cost_con'],
-                                  overall_costs['_22_total_cost_con']],
-           label='Con', width=w, color='b', align='center')
-    plt.bar([i - 1*w for i in x], [overall_costs['_37_total_cost_con_mi'],
-                                  overall_costs['_11_total_cost_con_mi'],
-                                  overall_costs['_22_total_cost_con_mi']], label='Con + MI', width=w)
-    plt.bar(x, [overall_costs['_37_total_cost_tou'],
-               overall_costs['_11_total_cost_tou'],
-               overall_costs['_22_total_cost_tou']], label='ToU', width=w)
-    plt.bar([i + 1*w for i in x], [overall_costs['_37_total_cost_tou_mi'],
-                                  overall_costs['_11_total_cost_tou_mi'],
-                                  overall_costs['_22_total_cost_tou_mi']], label='ToU + MI', width=w)
-    plt.bar([i + 2*w for i in x], [overall_costs['_37_total_cost_rtp'],
-                                  overall_costs['_11_total_cost_rtp'],
-                                  overall_costs['_22_total_cost_rtp']], label='RTP', width=w)
-    plt.autoscale(tight=True)
-    plt.xlim([0, 25])
-    # plt.ylim([0, 16000])
-    plt.xticks(x, ('3.7', '11', '22'))
-    plt.legend(bbox_to_anchor=(1.3, 0.5), loc="center right", borderaxespad=0.5)
+    plt.rcParams["font.family"] = "Times New Roman"
+    plt.rcParams["font.size"] = 10
+    # figsize und so
+    fig, ax = plt.subplots(1, 1, figsize=(12, 5))
+    # plotten
+    overall_costs.T.plot.bar(ax=ax)
+    # Achsen und so
     plt.grid(axis='y')
+    plt.xticks(rotation='horizontal')
     plt.xlabel('Maximum charging power level (kW)')
+    # plt.ylim([0, 25])
     plt.ylabel('Cumulated charging costs (€)')
-    # plt.yaxis().set_major_formatter(ticker.FuncFormatter(lambda x, p: format(int(x), ',')))
-    plt.subplots_adjust(left=0.13, bottom=0.2, right=0.8, top=0.95, wspace=0.2, hspace=0.2)
-    plt.savefig(figure_path + 'total_charging_cost' + '.png', dpi=600)
-
-    return
+    # legende
+    plt.legend(bbox_to_anchor=(1.1, 0.5), loc="center right", borderaxespad=0.2)
+    # speichern
+    plt.tight_layout()
+    plt.show() # -> optional
+    # plt.savefig(figure_path + 'total_charging_cost' + '.png', dpi=600)
 
 
 if __name__ == '__main__':
-    overall_cost = calc_overall_cost('../output/')
+    overall_costs = {'3.7': {'ToU': 14.538897959183677, 'Con': 18.976346938775514,
+                            'ToU + MI': 14.540111016893244, 'Con + MI': 18.97749908073416, },
+                     '11': {'ToU': 15.888316326530614, 'Con': 20.238877551020405,
+                            'ToU + MI': 15.889490335526514, 'Con + MI': 20.240000003239743, },
+                     '22': {'ToU': 16.581938775510196, 'Con': 20.938775510204074,
+                            'ToU + MI': 16.58311048543813, 'Con + MI': 20.939909765919552, }}
 
-    plot_overall_cost(overall_cost, figure_path='figures/')
+    df = pd.DataFrame(overall_costs)
+
+    plot_overall_cost(df, figure_path='../figures/')
 

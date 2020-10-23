@@ -18,7 +18,6 @@ from pathlib import Path
 
 
 def calc_ev_flex_offers(veh_availabilities,
-                        input_data='input/input_data.csv',
                         rtp_input_data_path='../analysis/input/RTP/',
                         output_path='output/',
                         power_levels=[3.7, 11, 22],
@@ -29,7 +28,6 @@ def calc_ev_flex_offers(veh_availabilities,
     """
     This function iteratively calculates the flexibility of each vehicle availability for every power level and pricing strategy.
 
-    :param input_path: input data path
     :param veh_availabilities: vehicle availabilities consisting of arrival and departure times, distance travelled
     :param output_path: path where output shall be stored
     :param rtp_input_data_path: real time prices input file in h5 format
@@ -53,8 +51,6 @@ def calc_ev_flex_offers(veh_availabilities,
                                                  start_time='2012-01-01 00:00',
                                                  end_time='2012-01-01 23:00')
 
-    # Initialize household devices
-    opentumflex.read_data(my_ems, input_data, fcst_only=False, to_csv=True)
     # Reset forecasts
     my_ems['fcst'] = {}
 
@@ -117,7 +113,7 @@ def calc_ev_flex_offers(veh_availabilities,
                 m = opentumflex.create_model(my_ems)
 
                 # solve the optimization problem
-                m = opentumflex.solve_model(m, solver='glpk', time_limit=30)
+                m = opentumflex.solve_model(m, solver='glpk', time_limit=30, troubleshooting=False)
 
                 # extract the results from model and store them in opentumflex['optplan'] dictionary
                 my_ems = opentumflex.extract_res(m, my_ems)

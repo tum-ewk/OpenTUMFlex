@@ -114,8 +114,8 @@ def plot_flex_heatmap(output_path='output/', figure_path='figures/'):
     sb.heatmap(_22_P_pos_const_mi_hm / _37_n_veh_avail_hm, ax=axs[2, 2], cbar=False, vmin=p_pos_min, vmax=p_pos_max, cmap='Greens')
     sb.heatmap(_22_P_pos_tou_mi_hm / _37_n_veh_avail_hm, ax=axs[3, 2], cbar=False, vmin=p_pos_min, vmax=p_pos_max, cmap='Greens')
     sb.heatmap(_22_P_pos_rtp_hm / _37_n_veh_avail_hm, ax=axs[4, 2], cbar=False, vmin=p_pos_min, vmax=p_pos_max, cmap='Greens')
-    axs[0, 0].set_xticklabels(_11_P_pos_const_hm.columns)
-    axs[0, 0].set_yticklabels(_11_P_pos_const_hm.index)
+    # axs[0, 0].set_xticklabels(_11_P_pos_const_hm.columns)
+    # axs[0, 0].set_yticklabels(_11_P_pos_const_hm.index)
     mappable = im.get_children()[0]
     plt.colorbar(mappable, ax=axs[:, :3], shrink=0.6, orientation='horizontal',
                  label='Positive flexible power per available vehicle $(kW \cdot EV^{-1})$')
@@ -147,7 +147,7 @@ def plot_flex_heatmap(output_path='output/', figure_path='figures/'):
                  label='Negative flexible power per available vehicle $(kW \cdot EV^{-1})$')
     # plt.colorbar(mappable, ax=axs[:, 3:],  shrink=0.6, label='Negative flexible power [kW]', location='bottom')
     plt.subplots_adjust(left=0.08, bottom=0.28, right=0.98, top=0.95, wspace=0.25, hspace=0.2)
-    plt.savefig(figure_path + 'flexible_power_heatmap.png', dpi=600)
+    # plt.savefig(figure_path + 'flexible_power_heatmap.png', dpi=600)
 
     _37_p_neg_max_const = (_37_P_neg_const_hm / _37_n_veh_avail_hm).min().min()
     _11_p_neg_max_const = (_11_P_neg_const_hm / _37_n_veh_avail_hm).min().min()

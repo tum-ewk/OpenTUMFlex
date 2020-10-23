@@ -23,7 +23,7 @@ rtp_input_path = '../analysis/input/RTP/'
 # Read veh availabilities from file
 veh_availabilities = pd.read_csv('input/chts_veh_availability.csv')
 # Extract a subsample for testing
-veh_availabilities = veh_availabilities[68:97]
+veh_availabilities = veh_availabilities[:]
 veh_availabilities = veh_availabilities.reset_index()
 # Maximal power charging levels
 max_charging_levels = [3.7, 11, 22]
@@ -42,7 +42,8 @@ ev_case_study.calc_ev_flex_offers(veh_availabilities,
 
 # Aggregate single offers
 ev_case_study.aggregate_ev_flex(veh_availabilities,
-                                output_path=output_path)
+                                output_path=output_path,
+                                rtp_input_data_path=rtp_input_path)
 
 # Plot number of available vehicles at home over a week (only for one power level, since it won't change)
 ev_case_study.plot_n_avail_veh(output_path=output_path + str(max_charging_levels[0]) + '/',

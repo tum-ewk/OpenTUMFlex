@@ -12,6 +12,7 @@ __email__ = "michel.zade@tum.de"
 __status__ = "Development"
 
 import os
+import pandas as pd
 import opentumflex
 
 
@@ -89,24 +90,15 @@ def calc_overall_cost(output_path='output/'):
     _11_total_cost = _11_total_cost_tou + _11_total_cost_con + _11_total_cost_tou_mi + _11_total_cost_con_mi + _11_total_cost_rtp
     _22_total_cost = _22_total_cost_tou + _22_total_cost_con + _22_total_cost_tou_mi + _22_total_cost_con_mi + _22_total_cost_rtp
 
-    overall_costs = {'_37_total_cost_tou': _37_total_cost_tou,
-                     '_37_total_cost_con': _37_total_cost_con,
-                     '_37_total_cost_tou_mi': _37_total_cost_tou_mi,
-                     '_37_total_cost_con_mi': _37_total_cost_con_mi,
-                     '_37_total_cost_rtp': _37_total_cost_rtp,
-                     '_37_total_cost': _37_total_cost,
-                     '_11_total_cost_tou': _11_total_cost_tou,
-                     '_11_total_cost_con': _11_total_cost_con,
-                     '_11_total_cost_tou_mi': _11_total_cost_tou_mi,
-                     '_11_total_cost_con_mi': _11_total_cost_con_mi,
-                     '_11_total_cost_rtp': _11_total_cost_rtp,
-                     '_11_total_cost': _11_total_cost,
-                     '_22_total_cost_tou': _22_total_cost_tou,
-                     '_22_total_cost_con': _22_total_cost_con,
-                     '_22_total_cost_tou_mi': _22_total_cost_tou_mi,
-                     '_22_total_cost_con_mi': _22_total_cost_con_mi,
-                     '_22_total_cost_rtp': _22_total_cost_rtp,
-                     '_22_total_cost': _22_total_cost}
+    overall_costs = {'3.7': {'ToU': _37_total_cost_tou, 'Con': _37_total_cost_con, 'ToU + MI': _37_total_cost_tou_mi,
+                             'Con + MI': _37_total_cost_con_mi, 'RTP': _37_total_cost_rtp, 'total_cost': _37_total_cost},
+                     '11': {'ToU': _11_total_cost_tou, 'Con': _11_total_cost_con, 'ToU + MI': _11_total_cost_tou_mi,
+                             'Con + MI': _11_total_cost_con_mi, 'RTP': _11_total_cost_rtp, 'total_cost': _11_total_cost},
+                     '22': {'ToU': _22_total_cost_tou, 'Con': _22_total_cost_con, 'ToU + MI': _22_total_cost_tou_mi,
+                             'Con + MI': _22_total_cost_con_mi, 'RTP': _22_total_cost_rtp, 'total_cost': _22_total_cost}}
+
+    overall_costs = pd.DataFrame(overall_costs)
+    overall_costs = overall_costs.drop(overall_costs.index[-1])
 
     return overall_costs
 

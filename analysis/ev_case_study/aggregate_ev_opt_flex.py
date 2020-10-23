@@ -101,10 +101,10 @@ def aggregate_ev_flex(veh_availabilities, output_path='../output/', rtp_input_da
     opt_sum_df.loc[:, 'c_elect_in_const_mi'] = price_forecast['Con_mi']
     opt_sum_df.loc[:, 'c_elect_in_rtp'] = price_forecast['RTP']
     # Create a daytime identifier for weekday and time for heat map
-    opt_sum_df['Daytime_ID'] = opt_sum_df.index.weekday_name.array + \
+    opt_sum_df['Daytime_ID'] = opt_sum_df.index.day_name().array + \
                                     ', ' + \
                                opt_sum_df.index.strftime('%H:%M').array
-    flex_sum_df['Daytime_ID'] = opt_sum_df.index.weekday_name.array + \
+    flex_sum_df['Daytime_ID'] = opt_sum_df.index.day_name().array + \
                                     ', ' + \
                                 opt_sum_df.index.strftime('%H:%M').array
     days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']

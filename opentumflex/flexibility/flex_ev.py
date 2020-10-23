@@ -51,8 +51,8 @@ def calc_flex_ev(my_ems, reopt=0):
     # Fixing column order
     ev_flex = ev_flex[[p_pos, p_neg, e_pos, e_neg, pr_pos, pr_neg, pr_fcst, p_opt]]
 
-    ev_flex[p_opt].at[:] = my_ems['optplan']['EV_power']
-    ev_flex[pr_fcst].at[:] = my_ems['fcst']['ele_price_in']
+    ev_flex[p_opt] = my_ems['optplan']['EV_power']
+    ev_flex[pr_fcst] = my_ems['fcst']['ele_price_in']
 
     # Check number of periods ev is available
     n_avail_periods = len(my_ems['devices']['ev']['initSOC'])
@@ -68,8 +68,8 @@ def calc_flex_ev(my_ems, reopt=0):
         ev_flex_temp = ev_flex_temp[[p_pos, p_neg, e_pos, e_neg, pr_pos, pr_neg, pr_fcst, p_opt, e_remain]]
 
         # Copy optimal power to flex table
-        ev_flex_temp[p_opt].at[:] = ev_flex[p_opt][my_ems['devices']['ev']['aval_init'][j]:my_ems['devices']['ev']['aval_end'][j]]
-        ev_flex_temp[pr_fcst].at[:] = ev_flex[pr_fcst][my_ems['devices']['ev']['aval_init'][j]:my_ems['devices']['ev']['aval_end'][j]]
+        ev_flex_temp[p_opt] = ev_flex[p_opt][my_ems['devices']['ev']['aval_init'][j]:my_ems['devices']['ev']['aval_end'][j]]
+        ev_flex_temp[pr_fcst] = ev_flex[pr_fcst][my_ems['devices']['ev']['aval_init'][j]:my_ems['devices']['ev']['aval_end'][j]]
 
         # Calculate remaining energy that needs to be charged in kWh ####
         remaining_energy = list((ev_flex_temp[p_opt] / n_time_steps_phour).sum() -

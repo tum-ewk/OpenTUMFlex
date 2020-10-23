@@ -67,8 +67,8 @@ def plot_n_avail_veh(output_path, figure_path='../figures/'):
     flex_per_daytime = pd.read_hdf(output_path + 'Aggregated Data/flex_per_daytime_data.h5', key='df')
     # Set font/figure style
     rcParams["font.family"] = "Times New Roman"
-    rcParams["font.size"] = 10
-    rcParams["figure.figsize"] = [11.69, 8.27]
+    # rcParams["font.size"] = 10
+    # rcParams["figure.figsize"] = [11.69, 8.27]
     plot_color = 'brown'
 
     # Subplots
@@ -84,7 +84,7 @@ def plot_n_avail_veh(output_path, figure_path='../figures/'):
     tick_range = np.linspace(start=0, stop=576, num=n_ticks)
     plt.xticks(tick_range, labels=flex_per_daytime.loc[tick_range, 'Daytime_ID'], rotation=45)
     fig1.subplots_adjust(bottom=0.30, right=0.95, left=0.16, top=0.95)
-    plt.savefig(figure_path + 'veh_availabilities_time.png', dpi=600)
+    # plt.savefig(figure_path + 'veh_availabilities_time.png', dpi=600)
 
     print('Maximum number of available vehicles:', opt_per_daytime['n_veh_avail'].max())
 
@@ -790,7 +790,7 @@ def plot_opt_flex_timeseries(output_path, figure_path='figures/'):
     axs[0, 0].set_xticks(ticks)
     axs[0, 0].set_xticklabels(resulting_labels, rotation=45)
     plt.subplots_adjust(left=0.08, bottom=0.05, right=0.98, top=0.95, wspace=0.25, hspace=0.2)
-    plt.savefig(figure_path + 'opt_flex_average_day_plots.png', dpi=600)
+    # plt.savefig(figure_path + 'opt_flex_average_day_plots.png', dpi=600)
 
 
 if __name__ == '__main__':
