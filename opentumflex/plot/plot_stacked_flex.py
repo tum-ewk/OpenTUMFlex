@@ -15,6 +15,7 @@ __status__ = "Development"
 import pandas as pd
 import matplotlib.pyplot as plt
 from operator import add
+import numpy as np
 
 def plot_stacked_flex(ems, reopt=0):
     """
@@ -72,7 +73,7 @@ def plot_stacked_flex(ems, reopt=0):
         plt.xlabel("Time", fontsize=font_size)
         
         
-def plot_stacked_flex_price(ems, reopt=0):
+def plot_stacked_flex_price(ems, reopt=0, plot_flexpr='bar'):
     """
     
 
@@ -82,49 +83,68 @@ def plot_stacked_flex_price(ems, reopt=0):
         ems model.
     reopt : binary, optional
         Choose between optimization or reoptimization. The default is 0.
+    plot_flexpr: string
+        Choose between plot type bar or scatter
 
     Returns
     -------
     None.
 
     """  
-    
+    # Get required defaults
     nsteps = ems['time_data']['nsteps']
     ts = ems['time_data']['time_slots'].tolist()
-    plt.figure(figsize=(12, 8))
+    chart_pos = ['skyblue', 'steelblue', 'cornflowerblue', 'lightskyblue', 'deepskyblue']     
+    chart_neg = ['rosybrown', 'firebrick', 'indianred', 'tomato', 'lightsalmon'] 
+    device = list(ems['flexopts'].keys())    
     font_size = 14
     
-    if not reopt:
-        # Get required defaults
-        device = list(ems['flexopts'].keys())  
-        pos_price_max = [0]*len(ts) 
-        neg_price_min = [0]*len(ts) 
+    if not reopt:        
+        # Create empty figure
+        plt.figure(figsize=(12, 8))         
         
-        # Loop through the device list and area plot
-        for i in range(len(device)):
-            pos_price_max = [max(value) for value in zip(pos_price_max, ems['flexopts'][device[i]]['Pos_Pr'])]
-            neg_price_min = [min(value) for value in zip(neg_price_min, ems['flexopts'][device[i]]['Neg_Pr'])]
+        if plot_flexpr == 'bar':
+            # Loop through the device list and stack plot
+            for i in range(len(device)):
+                plt.bar(ts, ems['flexopts'][device[i]]['Pos_Pr'], color=chart_pos[i], 
+                                    alpha=0.8, align='edge', edgecolor='k', label=device[i])
+                plt.bar(ts, ems['flexopts'][device[i]]['Neg_Pr'], color=chart_neg[i], 
+                                    alpha=0.8, align='edge', edgecolor='k')
+                       
+            # Change xtick intervals    
+            req_ticks = 12   # ticks needed
+            if nsteps > req_ticks:
+                plt.xticks(ts[::int(round(nsteps/req_ticks))], rotation=-45, ha="left", fontsize=font_size)
+            else:
+                plt.xticks(ts, rotation=-45, ha="left", fontsize=font_size)       
+                
+            # Plot legend
+            plt.legend(loc='lower left', bbox_to_anchor=(1.01, 0), fontsize=font_size)
             
-        pos_price_min = pos_price_max
-        neg_price_max = neg_price_min
+            # Axis labels
+            plt.ylabel("Flexibility price [€/kWh]", fontsize=font_size)
+            plt.xlabel("Time", fontsize=font_size)
         
-        for i in range(len(device)):
-            pos_price_min = [min(value) for value in zip(pos_price_min, ems['flexopts'][device[i]]['Pos_Pr'])]
-            neg_price_max = [max(value) for value in zip(neg_price_max, ems['flexopts'][device[i]]['Neg_Pr'])]
+        if plot_flexpr == 'scatter':
+            # Loop through the device list and stack plot
+            for i in range(len(device)):
+                plt.scatter(ts, ems['flexopts'][device[i]]['Pos_Pr'], color=chart_pos[i], 
+                                    label=device[i])
+                plt.scatter(ts, ems['flexopts'][device[i]]['Neg_Pr'], color=chart_neg[i])
+                       
+            # Change xtick intervals    
+            req_ticks = 12   # ticks needed
+            if nsteps > req_ticks:
+                plt.xticks(ts[::int(round(nsteps/req_ticks))], rotation=-45, ha="left", fontsize=font_size)
+            else:
+                plt.xticks(ts, rotation=-45, ha="left", fontsize=font_size)       
+                
+            # Plot legend
+            plt.legend(loc='lower left', bbox_to_anchor=(1.01, 0), fontsize=font_size)
             
-        # plt.fill_between(ts, pos_price_max, pos_price_min)
-        # plt.fill_between(ts, neg_price_max, neg_price_min)
-        
-        plt.plot(ts, pos_price_max)
-        plt.plot(ts, neg_price_min)
+            # Axis labels
+            plt.ylabel("Flexibility price [€/kWh]", fontsize=font_size)
+            plt.xlabel("Time", fontsize=font_size)
     
-        # Change xtick intervals    
-        req_ticks = 12   # ticks needed
-        if nsteps > req_ticks:
-            plt.xticks(ts[::int(round(nsteps/req_ticks))], rotation=-45, ha="left", fontsize=font_size)
-        else:
-            plt.xticks(ts, rotation=-45, ha="left", fontsize=font_size)     
-            
-        return pos_price_max, pos_price_min, neg_price_max, neg_price_min
     
     

@@ -138,7 +138,7 @@ def scenario_mini_apartment(ems):
     ems['devices']['sto']['stocap'] = 15
     ems['devices']['boiler']['maxpow'] = 3
     ems['devices'].update(create_device(device_name='hp', minpow=0, maxpow=4, supply_temp=45))
-    ems['devices'].update(create_device(device_name='ev', minpow=0, maxpow=0,
+    ems['devices'].update(create_device(device_name='ev', minpow=0, maxpow=8,
                                         stocap=20, eta=0.98, timesetting=ems['time_data'],
                                         ev_aval=['2019-12-18 00:00', '2019-12-18 08:00',
                                                  '2019-12-18 18:00', '2019-12-18 23:45'],
@@ -155,13 +155,13 @@ def scenario_apartment(ems):
 
     """
     ems['devices'].update(create_device(device_name='pv', minpow=0.5, maxpow=3, eta=0.95))
-    ems['devices'].update(create_device(device_name='bat', minpow=0, maxpow=0, stocap=5, init_soc=50, eta=0.95))
+    ems['devices'].update(create_device(device_name='bat', minpow=0, maxpow=3, stocap=5, init_soc=50, eta=0.95))
     ems['devices']['chp']['maxpow'] = 2
     ems['devices']['sto']['maxpow'] = 10
     ems['devices']['sto']['stocap'] = 15
     ems['devices']['boiler']['maxpow'] = 3
     ems['devices'].update(create_device(device_name='hp', minpow=0, maxpow=4, supply_temp=45))
-    ems['devices'].update(create_device(device_name='ev', minpow=0, maxpow=0,
+    ems['devices'].update(create_device(device_name='ev', minpow=0, maxpow=8,
                                         stocap=20, eta=0.98, timesetting=ems['time_data'],
                                         ev_aval=['2019-12-18 00:00', '2019-12-18 08:00',
                                                  '2019-12-18 18:00', '2019-12-18 23:45'],
