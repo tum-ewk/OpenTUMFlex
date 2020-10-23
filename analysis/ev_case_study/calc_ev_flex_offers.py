@@ -1,5 +1,5 @@
 """
-The ev_flex_computation module calculates the flexibility of a list of vehicle availabilities .
+The ev_flex_computation module calculates the flexibility of a list of vehicle availabilities.
 """
 
 __author__ = "Michel Zadé"
@@ -23,10 +23,11 @@ def calc_ev_flex_offers(veh_availabilities,
                         power_levels=[3.7, 11, 22],
                         pricing_strategies={'ToU', 'Constant', 'Con_mi', 'ToU_mi', 'RTP'},
                         conversion_distance_2_km=1.61,
-                        conversion_km_2_kwh = 0.2,
+                        conversion_km_2_kwh=0.2,
                         plotting=False):
     """
-    This function iteratively calculates the flexibility of each vehicle availability for every power level and pricing strategy.
+    This function iteratively calculates the flexibility of each vehicle availability for every power level
+    and pricing strategy.
 
     :param veh_availabilities: vehicle availabilities consisting of arrival and departure times, distance travelled
     :param output_path: path where output shall be stored
@@ -94,7 +95,7 @@ def calc_ev_flex_offers(veh_availabilities,
                 print('Pricing: ' + price + ' and Power: ' + str(power))
                 # Create subfolder for different power levels
                 Path(output_path + str(power)).mkdir(parents=True, exist_ok=True)
-                # Create subfolders for different pricing strategies
+                # Create subfolder for different pricing strategies
                 Path(output_path + str(power) + '/' + price).mkdir(parents=True, exist_ok=True)
                 # Update forecast data
                 my_ems['fcst']['ele_price_in'] = price_fcst[price].to_list()
@@ -122,7 +123,7 @@ def calc_ev_flex_offers(veh_availabilities,
                 my_ems = opentumflex.calc_flex_ev(my_ems)
 
                 # Plot flex result
-                if plotting == True:
+                if plotting:
                     opentumflex.plot_flex(my_ems, 'ev')
 
                 # Save results to files
@@ -137,7 +138,6 @@ if __name__ == '__main__':
     veh_avail = veh_avail.reset_index()
 
     calc_ev_flex_offers(veh_avail,
-                        input_data='../input/input_data.csv',
                         rtp_input_data_path='../input/RTP/',
                         output_path='../output/',
                         power_levels=[3.7, 11, 22],

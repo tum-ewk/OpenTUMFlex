@@ -1,5 +1,5 @@
 """
-The hm_plot_analysis module creates a heat map of the offerable flexibility.
+This module creates a heat map of the vehicle availabilities and the flexibility that can be offered.
 """
 
 __author__ = "Michel Zadé"
@@ -13,19 +13,21 @@ __status__ = "Development"
 
 
 from pandas.plotting import register_matplotlib_converters
-register_matplotlib_converters()
 from pathlib import Path
 from matplotlib import rcParams
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sb
+register_matplotlib_converters()
 
 
 def plot_flex_heatmap(output_path='output/', figure_path='figures/'):
     """
     This function plots the aggregated flexibility offers as heatmaps
 
-    :return: None
+    :param output_path: folder that contains single ems results
+    :param figure_path: folder where figures are stored
+    :return:
     """
     Path(figure_path).mkdir(parents=True, exist_ok=True)
     # Set font style

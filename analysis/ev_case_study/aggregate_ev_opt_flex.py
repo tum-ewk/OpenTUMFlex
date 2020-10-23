@@ -21,7 +21,7 @@ from pathlib import Path
 
 def aggregate_ev_flex(veh_availabilities, output_path='../output/', rtp_input_data_path='../input/RTP/'):
     """
-    This function aggregates the flexibility offers
+    This function aggregates the flexibility offers to data frame for weekdays and weekends in 15 minute resolution
 
     :param veh_availabilities: vehicle availabilities
     :param output_path: path where aggregated results shall be stored

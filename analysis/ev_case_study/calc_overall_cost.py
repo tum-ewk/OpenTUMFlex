@@ -1,5 +1,5 @@
 """
-The calc_overall_cost module calculates and plots the overall costs of all calculated optimal charging procedures.
+This module calculates the overall costs of all calculated optimal charging procedures.
 """
 
 __author__ = "Michel Zadé"
@@ -20,7 +20,8 @@ def calc_overall_cost(output_path='output/'):
     """
     This function calculates the overall costs of the optimal charging schedules
 
-    :return:
+    :param output_path: folder that contains single ems results
+    :return
     """
 
     # List all file names, for all scenarios (ToU & Constant, with and without minimally increasing prices) the same

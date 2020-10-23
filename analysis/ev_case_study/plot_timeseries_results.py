@@ -1,5 +1,5 @@
 """
-The time_plot_analysis module visualizes the optimal charging schedules and flexibility potentials over time.
+This module visualizes the optimal charging schedules and flexibility potentials over time.
 """
 
 __author__ = "Michel Zadé"
@@ -20,13 +20,21 @@ from pathlib import Path
 register_matplotlib_converters()
 
 
-def plot_n_avail_veh(chts_output_path, mp_output_path, figure_path='figures/'):
+def plot_n_avail_veh(cs1_output_path, cs2_output_path, figure_path='figures/'):
+    """
+    Plots the vehicle availabilities of two different case studies.
+
+    :param cs1_output_path: path to results of the first case study
+    :param cs2_output_path: path to results of the second case study
+    :param figure_path: folder where figures are stored
+    :return:
+    """
     # Define figure path
     Path(figure_path).mkdir(parents=True, exist_ok=True)
 
-    chts_opt_per_daytime = pd.read_hdf(chts_output_path + 'Aggregated Data/opt_per_daytime_data.h5', key='df')
-    mp_opt_per_daytime = pd.read_hdf(mp_output_path + 'Aggregated Data/opt_per_daytime_data.h5', key='df')
-    chts_flex_per_daytime = pd.read_hdf(chts_output_path + 'Aggregated Data/flex_per_daytime_data.h5', key='df')
+    chts_opt_per_daytime = pd.read_hdf(cs1_output_path + 'Aggregated Data/opt_per_daytime_data.h5', key='df')
+    mp_opt_per_daytime = pd.read_hdf(cs2_output_path + 'Aggregated Data/opt_per_daytime_data.h5', key='df')
+    chts_flex_per_daytime = pd.read_hdf(cs1_output_path + 'Aggregated Data/flex_per_daytime_data.h5', key='df')
 
     # Set font/figure style
     rcParams["font.family"] = "Times New Roman"
@@ -60,6 +68,13 @@ def plot_n_avail_veh(chts_output_path, mp_output_path, figure_path='figures/'):
 
 
 def plot_n_avail_veh(output_path, figure_path='../figures/'):
+    """
+    Plots the vehicle availabilities of a case study.
+
+    :param output_path: path to results of the case study
+    :param figure_path: folder where figures are stored
+    :return:
+    """
     # Define figure path
     Path(figure_path).mkdir(parents=True, exist_ok=True)
     # Read data from files
@@ -89,12 +104,14 @@ def plot_n_avail_veh(output_path, figure_path='../figures/'):
     print('Maximum number of available vehicles:', opt_per_daytime['n_veh_avail'].max())
 
 
-def plot_opt_flex_timeseries(chts_output_path, mp_output_path, figure_path='../figures/'):
+def plot_opt_flex_timeseries(cs1_output_path, cs2_output_path, figure_path='../figures/'):
     """
-    This function plots the aggregated flexibility results over time
+    This function plots the flexibility results of two case studies over time
 
-    :param power: power level to be plotted
-    :return: None
+    :param cs1_output_path: path to results of the first case study
+    :param cs2_output_path: path to results of the second case study
+    :param figure_path: folder where figures are stored
+    :return:
     """
 
     # Set font/figure style
@@ -106,25 +123,19 @@ def plot_opt_flex_timeseries(chts_output_path, mp_output_path, figure_path='../f
 
     # Read aggregated data from hdf files #########################################
     # US CHTS
-    chts_flex_sum_df = pd.read_hdf(chts_output_path + 'Aggregated Data/flex_sum_data.h5', key='df')
-    chts_opt_sum_df = pd.read_hdf(chts_output_path + 'Aggregated Data/opt_sum_data.h5', key='df')
-    chts_opt_per_daytime = pd.read_hdf(chts_output_path + 'Aggregated Data/opt_per_daytime_data.h5', key='df')
-    chts_flex_per_daytime = pd.read_hdf(chts_output_path + 'Aggregated Data/flex_per_daytime_data.h5', key='df')
-    chts_opt_per_daytime_qt = pd.read_hdf(chts_output_path + 'Aggregated Data/opt_per_daytime_qt_data.h5', key='df')
-    chts_weekday_flex_per_daytime = pd.read_hdf(chts_output_path + 'Aggregated Data/weekday_flex_per_daytime_data.h5', key='df')
-    chts_weekend_opt_per_daytime = pd.read_hdf(chts_output_path + 'Aggregated Data/weekend_opt_per_daytime_data.h5', key='df')
-    chts_weekend_flex_per_daytime = pd.read_hdf(chts_output_path + 'Aggregated Data/weekend_flex_per_daytime_data.h5', key='df')
-    chts_weekday_opt_per_daytime = pd.read_hdf(chts_output_path + 'Aggregated Data/weekday_opt_per_daytime_data.h5', key='df')
+    chts_opt_per_daytime = pd.read_hdf(cs1_output_path + 'Aggregated Data/opt_per_daytime_data.h5', key='df')
+    chts_flex_per_daytime = pd.read_hdf(cs1_output_path + 'Aggregated Data/flex_per_daytime_data.h5', key='df')
+    chts_weekday_flex_per_daytime = pd.read_hdf(cs1_output_path + 'Aggregated Data/weekday_flex_per_daytime_data.h5', key='df')
+    chts_weekend_opt_per_daytime = pd.read_hdf(cs1_output_path + 'Aggregated Data/weekend_opt_per_daytime_data.h5', key='df')
+    chts_weekend_flex_per_daytime = pd.read_hdf(cs1_output_path + 'Aggregated Data/weekend_flex_per_daytime_data.h5', key='df')
+    chts_weekday_opt_per_daytime = pd.read_hdf(cs1_output_path + 'Aggregated Data/weekday_opt_per_daytime_data.h5', key='df')
     # GER MP
-    mp_flex_sum_df = pd.read_hdf(mp_output_path + 'Aggregated Data/flex_sum_data.h5', key='df')
-    mp_opt_sum_df = pd.read_hdf(mp_output_path + 'Aggregated Data/opt_sum_data.h5', key='df')
-    mp_opt_per_daytime = pd.read_hdf(mp_output_path + 'Aggregated Data/opt_per_daytime_data.h5', key='df')
-    mp_flex_per_daytime = pd.read_hdf(mp_output_path + 'Aggregated Data/flex_per_daytime_data.h5', key='df')
-    mp_opt_per_daytime_qt = pd.read_hdf(mp_output_path + 'Aggregated Data/opt_per_daytime_qt_data.h5', key='df')
-    mp_weekday_flex_per_daytime = pd.read_hdf(mp_output_path + 'Aggregated Data/weekday_flex_per_daytime_data.h5', key='df')
-    mp_weekend_opt_per_daytime = pd.read_hdf(mp_output_path + 'Aggregated Data/weekend_opt_per_daytime_data.h5', key='df')
-    mp_weekend_flex_per_daytime = pd.read_hdf(mp_output_path + 'Aggregated Data/weekend_flex_per_daytime_data.h5', key='df')
-    mp_weekday_opt_per_daytime = pd.read_hdf(mp_output_path + 'Aggregated Data/weekday_opt_per_daytime_data.h5', key='df')
+    mp_opt_per_daytime = pd.read_hdf(cs2_output_path + 'Aggregated Data/opt_per_daytime_data.h5', key='df')
+    mp_flex_per_daytime = pd.read_hdf(cs2_output_path + 'Aggregated Data/flex_per_daytime_data.h5', key='df')
+    mp_weekday_flex_per_daytime = pd.read_hdf(cs2_output_path + 'Aggregated Data/weekday_flex_per_daytime_data.h5', key='df')
+    mp_weekend_opt_per_daytime = pd.read_hdf(cs2_output_path + 'Aggregated Data/weekend_opt_per_daytime_data.h5', key='df')
+    mp_weekend_flex_per_daytime = pd.read_hdf(cs2_output_path + 'Aggregated Data/weekend_flex_per_daytime_data.h5', key='df')
+    mp_weekday_opt_per_daytime = pd.read_hdf(cs2_output_path + 'Aggregated Data/weekday_opt_per_daytime_data.h5', key='df')
 
     # Subplots
     fig4, axs = plt.subplots(nrows=2, ncols=2, sharex=True)
@@ -584,9 +595,11 @@ def plot_opt_flex_timeseries(chts_output_path, mp_output_path, figure_path='../f
 
 def plot_opt_flex_timeseries(output_path, figure_path='figures/'):
     """
-    This function plots the aggregated flexibility results over time
+    This function plots the flexibility results of a study over time
 
-    :return: None
+    :param output_path: path to results of the  case study
+    :param figure_path: folder where figures are stored
+    :return:
     """
 
     # Set font/figure style
