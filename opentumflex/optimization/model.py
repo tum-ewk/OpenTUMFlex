@@ -73,112 +73,73 @@ def create_model(ems_local):
     # create the model object m
     m = pyen.ConcreteModel()
 
-    # heat storage
-    sto_param = devices['sto']
-    # storage_cap = sto_param['stocap']
-    tem_min_sto = sto_param['mintemp']
-    tem_max_sto = sto_param['maxtemp']
-    soc_init = sto_param['initSOC']
-    self_discharge = sto_param['self_discharge']
-    # unit in kWh
-    sto_cont = sto_param['stocap']
+    # create the parameter
+    # print('Define Model ...\n')
 
-    # boiler
-    boil_param = devices['boiler']
-    boil_cap = boil_param['maxpow']
-    boil_eff = boil_param['eta']
-    # EV, availability should be added
-    ev_param = devices['ev']
-    ev_min_power = ev_param['minpow']
-    ev_max_power = ev_param['maxpow']
-    ev_sto_cap = ev_param['stocap']
-    ev_soc_init = ev_param['initSOC']
-    ev_eta = ev_param['eta']
-    ev_soc_end = ev_param['endSOC']
-    ev_aval = ev_param['aval']
-    ev_init_soc_check = ev_param['init_soc_check']
-    ev_end_soc_check = ev_param['end_soc_check']
-    # CHP
-    chp_param = devices['chp']
-    chp_elec_eff = chp_param['eta'][0]
-    chp_ther_eff = chp_param['eta'][1]
-    chp_elec_cap = chp_param['maxpow']
+    m.t = pyen.Set(ordered=True, initialize=timesteps)
+    m.t_DN = pyen.Set(ordered=True, initialize=timesteps_dn)
+    m.t_UP = pyen.Set(ordered=True, initialize=timesteps_up)
+
+    # heat_storage
+    sto_param = devices['sto']
+    m.sto_max_cont = pyen.Param(initialize=sto_param['stocap'])
+    m.SOC_init = pyen.Param(initialize=sto_param['initSOC'])
+    m.temp_min = pyen.Param(initialize=sto_param['mintemp'])
+    m.temp_max = pyen.Param(initialize=sto_param['maxtemp'])
+
+    # battery
+    bat_param = devices['bat']
+    m.bat_cont_max = pyen.Param(initialize=bat_param['stocap'])
+    m.bat_SOC_init = pyen.Param(initialize=bat_param['initSOC'])
+    m.bat_power_max = pyen.Param(initialize=bat_param['maxpow'])
+    m.bat_eta = pyen.Param(initialize=bat_param['eta'])
+
     # heat pump
     hp_param = devices['hp']
     hp_elec_cap = pd.DataFrame.from_dict(hp_param['powmap'])
     hp_cop = pd.DataFrame.from_dict(hp_param['COP'])
     hp_supply_temp = hp_param['supply_temp']
-    hp_themInertia = hp_param['thermInertia']
-    hp_minTemp = hp_param['minTemp']
-    hp_maxTemp = hp_param['maxTemp']
-    hp_heatgain = hp_param['heatgain']
-
-    # PV
-    pv_param = devices['pv']
-    pv_peak_pow = pv_param['maxpow']
-    pv_eff = pv_param['eta']
-    # battery
-    bat_param = devices['bat']
-    bat_max_cont = bat_param['stocap']
-    bat_SOC_init = bat_param['initSOC']
-    bat_pow_max = bat_param['maxpow']
-    bat_eta = bat_param['eta']
-
-    ## create the parameter
-    # print('Define Model ...\n')
-    #
-    m.t = pyen.Set(ordered=True, initialize=timesteps)
-
-    #    m.t_end = pyen.Set(initialize=timesteps,
-    #		doc='Timesteps without zero')
-    m.t_DN = pyen.Set(ordered=True, initialize=timesteps_dn)
-    m.t_UP = pyen.Set(ordered=True, initialize=timesteps_up)
-
-    # heat_storage
-    m.sto_max_cont = pyen.Param(initialize=sto_cont)
-
-    m.SOC_init = pyen.Param(initialize=soc_init)
-
-    # battery
-    m.bat_cont_max = pyen.Param(initialize=bat_max_cont)
-    m.bat_SOC_init = pyen.Param(initialize=bat_SOC_init)
-    m.bat_power_max = pyen.Param(initialize=bat_pow_max)
-    m.bat_eta = pyen.Param(initialize=bat_eta)
-
-    # hp
     m.hp_ther_pow = pyen.Param(m.t, initialize=1, mutable=True, within=pyen.NonNegativeReals)
-    m.sto_cont = pyen.Param(initialize=sto_cont)
     m.hp_COP = pyen.Param(m.t, initialize=1, mutable=True, within=pyen.NonNegativeReals)
     m.hp_elec_pow = pyen.Param(m.t, initialize=1, mutable=True, within=pyen.NonNegativeReals)
     m.T_DN = pyen.Param(initialize=t_dn, mutable=True)
     m.T_UP = pyen.Param(initialize=t_up, mutable=True)
-    m.hp_themInertia = pyen.Param(initialize=hp_themInertia)
-    m.hp_minTemp = pyen.Param(initialize=hp_minTemp)
-    m.hp_maxTemp = pyen.Param(initialize=hp_maxTemp)
-    m.hp_heatgain = pyen.Param(initialize=hp_heatgain)
+    m.hp_themInertia = pyen.Param(initialize=hp_param['thermInertia'])
+    m.hp_minTemp = pyen.Param(initialize=hp_param['minTemp'])
+    m.hp_maxTemp = pyen.Param(initialize=hp_param['maxTemp'])
+    m.hp_heatgain = pyen.Param(initialize=hp_param['heatgain'])
 
     # elec_vehicle
-    m.ev_min_pow = pyen.Param(initialize=ev_min_power)
-    m.ev_max_pow = pyen.Param(initialize=ev_max_power)
-    m.ev_sto_cap = pyen.Param(initialize=ev_sto_cap)
-    # m.ev_soc_init = pyen.Param(m.aval_block, initialize=ev_soc_init)
-    m.ev_eta = pyen.Param(initialize=ev_eta)
-    # m.ev_soc_end = pyen.Param(m.aval_block, initialize=ev_soc_end)
+    ev_param = devices['ev']
+    ev_aval = ev_param['aval']
+    m.ev_min_pow = pyen.Param(initialize=ev_param['minpow'])
+    m.ev_max_pow = pyen.Param(initialize=ev_param['maxpow'])
+    m.ev_sto_cap = pyen.Param(initialize=ev_param['stocap'])
+    m.ev_eta = pyen.Param(initialize=ev_param['eta'])
     m.ev_aval = pyen.Param(m.t, initialize=1, mutable=True)
-    m.ev_charg_amount = ev_sto_cap * (ev_soc_end[-1] - ev_soc_init[0]) / 100
+    m.ev_charg_amount = m.ev_sto_cap * (ev_param['endSOC'][-1] - ev_param['initSOC'][0]) / 100
+    ev_soc_init = ev_param['initSOC']
+    ev_soc_end = ev_param['endSOC']
+    ev_init_soc_check = ev_param['init_soc_check']
+    ev_end_soc_check = ev_param['end_soc_check']
 
     # boilder
-    m.boiler_max_cap = pyen.Param(initialize=boil_cap)
-    m.boiler_eff = pyen.Param(initialize=boil_eff)
-    # chp
-    m.chp_elec_effic = pyen.Param(m.t, initialize=chp_elec_eff)
-    m.chp_ther_effic = pyen.Param(m.t, initialize=chp_ther_eff)
-    m.chp_elec_run = pyen.Param(m.t, initialize=chp_elec_cap)
+    boil_param = devices['boiler']
+    m.boiler_max_cap = pyen.Param(initialize=boil_param['maxpow'])
+    m.boiler_eff = pyen.Param(initialize=boil_param['eta'])
+
+    # CHP
+    chp_param = devices['chp']
+    m.chp_elec_effic = pyen.Param(m.t, initialize=chp_param['eta'][0])
+    m.chp_ther_effic = pyen.Param(m.t, initialize=chp_param['eta'][1])
+    m.chp_elec_run = pyen.Param(m.t, initialize=chp_param['maxpow'])
     m.chp_heat_run = pyen.Param(m.t, initialize=0, mutable=True)
     m.chp_gas_run = pyen.Param(m.t, initialize=0, mutable=True)
+
     # solar
-    m.pv_effic = pyen.Param(initialize=pv_eff)
-    m.pv_peak_power = pyen.Param(initialize=pv_peak_pow)
+    pv_param = devices['pv']
+    m.pv_effic = pyen.Param(initialize=pv_param['eta'])
+    m.pv_peak_power = pyen.Param(initialize=pv_param['maxpow'])
     m.solar = pyen.Param(m.t, initialize=1, mutable=True)
 
     #    for t in m.t_UP:
@@ -222,7 +183,7 @@ def create_model(ems_local):
     m.CHP_run = pyen.Var(m.t, within=pyen.Boolean,
                          doc='operation of the CHP')
 
-    m.ev_power = pyen.Var(m.t, within=pyen.NonNegativeReals, bounds=(ev_min_power, ev_max_power),
+    m.ev_power = pyen.Var(m.t, within=pyen.NonNegativeReals, bounds=(ev_param['minpow'], ev_param['maxpow']),
                           doc='power of the EV')
     m.boiler_cap, m.PV_cap, m.elec_import, m.elec_export, m.bat_cont, m.sto_e_cont, m.bat_pow_pos, m.bat_pow_neg, \
     m.ev_cont, m.ev_var_pow, m.soc_diff, m.roomtemp = (pyen.Var(m.t, within=pyen.NonNegativeReals) for i in range(12))
@@ -308,9 +269,9 @@ def create_model(ems_local):
     # ev battery balance
     def ev_cont_def_rule(m, t):
         if t > m.t[1]:
-            return m.ev_cont[t] == m.ev_cont[t - 1] + m.ev_power[t] * p2e * ev_eta - m.ev_var_pow[t]
+            return m.ev_cont[t] == m.ev_cont[t - 1] + m.ev_power[t] * p2e * m.ev_eta - m.ev_var_pow[t]
         else:
-            return m.ev_cont[t] == m.ev_sto_cap * ev_soc_init[0] / 100 + m.ev_power[t] * p2e * ev_eta
+            return m.ev_cont[t] == m.ev_sto_cap * ev_soc_init[0] / 100 + m.ev_power[t] * p2e * m.ev_eta
 
     m.ev_cont_def = pyen.Constraint(m.t, rule=ev_cont_def_rule, doc='EV_balance')
 
@@ -382,15 +343,15 @@ def create_model(ems_local):
 
     # storage
     # storage content
-    if m.sto_cont > 0:
+    if m.sto_max_cont > 0:
         def sto_e_cont_min_rule(m, t):
-            return m.sto_e_cont[t] / m.sto_cont >= 0.1
+            return m.sto_e_cont[t] / m.sto_max_cont >= 0.1
 
         m.sto_e_cont_min = pyen.Constraint(m.t,
                                            rule=sto_e_cont_min_rule)
 
         def sto_e_cont_max_rule(m, t):
-            return m.sto_e_cont[t] / m.sto_cont <= 0.9;
+            return m.sto_e_cont[t] / m.sto_max_cont <= 0.9;
 
         m.sto_e_cont_max = pyen.Constraint(m.t,
                                            rule=sto_e_cont_max_rule)
@@ -409,13 +370,13 @@ def create_model(ems_local):
     # storage power
 
     def sto_e_max_pow_rule_1(m, t):
-        return m.sto_e_pow[t] <= m.sto_cont
+        return m.sto_e_pow[t] <= m.sto_max_cont
 
     m.sto_e_pow_max_1 = pyen.Constraint(m.t,
                                         rule=sto_e_max_pow_rule_1)
 
     def sto_e_max_pow_rule_2(m, t):
-        return m.sto_e_pow[t] >= -m.sto_cont
+        return m.sto_e_pow[t] >= -m.sto_max_cont
 
     m.sto_e_pow_max_2 = pyen.Constraint(m.t,
                                         rule=sto_e_max_pow_rule_2)
@@ -433,7 +394,7 @@ def create_model(ems_local):
                                         rule=bat_e_max_pow_rule_2)
 
     # end state of storage and battery
-    m.sto_e_cont_end = pyen.Constraint(expr=(m.sto_e_cont[m.t[-1]] >= 0.5 * m.sto_cont))
+    m.sto_e_cont_end = pyen.Constraint(expr=(m.sto_e_cont[m.t[-1]] >= 0.5 * m.sto_max_cont))
     m.bat_e_cont_end = pyen.Constraint(expr=(m.bat_cont[m.t[-1]] >= 0.5 * m.bat_cont_max))
 
     def obj_rule(m):
@@ -504,9 +465,7 @@ def extract_res(m, ems):
     # heat balance
 
     bat_max_cont = get_value(m.bat_cont_max)
-    sto_cont_max = get_value(m.sto_cont)
-    bat_cont_init = bat_max_cont * 0.5
-    sto_cont_init = sto_cont_max * 0.5
+    sto_cont_max = get_value(m.sto_max_cont)
 
     i = 0
 
