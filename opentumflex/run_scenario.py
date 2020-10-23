@@ -21,7 +21,7 @@ import os
 
 def run_scenario(scenario, path_input, path_results, fcst_only=True, time_limit=30, troubleshooting=True,
                  show_opt_res=True, show_flex_res=True, save_opt_res=True, show_stacked_flex=True,
-                 convert_input_tocsv=True):
+                 convert_input_tocsv=True, show_price_flex='bar'):
     """ run an OpenTUMFlex model for given scenario
 
     Args:
@@ -86,7 +86,7 @@ def run_scenario(scenario, path_input, path_results, fcst_only=True, time_limit=
     # plot stacked flexibility of all devices
     if show_stacked_flex:
         opentumflex.plot_stacked_flex(my_ems)
-        opentumflex.plot_stacked_flex_price(my_ems)
+        opentumflex.plot_stacked_flex_price(my_ems, plot_flexpr=show_price_flex)
     return my_ems
 
 

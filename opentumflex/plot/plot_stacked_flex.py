@@ -95,7 +95,7 @@ def plot_stacked_flex_price(ems, reopt=0, plot_flexpr='bar'):
     nsteps = ems['time_data']['nsteps']
     ts = ems['time_data']['time_slots'].tolist()
     chart_pos = ['skyblue', 'steelblue', 'cornflowerblue', 'lightskyblue', 'deepskyblue']     
-    chart_neg = ['rosybrown', 'firebrick', 'indianred', 'tomato', 'lightsalmon'] 
+    chart_neg = ['sandybrown', 'indianred', 'coral', 'mistyrose', 'lightsalmon'] 
     device = list(ems['flexopts'].keys())    
     font_size = 14
     
@@ -107,9 +107,9 @@ def plot_stacked_flex_price(ems, reopt=0, plot_flexpr='bar'):
             # Loop through the device list and stack plot
             for i in range(len(device)):
                 plt.bar(ts, ems['flexopts'][device[i]]['Pos_Pr'], color=chart_pos[i], 
-                                    alpha=0.8, align='edge', edgecolor='k', label=device[i])
+                                    alpha=0.8, align='edge', edgecolor='k', label=device[i]+'_pos')
                 plt.bar(ts, ems['flexopts'][device[i]]['Neg_Pr'], color=chart_neg[i], 
-                                    alpha=0.8, align='edge', edgecolor='k')
+                                    alpha=0.7, align='edge', edgecolor='k', label=device[i]+'_neg')
                        
             # Change xtick intervals    
             req_ticks = 12   # ticks needed
@@ -129,8 +129,9 @@ def plot_stacked_flex_price(ems, reopt=0, plot_flexpr='bar'):
             # Loop through the device list and stack plot
             for i in range(len(device)):
                 plt.scatter(ts, ems['flexopts'][device[i]]['Pos_Pr'], color=chart_pos[i], 
-                                    label=device[i])
-                plt.scatter(ts, ems['flexopts'][device[i]]['Neg_Pr'], color=chart_neg[i])
+                                    label=device[i]+'_pos')
+                plt.scatter(ts, ems['flexopts'][device[i]]['Neg_Pr'], color=chart_neg[i],
+                                    label=device[i]+'_neg')
                        
             # Change xtick intervals    
             req_ticks = 12   # ticks needed
