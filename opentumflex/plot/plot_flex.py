@@ -117,7 +117,7 @@ def plot_flex(my_ems, device):
         plt_cum.legend(['Cummulative'], prop={'size': font_size+2})
 
     # Labels            
-    # plt_cum.set_title('Flexibility plots', fontsize=font_size, pad=20)
+    plt_cum.set_title('Flexibility plots' + ' - ' + device.upper(), fontsize=font_size, pad=20)
     plt_cum.set_ylabel('$CE\ [kWh]$', fontsize=font_size+2)
     plt_cum.tick_params(axis="x", labelsize=font_size, labelbottom=False)
     plt_cum.tick_params(axis="y", labelsize=font_size)

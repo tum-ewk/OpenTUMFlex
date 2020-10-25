@@ -17,7 +17,7 @@ import matplotlib.pyplot as plt
 from operator import add
 import numpy as np
 
-def plot_stacked_flex(ems, reopt=0):
+def plot_aggregated_flex_power(ems, reopt=0):
     """
     
 
@@ -71,9 +71,10 @@ def plot_stacked_flex(ems, reopt=0):
         # Axis labels
         plt.ylabel("Flexibility power [kW]", fontsize=font_size)
         plt.xlabel("Time", fontsize=font_size)
+        plt.title('Aggregated flex power', fontsize=font_size, pad=20)
         
         
-def plot_stacked_flex_price(ems, reopt=0, plot_flexpr='bar'):
+def plot_aggregated_flex_price(ems, reopt=0, plot_flexpr='bar'):
     """
     
 
@@ -124,6 +125,7 @@ def plot_stacked_flex_price(ems, reopt=0, plot_flexpr='bar'):
             # Axis labels
             plt.ylabel("Flexibility price [€/kWh]", fontsize=font_size)
             plt.xlabel("Time", fontsize=font_size)
+            plt.title('Aggregated flex price', fontsize=font_size, pad=20)
         
         if plot_flexpr == 'scatter':
             # Loop through the device list and stack plot
@@ -146,6 +148,7 @@ def plot_stacked_flex_price(ems, reopt=0, plot_flexpr='bar'):
             # Axis labels
             plt.ylabel("Flexibility price [€/kWh]", fontsize=font_size)
             plt.xlabel("Time", fontsize=font_size)
+            plt.title('Aggregated flex price', fontsize=font_size, pad=20)
     
     
     

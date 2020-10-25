@@ -26,8 +26,8 @@ from opentumflex.plot.plot_optimal_results import plot_optimal_results
 from opentumflex.plot.plot_flex_reoptimized import plot_cumm_energy_reoptimized, plot_flex_reoptimized, \
     plot_compare_optim_reoptim
 from opentumflex.plot.plot_flex import plot_flex
-from opentumflex.plot.plot_stacked_flex import plot_stacked_flex
-from opentumflex.plot.plot_stacked_flex import plot_stacked_flex_price
+from opentumflex.plot.plot_aggregated_flex import plot_aggregated_flex_power
+from opentumflex.plot.plot_aggregated_flex import plot_aggregated_flex_price
 from opentumflex.scenarios.scenarios import *
 from .run_scenario import run_scenario
 

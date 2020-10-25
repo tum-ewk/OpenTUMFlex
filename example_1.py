@@ -13,5 +13,5 @@ ems = opentumflex.run_scenario(opentumflex.scenario_apartment,
                                path_input=path_input_data, path_results=path_results,
                                fcst_only=True, time_limit=10,
                                show_flex_res=False, show_opt_res=False, save_opt_res=False,
-                               convert_input_tocsv=True, show_stacked_flex=True, show_price_flex='scatter', 
-                               troubleshooting=False)
+                               convert_input_tocsv=True, show_aggregated_flex=False, 
+                               show_aggregated_flex_price='bar', troubleshooting=False)
