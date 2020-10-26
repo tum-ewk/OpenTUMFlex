@@ -41,8 +41,8 @@ Increasing share of renewable energy requires alternative methods to provide pow
 * You will get following results if it works properly:
 
 <p float="left">
-  <img src="https://user-images.githubusercontent.com/42935122/97186850-1b97b500-17a2-11eb-9a86-97674ffad6d0.png" width="450" height="300">
-  <img src="https://user-images.githubusercontent.com/42935122/97187204-85b05a00-17a2-11eb-816e-6d20a472c9ae.png" width="450" height="300">
+  <img src="https://user-images.githubusercontent.com/42935122/97186850-1b97b500-17a2-11eb-9a86-97674ffad6d0.png" width="400" height="267">
+  <img src="https://user-images.githubusercontent.com/42935122/97187204-85b05a00-17a2-11eb-816e-6d20a472c9ae.png" width="400" height="267">
 </p>
 
 ## Getting started
