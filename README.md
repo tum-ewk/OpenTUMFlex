@@ -39,13 +39,15 @@ Run the [example.py](https://github.com/tum-ewk/OpenTUMFlex.py/blob/master/examp
 
 
 ## Getting started
-   * A scenario based approach is incorported in OpenTUMflex design. Here, a scenario refers to the device configurations installed at the prosumer premises. For example: A scenario can refer to just a household with PV, BSS and EV. 
-   * Once you have succesfully installed OpenTUMflex, you can choose or create your own scenario inside [scenario.py](https://github.com/tum-ewk/OpenTUMFlex.py/blob/master/opentumflex/scenarios/scenarios.py). To give an idea, we have already created 10 sample scenarios. 
+A scenario based approach is incorported in OpenTUMflex design. Here, a scenario refers to the device configurations installed at the prosumer premises. For example: A scenario can refer to just a household with PV, BSS and EV. 
 
-**Change your scenario (use predefined sample configurations in [scenario.py](https://github.com/tum-ewk/OpenTUMFlex.py/blob/master/opentumflex/scenarios/scenarios.py)):**
-  * `scenario_hp`: Heat storage, boiler and HP
-  * `scenario_simple_house`: PV, BSS, heat storage and boiler
-  * `scenario_apartment`: PV, BSS, heat storage, boiler, CHP, HP and EV
+* **Change your scenario (use predefined sample configurations in [scenario.py](https://github.com/tum-ewk/OpenTUMFlex.py/blob/master/opentumflex/scenarios/scenarios.py)):**
+   Once you have succesfully installed OpenTUMflex, you can choose or create your own scenario inside [scenario.py](https://github.com/tum-ewk/OpenTUMFlex.py/blob/master/opentumflex/scenarios/scenarios.py). To give an idea, we have already created 10 sample scenarios. 
+   
+  *For example the following scenarios portray the devices installed at the prosumers premises*
+   * `scenario_hp`: Heat storage, boiler and HP
+   * `scenario_simple_house`: PV, BSS, heat storage and boiler
+   * `scenario_apartment`: PV, BSS, heat storage, boiler, CHP, HP and EV
   
   *Change the arguments to enable/disable each plot:*
    * `show_opt_res`: show the optimiaztion results (power and heat balance, SoCs)
@@ -53,10 +55,10 @@ Run the [example.py](https://github.com/tum-ewk/OpenTUMFlex.py/blob/master/examp
    * `show_flex_res`: show the flexibility results (power, energy and price)
    * `show_aggregated_flex`: show the summay of all flexibility power and prices
 
-**Create your own scenario:** 
+* **Create your own scenario:** 
    * Refer our [documentation](https://github.com/tum-ewk/OpenTUMFlex.py/wiki).
    
-**Analysis Toolbox:**
+* **Analysis Toolbox:**
    * [Quantifying the Flexibility of Electric Vehicles in Germany and California](/https://github.com/tum-ewk/OpenTUMFlex.py/blob/master/analysis/README.md)
 
 
