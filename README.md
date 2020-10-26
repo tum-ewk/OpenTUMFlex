@@ -6,15 +6,15 @@ An open-source Python based flexibility model to quantify and price the flexibil
 
 ## Description
 
-Increasing share of renewable energy requires alternative methods to provide power system ancillary services to ensure stable operation of the electricity grids. Recent research have inclined their interests towards the aggregation of the small-scale system flexibility potentials to accommodate the grid variations. The advancements towards local flexibility markets (LFMs) allow prosumers participation in the solving grid congestion problems. In order to allow prosumers to interact with the LFMs and submit their bids, a flexibility estimation is required. This research proposes an open-source flexibility estimation model that quantifies all possible flexibilities from the available prosumer devices.
+The increasing share of renewable energy requires alternative methods to provide power system ancillary services to ensure a stable operation of the electricity grids. Recent research has inclined their interests towards the aggregation of the small-scale system flexibility potentials to accommodate the grid variations. The advancements towards local flexibility markets (LFMs) allow prosumers participation in solving grid congestion problems. In order to allow prosumers to interact with the LFMs and submit their bids, a flexibility estimation is required. This research proposes an open-source flexibility estimation model that quantifies all possible flexibilities from the available prosumer devices.
 
 
 ## Features
 
-* OpenTUMFlex uses mixed integer linear programming (MILP) to obtain cost-optimal operational plans for household devices. 
+* OpenTUMFlex uses mixed-integer linear programming (MILP) to obtain cost-optimal operational plans for household devices. 
 * Calculates the flexibility potential and flexibility prices of household devices.
 * Supported devices: PV, Battery Storage Systems (BSS), Electric Vehicle (EV), Heat Pump (HP), Combined Heat and Power (CHP).
-* Outputs flexibility offers of each device in suitable formats which can be directly used in FlexMarket (ReFlex, comax and ALF).
+* Outputs flexibility offers of each device in suitable formats that can be directly used in FlexMarket (ReFlex, comax and ALF).
 
 
 ## Installation
@@ -39,10 +39,10 @@ Run the [example.py](https://github.com/tum-ewk/OpenTUMFlex.py/blob/master/examp
 
 
 ## Getting started
-A scenario based approach is incorported in OpenTUMflex design. Here, a scenario refers to the device configurations installed at the prosumer premises. For example: A scenario can refer to just a household with PV, BSS and EV. 
+A scenario-based approach is incorporated in OpenTUMflex design. Here, a scenario refers to the device configurations installed at the prosumer premises. For example, a scenario can refer to just a household with PV, BSS and EV. 
 
 * **Change your scenario**
-   Once you have succesfully installed OpenTUMflex, you can choose to change your scenario by replacing the desired name in line 11 in [example.py](https://github.com/tum-ewk/OpenTUMFlex.py/blob/master/example_1.py). To give an idea, we have already created 10 sample scenarios inside [scenario.py](https://github.com/tum-ewk/OpenTUMFlex.py/blob/master/opentumflex/scenarios/scenarios.py). 
+   Once you have successfully installed OpenTUMflex, you can choose to change your scenario by replacing the desired name in line 11 in [example.py](https://github.com/tum-ewk/OpenTUMFlex.py/blob/master/example_1.py). To give an idea, we have already created 10 sample scenarios inside [scenario.py](https://github.com/tum-ewk/OpenTUMFlex.py/blob/master/opentumflex/scenarios/scenarios.py). 
    
   *For example the following scenarios portray the devices installed at the prosumers premises*
    * `scenario_hp`: Heat storage, boiler and HP
@@ -50,10 +50,10 @@ A scenario based approach is incorported in OpenTUMflex design. Here, a scenario
    * `scenario_apartment`: PV, BSS, heat storage, boiler, CHP, HP and EV
   
   *Change the arguments to enable/disable each plot:*
-   * `show_opt_res`: show the optimiaztion results (power and heat balance, SoCs)
-   * `show_opt_res`: save the optimiaztion results in spreedsheet 
-   * `show_flex_res`: show the flexibility results (power, energy and price)
-   * `show_aggregated_flex`: show the summay of all flexibility power and prices
+   * `show_opt_res`: plot the optimization results (energy balance and device SoCs)
+   * `save_opt_res`: save the optimization results in a spreedsheet 
+   * `show_flex_res`: plot the flexibility results of all available devices individually (power, energy and price)
+   * `show_aggregated_flex`: plot the cumulative flexibility power and price of all the available devices
 
 * **Create your own scenario:** 
    * Refer our [documentation](https://github.com/tum-ewk/OpenTUMFlex.py/wiki).
@@ -79,7 +79,7 @@ The authors declare no conflict of interest. All authors have equally contribute
 
 ## License
 
-OpenTUMFlex can be used to optimize and calculate a households flexibility potential and price it. 
+OpenTUMFlex can be used to optimize and calculate a household flexibility potential and price it. 
 Copyright (C) 2020 TUM-EWK 
 
 This program is free software: you can redistribute it and/or modify
