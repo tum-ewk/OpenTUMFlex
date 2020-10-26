@@ -20,15 +20,30 @@ Increasing share of renewable energy requires alternative methods to provide pow
 ## Installation
 
 1. Install a Python distrubution (64-bit installation recommended): [PyCharm](https://www.jetbrains.com/pycharm/)/[Miniconda](https://docs.conda.io/en/latest/miniconda.html).
-2. Install the optimization modeling language: [Pyomo](http://www.pyomo.org/installation) `pip install pyomo`
-2. Install a Solver: [GLPK](https://pypi.org/project/glpk/). You can also use Gurobi or other MILP solvers. 
-3. [Download](https://github.com/tum-ewk/OpenTUMFlex.py/archive/master.zip) or clone the OpenTUMflex repository `git clone https://github.com/tum-ewk/OpenTUMFlex.py.git`
-4. Create an environment and install the [requirements](https://github.com/tum-ewk/OpenTUMFlex.py/blob/master/requirements.txt) file using [Anaconda prompt](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html)/[PyCharm](https://www.jetbrains.com/help/idea/conda-support-creating-conda-virtual-environment.html).
+2. Install the optimization modeling language: [Pyomo](http://www.pyomo.org/installation) `pip install pyomo` (necessary only if the automatic installation of Packages is not completed)
+* Note: If you're using PyCharm, you can add Pyomo package by File--Settings--Project:emsflex--Python Interpreter--add--search for Pyomo--Install Package
+3. Install a Solver: [GLPK](https://pypi.org/project/glpk/). You can also use Gurobi or other MILP solvers. 
+4. [Download](https://github.com/tum-ewk/OpenTUMFlex.py/archive/master.zip) or clone the OpenTUMflex repository `git clone https://github.com/tum-ewk/OpenTUMFlex.py.git`
+5. Create an environment and install the [requirements](https://github.com/tum-ewk/OpenTUMFlex.py/blob/master/requirements.txt) file using [Anaconda prompt](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html)/[PyCharm](https://www.jetbrains.com/help/idea/conda-support-creating-conda-virtual-environment.html).
 
 ## Test your installation
 
-Run the [example.py](https://github.com/tum-ewk/OpenTUMFlex.py/blob/master/example_1.py) file to test if the OpenTUMflex model is correctly installed. 
+* Run the [example.py](https://github.com/tum-ewk/OpenTUMFlex.py/blob/master/example_1.py) file to test if the OpenTUMflex model is correctly installed. 
+* You can change the scenario by using following predefined examples in the first input of run_scenario():
+  * scenario_hp: heat storage, boilder and heat pump
+  * scenario_simple_house: pv, battery, storage and boiler
+  * scenario_apartment: pv, battery, storage and boiler, combined heat and power, heat pump and electric vehicle
+* change the arguments in run_scenario() to enable/disable each plot:
+  * show_opt_res: show the optimiaztion results (power and heat balance, SoCs)
+  * show_opt_res: save the optimiaztion results in spreedsheet 
+  * show_flex_res: show the flexibility results (power, energy and price)
+  * show_aggregated_flex: show the summay of all flexibility power and prices
+* You will get following results if it works properly:
 
+<p float="left">
+  <img src="https://user-images.githubusercontent.com/42935122/97186850-1b97b500-17a2-11eb-9a86-97674ffad6d0.png" width="400" height="267">
+  <img src="https://user-images.githubusercontent.com/42935122/97187204-85b05a00-17a2-11eb-816e-6d20a472c9ae.png" width="400" height="267">
+</p>
 
 ## Getting started
 
@@ -38,7 +53,7 @@ Run the [example.py](https://github.com/tum-ewk/OpenTUMFlex.py/blob/master/examp
    * For more information refer to our [documentation](https://github.com/tum-ewk/OpenTUMFlex.py/wiki).
    
 * **Analysis Toolbox:**
-   * [Quantifying the Flexibility of Electric Vehicles in Germany and California](https://github.com/tum-ewk/OpenTUMFlex.py/blob/master/analysis/README.md)
+   * [Quantifying the Flexibility of Electric Vehicles in Germany and California](/https://github.com/tum-ewk/OpenTUMFlex.py/blob/master/analysis/README.md)
 
 
 <!---
