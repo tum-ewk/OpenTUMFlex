@@ -24,21 +24,20 @@ Increasing share of renewable energy requires alternative methods to provide pow
 3. [Download](https://github.com/tum-ewk/OpenTUMFlex.py/archive/master.zip) or clone the OpenTUMflex repository `git clone https://github.com/tum-ewk/OpenTUMFlex.py.git`
 4. Create an environment and install the [requirements](https://github.com/tum-ewk/OpenTUMFlex.py/blob/master/requirements.txt) file using [Anaconda prompt](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html)/[PyCharm](https://www.jetbrains.com/help/idea/conda-support-creating-conda-virtual-environment.html).
 
+## Test your installation
+
+Run the [example.py](https://github.com/tum-ewk/OpenTUMFlex.py/blob/master/example_1.py) file to test if the OpenTUMflex model is correctly installed. 
+
 
 ## Getting started
 
-1. **Input file formats:** OpenTUMflex accepts two different file formats (.xlsx/.csv) as input. An example input file is available inside the *input* folder. CSV files are generally prefered as they reduces the overall optimization time. In case the user wishes to use an .xlsx file, the model has an inbuilt option to convert any .xlsx file to .csv files.
-
-2. **Test your installation:** Run the [example.py](https://github.com/tum-ewk/OpenTUMFlex.py/blob/master/example_1.py) file to test if the OpenTUMflex model is correctly installed. 
-
-3. **Creating your own scenario**: 
+* **Create your own scenario:** 
    * A scenario based approach is incorported in OpenTUMflex design. Here, a scenario refers to the device configurations installed at the prosumer premises. For example: A scenario can refer to just a household with PV, BSS and EV. 
    * Once you have succesfully installed OpenTUMflex, you can choose or create your own scenario inside [scenario.py](https://github.com/tum-ewk/OpenTUMFlex.py/blob/master/opentumflex/scenarios/scenarios.py). To give an idea, we have already created 10 sample scenarios. 
    * For more information refer to our [documentation](https://github.com/tum-ewk/OpenTUMFlex.py/wiki/Usage-and-Functions-in-OpenTUMFlex).
-  
-4. **Output file formats:** 
-   * Generate a variety of plots related to optimial operation plan, flexiblity, aggregated flexibility potential of the prosumer devices.
-   * The model delivers the flexibility offers of each device in suitable formats which can be directly used in FlexMarket interactions.
+   
+* **Analyze using OpenTUMflex:**
+   * Quantifying the Flexibility of Electric Vehicles in Germany and California.
 
 
 ## Conflicts of Interest: 
