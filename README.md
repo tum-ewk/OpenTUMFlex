@@ -13,42 +13,45 @@ Increasing share of renewable energy requires alternative methods to provide pow
 
 * OpenTUMFlex uses mixed integer linear programming (MILP) to obtain cost-optimal operational plans for household devices. 
 * Calculates the flexibility potential and flexibility prices of household devices.
-* Supported devices: PV, Battery Storage Systems (BSS), Electric Vehicle (EV), Heat Pump, Combined Heat and Power (CHP).
+* Supported devices: PV, Battery Storage Systems (BSS), Electric Vehicle (EV), Heat Pump (HP), Combined Heat and Power (CHP).
 * Outputs flexibility offers of each device in suitable formats which can be directly used in FlexMarket (ReFlex, comax and ALF).
 
 
 ## Installation
 
 1. Install a Python distrubution (64-bit installation recommended): [PyCharm](https://www.jetbrains.com/pycharm/)/[Miniconda](https://docs.conda.io/en/latest/miniconda.html).
-2. Create an environment and install the [requirements](https://github.com/tum-ewk/OpenTUMFlex.py/blob/master/requirements.txt) file using [Anaconda prompt](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html)/[PyCharm](https://www.jetbrains.com/help/idea/conda-support-creating-conda-virtual-environment.html).
+2. [Download](https://github.com/tum-ewk/OpenTUMFlex.py/archive/master.zip) or clone the OpenTUMflex repository `git clone https://github.com/tum-ewk/OpenTUMFlex.py.git`
+3. Create an environment and install the [requirements](https://github.com/tum-ewk/OpenTUMFlex.py/blob/master/requirements.txt) file using [Anaconda prompt](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html)/[PyCharm](https://www.jetbrains.com/help/idea/conda-support-creating-conda-virtual-environment.html) plugin.
     * Pycharm: `File->Settings->Project->Python Interpreter->Setting icon->Add->New environment->Base interpretor-Python 3.7`
-3. Install the optimization modeling language: [Pyomo](http://www.pyomo.org/installation)
+4. Install the optimization modeling language: [Pyomo](http://www.pyomo.org/installation)
     * PyCharm: Add Pyomo package using `File->Settings->Project->Python Interpreter->Add(+)->Search for Pyomo->Install`
     * Manual installation: `pip install pyomo` (only necessary if the automatic installation of packages did not detect Pyomo)
-4. Install a Solver: [GLPK](https://pypi.org/project/glpk/). You can also use Gurobi or other MILP solvers. 
-5. [Download](https://github.com/tum-ewk/OpenTUMFlex.py/archive/master.zip) or clone the OpenTUMflex repository `git clone https://github.com/tum-ewk/OpenTUMFlex.py.git`
- 
+5. Install a Solver: [GLPK](https://pypi.org/project/glpk/). You can also use Gurobi or other MILP solvers. 
+
 
 ## Test your installation
 
 * Run the [example.py](https://github.com/tum-ewk/OpenTUMFlex.py/blob/master/example_1.py) file to test if the OpenTUMflex model is correctly installed. 
-* You can change the scenario by using following predefined examples in the first input of run_scenario():
-  * scenario_hp: heat storage, boilder and heat pump
-  * scenario_simple_house: pv, battery, storage and boiler
-  * scenario_apartment: pv, battery, storage and boiler, combined heat and power, heat pump and electric vehicle
-* change the arguments in run_scenario() to enable/disable each plot:
-  * show_opt_res: show the optimiaztion results (power and heat balance, SoCs)
-  * show_opt_res: save the optimiaztion results in spreedsheet 
-  * show_flex_res: show the flexibility results (power, energy and price)
-  * show_aggregated_flex: show the summay of all flexibility power and prices
-* You will get following results if it works properly:
 
-<p float="left">
-  <img src="https://user-images.githubusercontent.com/42935122/97186850-1b97b500-17a2-11eb-9a86-97674ffad6d0.png" width="400" height="267">
-  <img src="https://user-images.githubusercontent.com/42935122/97187204-85b05a00-17a2-11eb-816e-6d20a472c9ae.png" width="400" height="267">
-</p>
+* You will get following results if everything works perfectly:
+
+![](https://user-images.githubusercontent.com/42935122/97186850-1b97b500-17a2-11eb-9a86-97674ffad6d0.png)|![](https://user-images.githubusercontent.com/40628466/97216385-09c80900-17c6-11eb-98ac-615b77bbed0b.png)
+:-------------------------:|:-------------------------:
+![](https://user-images.githubusercontent.com/40628466/97215739-23b51c00-17c5-11eb-8915-19cce5d8f42c.png)|![](https://user-images.githubusercontent.com/40628466/97215750-26b00c80-17c5-11eb-8795-9c3032ef36a8.png)
+
 
 ## Getting started
+
+* **Change your scenario (use predefined sample configurations in [scenario.py](https://github.com/tum-ewk/OpenTUMFlex.py/blob/master/opentumflex/scenarios/scenarios.py)):**
+  * `scenario_hp`: Heat storage, boiler and HP
+  * `scenario_simple_house`: PV, BSS, heat storage and boiler
+  * `scenario_apartment`: PV, BSS, heat storage, boiler, CHP, HP and EV
+  
+  **Change the arguments in run_scenario() to enable/disable each plot:
+   * show_opt_res: show the optimiaztion results (power and heat balance, SoCs)
+   * show_opt_res: save the optimiaztion results in spreedsheet 
+   * show_flex_res: show the flexibility results (power, energy and price)
+   * show_aggregated_flex: show the summay of all flexibility power and prices
 
 * **Create your own scenario:** 
    * A scenario based approach is incorported in OpenTUMflex design. Here, a scenario refers to the device configurations installed at the prosumer premises. For example: A scenario can refer to just a household with PV, BSS and EV. 
