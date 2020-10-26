@@ -41,21 +41,21 @@ Increasing share of renewable energy requires alternative methods to provide pow
 
 
 ## Getting started
+   * A scenario based approach is incorported in OpenTUMflex design. Here, a scenario refers to the device configurations installed at the prosumer premises. For example: A scenario can refer to just a household with PV, BSS and EV. 
+   * Once you have succesfully installed OpenTUMflex, you can choose or create your own scenario inside [scenario.py](https://github.com/tum-ewk/OpenTUMFlex.py/blob/master/opentumflex/scenarios/scenarios.py). To give an idea, we have already created 10 sample scenarios. 
 
 * **Change your scenario (use predefined sample configurations in [scenario.py](https://github.com/tum-ewk/OpenTUMFlex.py/blob/master/opentumflex/scenarios/scenarios.py)):**
   * `scenario_hp`: Heat storage, boiler and HP
   * `scenario_simple_house`: PV, BSS, heat storage and boiler
   * `scenario_apartment`: PV, BSS, heat storage, boiler, CHP, HP and EV
   
-  **Change the arguments in run_scenario() to enable/disable each plot:
-   * show_opt_res: show the optimiaztion results (power and heat balance, SoCs)
-   * show_opt_res: save the optimiaztion results in spreedsheet 
-   * show_flex_res: show the flexibility results (power, energy and price)
-   * show_aggregated_flex: show the summay of all flexibility power and prices
+  **Change the arguments in run_scenario() to enable/disable each plot:**
+   * `show_opt_res`: show the optimiaztion results (power and heat balance, SoCs)
+   * `show_opt_res`: save the optimiaztion results in spreedsheet 
+   * `show_flex_res`: show the flexibility results (power, energy and price)
+   * `show_aggregated_flex`: show the summay of all flexibility power and prices
 
 * **Create your own scenario:** 
-   * A scenario based approach is incorported in OpenTUMflex design. Here, a scenario refers to the device configurations installed at the prosumer premises. For example: A scenario can refer to just a household with PV, BSS and EV. 
-   * Once you have succesfully installed OpenTUMflex, you can choose or create your own scenario inside [scenario.py](https://github.com/tum-ewk/OpenTUMFlex.py/blob/master/opentumflex/scenarios/scenarios.py). To give an idea, we have already created 10 sample scenarios. 
    * For more information refer to our [documentation](https://github.com/tum-ewk/OpenTUMFlex.py/wiki).
    
 * **Analysis Toolbox:**
