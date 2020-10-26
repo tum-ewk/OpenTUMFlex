@@ -19,7 +19,7 @@ Increasing share of renewable energy requires alternative methods to provide pow
 
 ## Installation
 
-1. Install a Python distrubution (64-bit installation recommended): [PyCharm](https://www.jetbrains.com/pycharm/)/[Miniconda](https://docs.conda.io/en/latest/miniconda.html) 
+1. Install a Python distrubution (64-bit installation recommended): [PyCharm](https://www.jetbrains.com/pycharm/)/[Miniconda](https://docs.conda.io/en/latest/miniconda.html).
 2. Install the optimization modeling language: [Pyomo](http://www.pyomo.org/installation) `pip install pyomo`
 2. Install a Solver: [GLPK](https://pypi.org/project/glpk/). You can also use Gurobi or other MILP solvers. 
 3. [Download](https://github.com/tum-ewk/OpenTUMFlex.py/archive/master.zip) or clone the OpenTUMflex repository `git clone https://github.com/tum-ewk/OpenTUMFlex.py.git`
@@ -37,8 +37,8 @@ Run the [example.py](https://github.com/tum-ewk/OpenTUMFlex.py/blob/master/examp
    * Once you have succesfully installed OpenTUMflex, you can choose or create your own scenario inside [scenario.py](https://github.com/tum-ewk/OpenTUMFlex.py/blob/master/opentumflex/scenarios/scenarios.py). To give an idea, we have already created 10 sample scenarios. 
    * For more information refer to our [documentation](https://github.com/tum-ewk/OpenTUMFlex.py/wiki).
    
-* **Analyze using OpenTUMflex:**
-   * [Quantifying the Flexibility of Electric Vehicles in Germany and California](https://github.com/tum-ewk/OpenTUMFlex.py/wiki/Quantifying-the-Flexibility-of-Electric-Vehicles-in-Germany-and-California)
+* **Analysis Toolbox:**
+   * [Quantifying the Flexibility of Electric Vehicles in Germany and California](https://github.com/tum-ewk/OpenTUMFlex.py/blob/master/analysis/README.md)
 
 
 <!---
