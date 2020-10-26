@@ -22,7 +22,7 @@ Increasing share of renewable energy requires alternative methods to provide pow
 1. Install a Python distrubution (64-bit installation recommended): [PyCharm](https://www.jetbrains.com/pycharm/)/[Miniconda](https://docs.conda.io/en/latest/miniconda.html) 
 2. Install a Solver: [GLPK](https://pypi.org/project/glpk/). You can also use Gurobi or other MILP solvers. 
 3. [Download](https://github.com/tum-ewk/OpenTUMFlex.py/archive/master.zip) or clone the OpenTUMflex repository `git clone https://github.com/tum-ewk/OpenTUMFlex.py.git`
-4. Create an environment and install the [requirements](https://github.com/tum-ewk/OpenTUMFlex.py/blob/master/requirements.txt) file using [Anaconda prompt](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html)/[PyCharm](https://www.jetbrains.com/help/idea/conda-support-creating-conda-virtual-environment.html) 
+4. Create an environment and install the [requirements](https://github.com/tum-ewk/OpenTUMFlex.py/blob/master/requirements.txt) file using [Anaconda prompt](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html)/[PyCharm](https://www.jetbrains.com/help/idea/conda-support-creating-conda-virtual-environment.html).
 
 
 ## Getting started
@@ -34,11 +34,16 @@ Increasing share of renewable energy requires alternative methods to provide pow
 3. **Creating your own scenario**: 
    * A scenario based approach is incorported in OpenTUMflex design. Here, a scenario refers to the device configurations installed at the prosumer premises. For example: A scenario can refer to just a household with PV, BSS and EV. 
    * Once you have succesfully installed OpenTUMflex, you can choose or create your own scenario inside [scenario.py](https://github.com/tum-ewk/OpenTUMFlex.py/blob/master/opentumflex/scenarios/scenarios.py). To give an idea, we have already created 10 sample scenarios. 
-   * For more information refer to our [documentation](https://github.com/tum-ewk/OpenTUMFlex.py/wiki/Usage-and-Functions-in-OpenTUMFlex)
+   * For more information refer to our [documentation](https://github.com/tum-ewk/OpenTUMFlex.py/wiki/Usage-and-Functions-in-OpenTUMFlex).
   
 4. **Output file formats:** 
-   * Generate a variety of plots related to optimial operation plan, flexiblity, aggregated flexibility potential of the prosumer devices
-   * The model delivers the flexibility offers of each device in suitable formats which can be directly used in FlexMarket interactions
+   * Generate a variety of plots related to optimial operation plan, flexiblity, aggregated flexibility potential of the prosumer devices.
+   * The model delivers the flexibility offers of each device in suitable formats which can be directly used in FlexMarket interactions.
+
+
+## Conflicts of Interest: 
+
+The authors declare no conflict of interest. All authors have equally contributed to the development of this software. 
 
 
 ## References
@@ -48,11 +53,6 @@ Increasing share of renewable energy requires alternative methods to provide pow
 <sub>[B. K. Nalini, M. Eldakadosi, Z. You, M. Zade, P. Tzscheutschler and U. Wagner, "Towards Prosumer Flexibility Markets: A Photovoltaic and Battery Storage Model," 2019 IEEE PES Innovative Smart Grid Technologies Europe (ISGT-Europe), Bucharest, Romania, 2019, pp. 1-5, doi: 10.1109/ISGTEurope.2019.8905622.](http://dx.doi.org/10.1109/isgteurope.2019.8905622)<sub>
 
 <sub>[M. Zade, Y. Incedag, W. El-Baz, P. Tzscheutschler and U. Wagner, "Prosumer Integration in Flexibility Markets: A Bid Development and Pricing Model," 2018 2nd IEEE Conference on Energy Internet and Energy System Integration (EI2), Beijing, 2018, pp. 1-9, doi: 10.1109/EI2.2018.8582022.](http://dx.doi.org/10.1109/EI2.2018.8582022)<sub>
-
-
-## Conflicts of Interest: 
-
-The authors declare no conflict of interest. All authors have equally contributed to the development of this software. 
 
 
 ## License
