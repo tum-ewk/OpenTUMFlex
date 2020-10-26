@@ -116,7 +116,7 @@ def plot_optimal_results(ems, prnt_pgr=False):
     ax = plt.gca()
     ax.axhline(linewidth=2, color="black")
     idx_plt = np.arange(0, N, int(N / 5))
-    plt.xticks([0, 24, 2, 2], fontsize=font_size)
+    plt.xticks(ind[idx_plt], ts[idx_plt], rotation=20)
     plt.tick_params(axis="x", labelsize=font_size - 2)
     plt.tick_params(axis="y", labelsize=font_size - 2)
     plt.xlabel('time [1/4 h]', fontsize=font_size)
