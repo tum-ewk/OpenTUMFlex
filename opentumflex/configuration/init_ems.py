@@ -37,7 +37,6 @@ def save_ems(ems, path):
             if not isinstance(ems['flexopts'][key], dict):
                 ems['flexopts'][key] = ems['flexopts'][key].to_dict('dict')
         js.dump(ems, f)
-    print('complete saving EMS_data!!! ')
 
 
 def init_ems_js(path=None):
