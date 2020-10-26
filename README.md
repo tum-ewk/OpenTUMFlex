@@ -3,57 +3,60 @@ OpenTUMflex
 
 An open-source Python based flexibility model to quantify and price the flexibility of household devices.
 
-Description
-===========
+
+## Description
 
 Increasing share of renewable energy requires alternative methods to provide power system ancillary services to ensure stable operation of the electricity grids. Recent research have inclined their interests towards the aggregation of the small-scale system flexibility potentials to accommodate the grid variations. The advancements towards local flexibility markets (LFMs) allow prosumers participation in the solving grid congestion problems. In order to allow prosumers to interact with the LFMs and submit their bids, a flexibility estimation is required. This research proposes an open-source flexibility estimation model that quantifies all possible flexibilities from the available prosumer devices.
 
-Features
-===========
+
+## Features
+
 * OpenTUMFlex uses mixed integer linear programming (MILP) to obtain cost-optimal operational plans for household devices. 
 * Calculates the flexibility potential and flexibility prices of household devices.
 * Supported devices: PV, Battery Storage Systems (BSS), Electric Vehicle (EV), Heat Pump, Combined Heat and Power (CHP).
-* Output flexibility offers of each devices in suitable formats which can be directly used in FlexMarket (ReFlex, comax and ALF).
+* Output flexibility offers of each device in suitable formats which can be directly used in FlexMarket (ReFlex, comax and ALF).
 
-Installation
-===========
+
+## Installation
+
 1. Install a Python distrubution (64-bit installation recommended): [PyCharm](https://www.jetbrains.com/pycharm/)/[Miniconda](https://docs.conda.io/en/latest/miniconda.html) 
 2. Install a Solver: [GLPK](https://pypi.org/project/glpk/). You can also use Gurobi or other MILP solvers. 
 3. [Download](https://github.com/tum-ewk/OpenTUMFlex.py/archive/master.zip) or clone the OpenTUMflex repository `git clone https://github.com/tum-ewk/OpenTUMFlex.py.git`
-4. Create an environment and install the [requirements](https://github.com/tum-ewk/OpenTUMFlex.py/blob/master/requirements.txt) file.
-    * Using [Anaconda prompt](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html)
-    * Using [PyCharm](https://www.jetbrains.com/help/idea/conda-support-creating-conda-virtual-environment.html) 
+4. Create an environment and install the [requirements](https://github.com/tum-ewk/OpenTUMFlex.py/blob/master/requirements.txt) file using [Anaconda prompt](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html)/[PyCharm](https://www.jetbrains.com/help/idea/conda-support-creating-conda-virtual-environment.html) 
 
 
-Getting started
-===========
-1. Run the given **example.py** in the **tests** folder. 
-2. You will learn how to: 
-    * set up the time interval, start and end time.
-    * read input data from **tests/data/input_data.xlsx**
-    * change/add device parameters (boiler and heat pump) by using **update(devices(device_name))**
-    * obtain the optimal plans of each device
-    * calculate the flexibility offers of battery and heat pump
-    * visualize the results
-3. If you have installed all the packages/solver, you will get results (e.g. electricity balance and flexibility of battery) as follows:
-<img src="https://github.com/zxc8063898/emstest/blob/master/Figure_1-1.png" alt="electricity balance" width="380" height="250"> <img src="https://github.com/zxc8063898/emstest/blob/master/Figure_6.png" alt="electricity balance" width="380" height="250">
+## Getting started
 
-4. For more information refer to our [documentaion](https://github.com/tum-ewk/OpenTUMFlex.py/wiki/Usage-and-Functions-in-OpenTUMFlex)
+1. **Input file formats:** OpenTUMflex accepts two different file formats (.xlsx/.csv) as input. An example input file is available inside the *input* folder. CSV files are generally prefered as they reduces the overall optimization time. In case the user wishes to use an .xlsx file, the model has an inbuilt option to convert any .xlsx file to .csv files.
 
-Input file formats
-===========
-OpenTUMflex accepts two different file formats (.xlsx/.csv) as input. An example input file is available inside the folder test->data. CSV files reduces the overall optimization time. THe model converts Excel file into CSV files for future use.  
+2. **Test your installation:** Run the [example.py](https://github.com/tum-ewk/OpenTUMFlex.py/blob/master/example_1.py) file to test if the OpenTUMflex model is correctly installed. 
 
-References
-===========
-[Z. You, B. K. Nalini, M. Zade, P. Tzscheutschler and U. Wagner, "Flexibility quantification and pricing of household heat pump and combined heat and power unit," 2019 IEEE PES Innovative Smart Grid Technologies Europe (ISGT-Europe), Bucharest, Romania, 2019, pp. 1-5, doi: 10.1109/ISGTEurope.2019.8905594.](http://dx.doi.org/10.1109/isgteurope.2019.8905594)
+3. **Creating your own scenario**: 
+   * A scenario based approach is incorported in OpenTUMflex design. Here, a scenario refers to the device configurations installed at the prosumer premises. For example: A scenario can refer to just a household with PV, BSS and EV. 
+   * Once you have succesfully installed OpenTUMflex, you can choose or create your own scenario inside [scenario.py](https://github.com/tum-ewk/OpenTUMFlex.py/blob/master/opentumflex/scenarios/scenarios.py). To give an idea, we have already created 10 sample scenarios. 
+   * For more information refer to our [documentation](https://github.com/tum-ewk/OpenTUMFlex.py/wiki/Usage-and-Functions-in-OpenTUMFlex)
+  
+4. **Output file formats:** 
+   * Generate a variety of plots related to optimial operation plan, flexiblity, aggregated flexibility potential of the prosumer devices
+   * The model delivers the flexibility offers of each device in suitable formats which can be directly used in FlexMarket interactions
 
-[B. K. Nalini, M. Eldakadosi, Z. You, M. Zade, P. Tzscheutschler and U. Wagner, "Towards Prosumer Flexibility Markets: A Photovoltaic and Battery Storage Model," 2019 IEEE PES Innovative Smart Grid Technologies Europe (ISGT-Europe), Bucharest, Romania, 2019, pp. 1-5, doi: 10.1109/ISGTEurope.2019.8905622.](http://dx.doi.org/10.1109/isgteurope.2019.8905622)
 
-[M. Zade, Y. Incedag, W. El-Baz, P. Tzscheutschler and U. Wagner, "Prosumer Integration in Flexibility Markets: A Bid Development and Pricing Model," 2018 2nd IEEE Conference on Energy Internet and Energy System Integration (EI2), Beijing, 2018, pp. 1-9, doi: 10.1109/EI2.2018.8582022.](http://dx.doi.org/10.1109/EI2.2018.8582022)
+## References
 
-License
-===========
+<sub>[Z. You, B. K. Nalini, M. Zade, P. Tzscheutschler and U. Wagner, "Flexibility quantification and pricing of household heat pump and combined heat and power unit," 2019 IEEE PES Innovative Smart Grid Technologies Europe (ISGT-Europe), Bucharest, Romania, 2019, pp. 1-5, doi: 10.1109/ISGTEurope.2019.8905594.](http://dx.doi.org/10.1109/isgteurope.2019.8905594)<sub>
+
+<sub>[B. K. Nalini, M. Eldakadosi, Z. You, M. Zade, P. Tzscheutschler and U. Wagner, "Towards Prosumer Flexibility Markets: A Photovoltaic and Battery Storage Model," 2019 IEEE PES Innovative Smart Grid Technologies Europe (ISGT-Europe), Bucharest, Romania, 2019, pp. 1-5, doi: 10.1109/ISGTEurope.2019.8905622.](http://dx.doi.org/10.1109/isgteurope.2019.8905622)<sub>
+
+<sub>[M. Zade, Y. Incedag, W. El-Baz, P. Tzscheutschler and U. Wagner, "Prosumer Integration in Flexibility Markets: A Bid Development and Pricing Model," 2018 2nd IEEE Conference on Energy Internet and Energy System Integration (EI2), Beijing, 2018, pp. 1-9, doi: 10.1109/EI2.2018.8582022.](http://dx.doi.org/10.1109/EI2.2018.8582022)<sub>
+
+
+## Conflicts of Interest: 
+
+The authors declare no conflict of interest. All authors have equally contributed to the development of this software. 
+
+
+## License
+
 OpenTUMFlex can be used to optimize and calculate a households flexibility potential and price it. 
 Copyright (C) 2020 TUM-EWK 
 
