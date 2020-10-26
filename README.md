@@ -38,9 +38,12 @@ Increasing share of renewable energy requires alternative methods to provide pow
   * show_opt_res: save the optimiaztion results in spreedsheet 
   * show_flex_res: show the flexibility results (power, energy and price)
   * show_aggregated_flex: show the summay of all flexibility power and prices
+* You will get following results if it works properly:
 
-<p align="center"><img src="https://user-images.githubusercontent.com/42935122/97186850-1b97b500-17a2-11eb-9a86-97674ffad6d0.png" width="550" height="366">
- <p align="center"><img src="https://user-images.githubusercontent.com/42935122/97187204-85b05a00-17a2-11eb-816e-6d20a472c9ae.png" width="550" height="366">
+<p float="left">
+  <img src="https://user-images.githubusercontent.com/42935122/97186850-1b97b500-17a2-11eb-9a86-97674ffad6d0.png" width="450" height="300">
+  <img src="https://user-images.githubusercontent.com/42935122/97187204-85b05a00-17a2-11eb-816e-6d20a472c9ae.png" width="450" height="300">
+</p>
 
 ## Getting started
 
