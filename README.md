@@ -20,7 +20,8 @@ Increasing share of renewable energy requires alternative methods to provide pow
 ## Installation
 
 1. Install a Python distrubution (64-bit installation recommended): [PyCharm](https://www.jetbrains.com/pycharm/)/[Miniconda](https://docs.conda.io/en/latest/miniconda.html).
-2. Install the optimization modeling language: [Pyomo](http://www.pyomo.org/installation) `pip install pyomo`
+2. Install the optimization modeling language: [Pyomo](http://www.pyomo.org/installation) `pip install pyomo` (optional, necessary only if the automatic installation of Packages is not completed )
+Note: If you're using PyCharm, you can add Pyomo package by File--Settings--Project:emsflex--Python Interpreter--add--search for Pyomo--Install Package
 2. Install a Solver: [GLPK](https://pypi.org/project/glpk/). You can also use Gurobi or other MILP solvers. 
 3. [Download](https://github.com/tum-ewk/OpenTUMFlex.py/archive/master.zip) or clone the OpenTUMflex repository `git clone https://github.com/tum-ewk/OpenTUMFlex.py.git`
 4. Create an environment and install the [requirements](https://github.com/tum-ewk/OpenTUMFlex.py/blob/master/requirements.txt) file using [Anaconda prompt](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html)/[PyCharm](https://www.jetbrains.com/help/idea/conda-support-creating-conda-virtual-environment.html).
