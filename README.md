@@ -14,12 +14,13 @@ Increasing share of renewable energy requires alternative methods to provide pow
 * OpenTUMFlex uses mixed integer linear programming (MILP) to obtain cost-optimal operational plans for household devices. 
 * Calculates the flexibility potential and flexibility prices of household devices.
 * Supported devices: PV, Battery Storage Systems (BSS), Electric Vehicle (EV), Heat Pump, Combined Heat and Power (CHP).
-* Output flexibility offers of each device in suitable formats which can be directly used in FlexMarket (ReFlex, comax and ALF).
+* Outputs flexibility offers of each device in suitable formats which can be directly used in FlexMarket (ReFlex, comax and ALF).
 
 
 ## Installation
 
 1. Install a Python distrubution (64-bit installation recommended): [PyCharm](https://www.jetbrains.com/pycharm/)/[Miniconda](https://docs.conda.io/en/latest/miniconda.html) 
+2. Install the optimization modeling language: [Pyomo](http://www.pyomo.org/installation) `pip install pyomo`
 2. Install a Solver: [GLPK](https://pypi.org/project/glpk/). You can also use Gurobi or other MILP solvers. 
 3. [Download](https://github.com/tum-ewk/OpenTUMFlex.py/archive/master.zip) or clone the OpenTUMflex repository `git clone https://github.com/tum-ewk/OpenTUMFlex.py.git`
 4. Create an environment and install the [requirements](https://github.com/tum-ewk/OpenTUMFlex.py/blob/master/requirements.txt) file using [Anaconda prompt](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html)/[PyCharm](https://www.jetbrains.com/help/idea/conda-support-creating-conda-virtual-environment.html).
@@ -34,10 +35,10 @@ Run the [example.py](https://github.com/tum-ewk/OpenTUMFlex.py/blob/master/examp
 * **Create your own scenario:** 
    * A scenario based approach is incorported in OpenTUMflex design. Here, a scenario refers to the device configurations installed at the prosumer premises. For example: A scenario can refer to just a household with PV, BSS and EV. 
    * Once you have succesfully installed OpenTUMflex, you can choose or create your own scenario inside [scenario.py](https://github.com/tum-ewk/OpenTUMFlex.py/blob/master/opentumflex/scenarios/scenarios.py). To give an idea, we have already created 10 sample scenarios. 
-   * For more information refer to our [documentation](https://github.com/tum-ewk/OpenTUMFlex.py/wiki/Usage-and-Functions-in-OpenTUMFlex).
+   * For more information refer to our [documentation](https://github.com/tum-ewk/OpenTUMFlex.py/wiki).
    
 * **Analyze using OpenTUMflex:**
-   * Quantifying the Flexibility of Electric Vehicles in Germany and California.
+   * [Quantifying the Flexibility of Electric Vehicles in Germany and California](https://github.com/tum-ewk/OpenTUMFlex.py/wiki/Quantifying-the-Flexibility-of-Electric-Vehicles-in-Germany-and-California)
 
 
 ## Conflicts of Interest: 
