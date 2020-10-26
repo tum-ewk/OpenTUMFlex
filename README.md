@@ -41,10 +41,11 @@ Run the [example.py](https://github.com/tum-ewk/OpenTUMFlex.py/blob/master/examp
    * [Quantifying the Flexibility of Electric Vehicles in Germany and California](https://github.com/tum-ewk/OpenTUMFlex.py/wiki/Quantifying-the-Flexibility-of-Electric-Vehicles-in-Germany-and-California)
 
 
-## Conflicts of Interest: 
+<!---
+## Conflict of Interest: 
 
 The authors declare no conflict of interest. All authors have equally contributed to the development of this software. 
-
+--->
 
 ## References
 
