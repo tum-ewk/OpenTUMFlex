@@ -72,6 +72,7 @@ def plot_aggregated_flex_power(ems, reopt=0):
         plt.ylabel("Flexibility power [kW]", fontsize=font_size)
         plt.xlabel("Time", fontsize=font_size)
         plt.title('Aggregated flex power', fontsize=font_size, pad=20)
+        plt.show()
         
         
 def plot_aggregated_flex_price(ems, reopt=0, plot_flexpr='bar'):
@@ -102,6 +103,8 @@ def plot_aggregated_flex_price(ems, reopt=0, plot_flexpr='bar'):
     
     if not reopt:
         if plot_flexpr == 'bar':
+            # Create an empty plot
+            plt.figure(figsize=(12, 8))
             # Loop through the device list and stack plot
             for i in range(len(device)):
                 plt.bar(ts, ems['flexopts'][device[i]]['Pos_Pr'], color=chart_pos[i], 
@@ -123,8 +126,11 @@ def plot_aggregated_flex_price(ems, reopt=0, plot_flexpr='bar'):
             plt.ylabel("Flexibility price [€/kWh]", fontsize=font_size)
             plt.xlabel("Time", fontsize=font_size)
             plt.title('Aggregated flex price', fontsize=font_size, pad=20)
+            plt.show()
         
         if plot_flexpr == 'scatter':
+            # Create an empty plot
+            plt.figure(figsize=(12, 8))
             # Loop through the device list and stack plot
             for i in range(len(device)):
                 plt.scatter(ts, ems['flexopts'][device[i]]['Pos_Pr'], color=chart_pos[i], 
@@ -146,3 +152,4 @@ def plot_aggregated_flex_price(ems, reopt=0, plot_flexpr='bar'):
             plt.ylabel("Flexibility price [€/kWh]", fontsize=font_size)
             plt.xlabel("Time", fontsize=font_size)
             plt.title('Aggregated flex price', fontsize=font_size, pad=20)
+            plt.show()
