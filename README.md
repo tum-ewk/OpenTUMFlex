@@ -31,9 +31,7 @@ Increasing share of renewable energy requires alternative methods to provide pow
 
 ## Test your installation
 
-* Run the [example.py](https://github.com/tum-ewk/OpenTUMFlex.py/blob/master/example_1.py) file to test if the OpenTUMflex model is correctly installed. 
-
-* You will get following results if everything works perfectly:
+Run the [example.py](https://github.com/tum-ewk/OpenTUMFlex.py/blob/master/example_1.py) file to test if the OpenTUMflex model is correctly installed. You will obtain the following results if everything works perfectly:
 
 ![](https://user-images.githubusercontent.com/42935122/97186850-1b97b500-17a2-11eb-9a86-97674ffad6d0.png)|![](https://user-images.githubusercontent.com/40628466/97216385-09c80900-17c6-11eb-98ac-615b77bbed0b.png)
 :-------------------------:|:-------------------------:
@@ -44,21 +42,21 @@ Increasing share of renewable energy requires alternative methods to provide pow
    * A scenario based approach is incorported in OpenTUMflex design. Here, a scenario refers to the device configurations installed at the prosumer premises. For example: A scenario can refer to just a household with PV, BSS and EV. 
    * Once you have succesfully installed OpenTUMflex, you can choose or create your own scenario inside [scenario.py](https://github.com/tum-ewk/OpenTUMFlex.py/blob/master/opentumflex/scenarios/scenarios.py). To give an idea, we have already created 10 sample scenarios. 
 
-* **Change your scenario (use predefined sample configurations in [scenario.py](https://github.com/tum-ewk/OpenTUMFlex.py/blob/master/opentumflex/scenarios/scenarios.py)):**
+**Change your scenario (use predefined sample configurations in [scenario.py](https://github.com/tum-ewk/OpenTUMFlex.py/blob/master/opentumflex/scenarios/scenarios.py)):**
   * `scenario_hp`: Heat storage, boiler and HP
   * `scenario_simple_house`: PV, BSS, heat storage and boiler
   * `scenario_apartment`: PV, BSS, heat storage, boiler, CHP, HP and EV
   
-  **Change the arguments in run_scenario() to enable/disable each plot:**
+  *Change the arguments to enable/disable each plot:*
    * `show_opt_res`: show the optimiaztion results (power and heat balance, SoCs)
    * `show_opt_res`: save the optimiaztion results in spreedsheet 
    * `show_flex_res`: show the flexibility results (power, energy and price)
    * `show_aggregated_flex`: show the summay of all flexibility power and prices
 
-* **Create your own scenario:** 
-   * For more information refer to our [documentation](https://github.com/tum-ewk/OpenTUMFlex.py/wiki).
+**Create your own scenario:** 
+   * Refer our [documentation](https://github.com/tum-ewk/OpenTUMFlex.py/wiki).
    
-* **Analysis Toolbox:**
+**Analysis Toolbox:**
    * [Quantifying the Flexibility of Electric Vehicles in Germany and California](/https://github.com/tum-ewk/OpenTUMFlex.py/blob/master/analysis/README.md)
 
 
