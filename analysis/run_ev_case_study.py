@@ -22,11 +22,11 @@ import analysis.ev_case_study as ev_case_study
 output_path = 'output/'
 input_path = 'input/'
 figure_path = 'figures/'
-rtp_input_path = '../analysis/input/RTP/'
+rtp_input_path = 'input/RTP/'
 # Read veh availabilities from file
 veh_availabilities = pd.read_csv('input/chts_veh_availability.csv')
 # Extract a subsample for testing
-veh_availabilities = veh_availabilities[:20]
+veh_availabilities = veh_availabilities[:]
 veh_availabilities = veh_availabilities.reset_index()
 
 # Define case study details
