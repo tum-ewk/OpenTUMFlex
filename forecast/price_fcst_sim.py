@@ -101,10 +101,16 @@ def simulate_elect_price_fcst(rtp_input_data_path='../analysis/input/RTP/',
         # Read RTP data
         rtp_files = os.listdir(rtp_input_data_path)
         # If time is 2012 then use data from 2017, because data from 2012 is insufficient
-        if t_start.year == 2012:
+        if t_start.year == 2012 and t_end.year == 2012:
             rtp_price_forecast = pd.read_hdf(rtp_input_data_path + [i for i in rtp_files if 'rtp_15min_2017' in i][0], key='df')
             # Insert rtp prices into simulated price forecast
             price_fcst['RTP'] = rtp_price_forecast['price'].loc[t_start+pd.Timedelta('1826d'):t_end+pd.Timedelta('1826d')].values
+        elif t_start.year == 2012 and t_end.year == 2013:
+            rtp_price_forecast_2012 = pd.read_hdf(rtp_input_data_path + [i for i in rtp_files if 'rtp_15min_2017' in i][0], key='df')
+            rtp_price_forecast_2013 = pd.read_hdf(rtp_input_data_path + [i for i in rtp_files if 'rtp_15min_2013' in i][0], key='df')
+            # Insert rtp prices into simulated price forecast
+            price_fcst['RTP'] = np.concatenate((rtp_price_forecast_2012['price'].loc[t_start+pd.Timedelta('1826d'):].values,
+                                                rtp_price_forecast_2013['price'].loc[:t_end].values))
         else:
             rtp_price_forecast = pd.read_hdf(rtp_input_data_path + [i for i in rtp_files if 'rtp_15min_' + str(t_start.year) in i][0], key='df')
             # Insert rtp prices into simulated price forecast
