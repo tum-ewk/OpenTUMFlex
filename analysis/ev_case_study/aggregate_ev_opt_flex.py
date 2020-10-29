@@ -31,6 +31,8 @@ def aggregate_ev_flex(veh_availabilities, output_path='../output/', rtp_input_da
     # Extract min and max time
     t_min = pd.Timestamp(veh_availabilities['t_arrival'].min()).floor('1d')
     t_max = pd.Timestamp(veh_availabilities['t_departure'].max()).ceil('1d')
+    # Date range from minimal to maximal time
+    t_range = pd.date_range(start=t_min, end=t_max, freq='15Min')
     """
     #################################################################
     # Preparation ###################################################
@@ -38,81 +40,76 @@ def aggregate_ev_flex(veh_availabilities, output_path='../output/', rtp_input_da
     """
     # List all power levels
     power_levels = os.listdir(output_path)
-    # List all pricing strategies
-    pricing_strategies = os.listdir(output_path + power_levels[0])
-    if 'Aggregated Data' in pricing_strategies: pricing_strategies.remove('Aggregated Data')
-    # List all ev flex offer files
-    file_names = os.listdir(output_path + power_levels[0] + '/' + pricing_strategies[0])
-    # Date range from minimal to maximal time
-    t_range = pd.date_range(start=t_min, end=t_max, freq='15Min')
-    # Create df for sum of optimal charging plans
-    opt_sum_df = pd.DataFrame(0, index=t_range, columns={'P_ev_opt_sum_tou',
-                                                         'P_ev_opt_sum_const',
-                                                         'P_ev_opt_sum_tou_mi',
-                                                         'P_ev_opt_sum_const_mi',
-                                                         'P_ev_opt_sum_rtp',
-                                                         'n_veh_avail',
-                                                         'c_elect_in_tou',
-                                                         'c_elect_in_const',
-                                                         'c_elect_in_tou_mi',
-                                                         'c_elect_in_const_mi',
-                                                         'c_elect_in_rtp',
-                                                         'Daytime_ID'})
-    # Create df for sum of flexibility
-    flex_sum_df = pd.DataFrame(0, index=t_range, columns={'P_pos_sum_tou',
-                                                          'P_pos_sum_tou_mi',
-                                                          'P_pos_sum_const',
-                                                          'P_pos_sum_const_mi',
-                                                          'P_pos_sum_rtp',
-                                                          'P_neg_sum_tou',
-                                                          'P_neg_sum_tou_mi',
-                                                          'P_neg_sum_const',
-                                                          'P_neg_sum_const_mi',
-                                                          'P_neg_sum_rtp',
-                                                          'E_pos_sum_tou',
-                                                          'E_pos_sum_tou_mi',
-                                                          'E_pos_sum_const',
-                                                          'E_pos_sum_const_mi',
-                                                          'E_pos_sum_rtp',
-                                                          'E_neg_sum_tou',
-                                                          'E_neg_sum_tou_mi',
-                                                          'E_neg_sum_const',
-                                                          'E_neg_sum_const_mi',
-                                                          'E_neg_sum_rtp',
-                                                          'c_flex_pos_tou',
-                                                          'c_flex_pos_tou_mi',
-                                                          'c_flex_pos_const',
-                                                          'c_flex_pos_const_mi',
-                                                          'c_flex_pos_rtp',
-                                                          'c_flex_neg_tou',
-                                                          'c_flex_neg_tou_mi',
-                                                          'c_flex_neg_const',
-                                                          'c_flex_neg_const_mi',
-                                                          'c_flex_neg_rtp',
-                                                          'Daytime_ID'})
-    # Get forecast electricity prices for each time step
-    price_forecast = forecast.simulate_elect_price_fcst(rtp_input_data_path=rtp_input_data_path,
-                                                        t_start=t_min,
-                                                        t_end=t_max,
-                                                        pr_constant=0.19)
-    opt_sum_df.loc[:, 'c_elect_in_tou'] = price_forecast['ToU']
-    opt_sum_df.loc[:, 'c_elect_in_const'] = price_forecast['Constant']
-    opt_sum_df.loc[:, 'c_elect_in_tou_mi'] = price_forecast['ToU_mi']
-    opt_sum_df.loc[:, 'c_elect_in_const_mi'] = price_forecast['Con_mi']
-    opt_sum_df.loc[:, 'c_elect_in_rtp'] = price_forecast['RTP']
-    # Create a daytime identifier for weekday and time for heat map
-    opt_sum_df['Daytime_ID'] = opt_sum_df.index.day_name().array + \
-                                    ', ' + \
-                               opt_sum_df.index.strftime('%H:%M').array
-    flex_sum_df['Daytime_ID'] = opt_sum_df.index.day_name().array + \
-                                    ', ' + \
-                                opt_sum_df.index.strftime('%H:%M').array
     days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 
     # Go through all power levels
     for power in power_levels:
         # Create folder for aggregated data
         Path(output_path + str(power) + '/Aggregated Data').mkdir(parents=True, exist_ok=True)
+        # List all pricing strategies
+        pricing_strategies = os.listdir(output_path + power)
+        if 'Aggregated Data' in pricing_strategies:
+            pricing_strategies.remove('Aggregated Data')
+        # List all ev flex offer files
+        file_names = os.listdir(output_path + power + '/' + pricing_strategies[0])
+        # Create df for sum of optimal charging plans
+        opt_sum_df = pd.DataFrame(0, index=t_range, columns={'P_ev_opt_sum_tou',
+                                                             'P_ev_opt_sum_const',
+                                                             'P_ev_opt_sum_tou_mi',
+                                                             'P_ev_opt_sum_const_mi',
+                                                             'P_ev_opt_sum_rtp',
+                                                             'n_veh_avail',
+                                                             'c_elect_in_tou',
+                                                             'c_elect_in_const',
+                                                             'c_elect_in_tou_mi',
+                                                             'c_elect_in_const_mi',
+                                                             'c_elect_in_rtp',
+                                                             'Daytime_ID'})
+        # Create df for sum of flexibility
+        flex_sum_df = pd.DataFrame(0, index=t_range, columns={'P_pos_sum_tou',
+                                                              'P_pos_sum_tou_mi',
+                                                              'P_pos_sum_const',
+                                                              'P_pos_sum_const_mi',
+                                                              'P_pos_sum_rtp',
+                                                              'P_neg_sum_tou',
+                                                              'P_neg_sum_tou_mi',
+                                                              'P_neg_sum_const',
+                                                              'P_neg_sum_const_mi',
+                                                              'P_neg_sum_rtp',
+                                                              'E_pos_sum_tou',
+                                                              'E_pos_sum_tou_mi',
+                                                              'E_pos_sum_const',
+                                                              'E_pos_sum_const_mi',
+                                                              'E_pos_sum_rtp',
+                                                              'E_neg_sum_tou',
+                                                              'E_neg_sum_tou_mi',
+                                                              'E_neg_sum_const',
+                                                              'E_neg_sum_const_mi',
+                                                              'E_neg_sum_rtp',
+                                                              'c_flex_pos_tou',
+                                                              'c_flex_pos_tou_mi',
+                                                              'c_flex_pos_const',
+                                                              'c_flex_pos_const_mi',
+                                                              'c_flex_pos_rtp',
+                                                              'c_flex_neg_tou',
+                                                              'c_flex_neg_tou_mi',
+                                                              'c_flex_neg_const',
+                                                              'c_flex_neg_const_mi',
+                                                              'c_flex_neg_rtp',
+                                                              'Daytime_ID'})
+        # Get forecast electricity prices for each time step
+        price_forecast = forecast.simulate_elect_price_fcst(rtp_input_data_path=rtp_input_data_path,
+                                                            t_start=t_min,
+                                                            t_end=t_max,
+                                                            pr_constant=0.19)
+        opt_sum_df.loc[:, 'c_elect_in_tou'] = price_forecast['ToU']
+        opt_sum_df.loc[:, 'c_elect_in_const'] = price_forecast['Constant']
+        opt_sum_df.loc[:, 'c_elect_in_tou_mi'] = price_forecast['ToU_mi']
+        opt_sum_df.loc[:, 'c_elect_in_const_mi'] = price_forecast['Con_mi']
+        opt_sum_df.loc[:, 'c_elect_in_rtp'] = price_forecast['RTP']
+        # Create a daytime identifier for weekday and time for heat map
+        opt_sum_df['Daytime_ID'] = opt_sum_df.index.day_name().array + ', ' + opt_sum_df.index.strftime('%H:%M').array
+        flex_sum_df['Daytime_ID'] = opt_sum_df.index.day_name().array + ', ' + opt_sum_df.index.strftime('%H:%M').array
         # Go through all files
         for result_name in file_names:
             my_ems_tou_mi = opentumflex.init_ems_js(path=output_path + str(power) + '/ToU_mi/' + result_name)
@@ -321,17 +318,17 @@ def aggregate_ev_flex(veh_availabilities, output_path='../output/', rtp_input_da
 
         # Copy power to single day columns
         for i in range(7):
-            P_pos_tou_hm[days[i]].iloc[:] = flex_per_daytime['P_pos_sum_tou'].iloc[i * 96:i * 96 + 96].values
-            P_pos_const_hm[days[i]].iloc[:] = flex_per_daytime['P_pos_sum_const'].iloc[i * 96:i * 96 + 96].values
-            P_pos_tou_mi_hm[days[i]].iloc[:] = flex_per_daytime['P_pos_sum_tou_mi'].iloc[i * 96:i * 96 + 96].values
-            P_pos_const_mi_hm[days[i]].iloc[:] = flex_per_daytime['P_pos_sum_const_mi'].iloc[i * 96:i * 96 + 96].values
-            P_pos_rtp_hm[days[i]].iloc[:] = flex_per_daytime['P_pos_sum_rtp'].iloc[i * 96:i * 96 + 96].values
-            P_neg_tou_hm[days[i]].iloc[:] = flex_per_daytime['P_neg_sum_tou'].iloc[i * 96:i * 96 + 96].values
-            P_neg_const_hm[days[i]].iloc[:] = flex_per_daytime['P_neg_sum_const'].iloc[i * 96:i * 96 + 96].values
-            P_neg_tou_mi_hm[days[i]].iloc[:] = flex_per_daytime['P_neg_sum_tou_mi'].iloc[i * 96:i * 96 + 96].values
-            P_neg_const_mi_hm[days[i]].iloc[:] = flex_per_daytime['P_neg_sum_const_mi'].iloc[i * 96:i * 96 + 96].values
-            P_neg_rtp_hm[days[i]].iloc[:] = flex_per_daytime['P_neg_sum_rtp'].iloc[i * 96:i * 96 + 96].values
-            n_avail_veh_hm[days[i]].iloc[:] = opt_per_daytime['n_veh_avail'].iloc[i * 96:i * 96 + 96].values
+            P_pos_tou_hm[days[i]] = flex_per_daytime['P_pos_sum_tou'].iloc[i * 96:i * 96 + 96].values
+            P_pos_const_hm[days[i]] = flex_per_daytime['P_pos_sum_const'].iloc[i * 96:i * 96 + 96].values
+            P_pos_tou_mi_hm[days[i]] = flex_per_daytime['P_pos_sum_tou_mi'].iloc[i * 96:i * 96 + 96].values
+            P_pos_const_mi_hm[days[i]] = flex_per_daytime['P_pos_sum_const_mi'].iloc[i * 96:i * 96 + 96].values
+            P_pos_rtp_hm[days[i]] = flex_per_daytime['P_pos_sum_rtp'].iloc[i * 96:i * 96 + 96].values
+            P_neg_tou_hm[days[i]] = flex_per_daytime['P_neg_sum_tou'].iloc[i * 96:i * 96 + 96].values
+            P_neg_const_hm[days[i]] = flex_per_daytime['P_neg_sum_const'].iloc[i * 96:i * 96 + 96].values
+            P_neg_tou_mi_hm[days[i]] = flex_per_daytime['P_neg_sum_tou_mi'].iloc[i * 96:i * 96 + 96].values
+            P_neg_const_mi_hm[days[i]] = flex_per_daytime['P_neg_sum_const_mi'].iloc[i * 96:i * 96 + 96].values
+            P_neg_rtp_hm[days[i]] = flex_per_daytime['P_neg_sum_rtp'].iloc[i * 96:i * 96 + 96].values
+            n_avail_veh_hm[days[i]] = opt_per_daytime['n_veh_avail'].iloc[i * 96:i * 96 + 96].values
 
         # Save heat map dataframes to files
         P_pos_tou_hm.to_hdf(output_path + str(power) + '/Aggregated Data/P_pos_tou_hm_data.h5', mode='w', key='df')
