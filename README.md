@@ -26,12 +26,15 @@ The increasing share of renewable energy requires alternative methods to provide
 4. Install the optimization modeling language: [Pyomo](http://www.pyomo.org/installation)
     * PyCharm: Add Pyomo package using `File->Settings->Project->Python Interpreter->Add(+)->Search for Pyomo->Install`
     * Manual installation: `pip install pyomo` (only necessary if the automatic installation of packages did not detect Pyomo)
-5. Install a Solver: [GLPK](https://pypi.org/project/glpk/). You can also use Gurobi or other MILP solvers. 
+5. Install a Solver: 
+	* Anaconda: [GLPK](https://anaconda.org/conda-forge/glpk)
+	* Pip: [GLPK](https://pypi.org/project/glpk/)
+	* You can also use Gurobi or other MILP solvers. 
 
 
 ## Test your installation
 
-Run the [example.py](https://github.com/tum-ewk/OpenTUMFlex.py/blob/master/example_1.py) file to test if the OpenTUMflex model is correctly installed. You will obtain the following results if everything works perfectly:
+Run the [example_1.py](https://github.com/tum-ewk/OpenTUMFlex.py/blob/master/example_1.py) file to test if the OpenTUMflex model is correctly installed. You will obtain the following results if everything works perfectly:
 
 ![](https://user-images.githubusercontent.com/42935122/97186850-1b97b500-17a2-11eb-9a86-97674ffad6d0.png)|![](https://user-images.githubusercontent.com/40628466/97216385-09c80900-17c6-11eb-98ac-615b77bbed0b.png)
 :-------------------------:|:-------------------------:
