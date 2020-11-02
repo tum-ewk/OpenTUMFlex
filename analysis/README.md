@@ -9,7 +9,7 @@ The run_ev_case_study.py executes a sample case study for the quantification of 
 ### [Input](input/) 
 As an input, a small data set with 100 vehicle availabilities is stored in the input folder in a csv format. Furthermore, real-time prices are stored in the folder input/RTP/ in a hdf-format. 
 
-### [Output](output/) 
+### Output
 The case study will store the individual flexibility offers as txt files in the folder output/. The folder will be created at execution. 
 
 ### Duration
