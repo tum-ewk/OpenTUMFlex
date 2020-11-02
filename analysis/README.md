@@ -10,7 +10,7 @@ The run_ev_case_study.py executes a sample case study for the quantification of 
 As an input, a small data set with 100 vehicle availabilities is stored in the input folder in a csv format. Furthermore, real-time prices are stored in a hdf format [here](input/RTP/). 
 
 ### Output
-The case study will store the individual flexibility offers as txt files in the folder output/. The folder will be created at execution. 
+The case study will store the individual flexibility offers as txt files in the folder output/. The program will create subfolders for all charging power levels and pricing strategies. Furthermore, a folder for the aggregated results are created. All folders will be created at execution. 
 
 ### Duration
 Depending on your computer, the cores and the configuration of charging power levels, controller strategies and pricing tariffs, the execution will take approximately 5-10 minutes. 
