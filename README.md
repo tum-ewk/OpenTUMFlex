@@ -61,7 +61,7 @@ A scenario-based approach is incorporated in the OpenTUMflex design. Here, a sce
    * Refer our [documentation](https://github.com/tum-ewk/OpenTUMFlex.py/wiki).
    
 * **Analysis Toolbox:**
-   * [Quantifying the Flexibility of Electric Vehicles in Germany and California](/https://github.com/tum-ewk/OpenTUMFlex.py/blob/master/analysis/README.md)
+   * [EV Case Study](analysis/README.md)
 
 
 <!---
