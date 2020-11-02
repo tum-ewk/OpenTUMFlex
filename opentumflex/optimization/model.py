@@ -421,11 +421,22 @@ def solve_model(m, solver, time_limit=100, min_gap=0.001, troubleshooting=True):
 
     """
     optimizer = SolverFactory(solver)
-    solver_opt = dict()
-    solver_opt['mipgap'] = min_gap
-    # optimizer.solve(m, load_solutions=True, options=solver_opt, tee=True)
-    optimizer.solve(m, load_solutions=True, options=solver_opt, tee=troubleshooting, timelimit=time_limit)
 
+    # optimizer.solve(m, load_solutions=True, options=solver_opt, tee=True)
+    if solver == "glpk":
+        solver_opt = dict()
+        solver_opt['mipgap'] = min_gap
+        optimizer.solve(m, load_solutions=True, options=solver_opt, tee=troubleshooting, timelimit=time_limit)
+    elif solver == "gurobi":
+        optimizer.set_options("timelimit="+str(time_limit))  # seconds
+        optimizer.set_options("mipgap="+str(min_gap))  # default = 1e-3
+        optimizer.solve(m, load_solutions=True, tee=troubleshooting)
+    else:
+        try:
+            optimizer.solve(m, load_solutions=True, tee=troubleshooting)
+        except RuntimeError:
+            raise RuntimeError(
+                'this solver is not available or the configuration is not adequate')
     return m
 
 

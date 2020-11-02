@@ -19,7 +19,7 @@ import opentumflex
 import os
 
 
-def run_scenario(scenario, path_input, path_results, fcst_only=True, time_limit=30, troubleshooting=True,
+def run_scenario(scenario, path_input, path_results, fcst_only=True, solver='glpk', time_limit=30, troubleshooting=True,
                  show_opt_res=True, show_flex_res=True, save_opt_res=True, show_aggregated_flex=True,
                  convert_input_tocsv=True, show_aggregated_flex_price='bar'):
     """ run an OpenTUMFlex model for given scenario
@@ -51,7 +51,7 @@ def run_scenario(scenario, path_input, path_results, fcst_only=True, time_limit=
     m = opentumflex.create_model(my_ems)
 
     # solve the optimization problem
-    m = opentumflex.solve_model(m, solver='glpk', time_limit=time_limit, troubleshooting=troubleshooting)
+    m = opentumflex.solve_model(m, solver=solver, time_limit=time_limit, troubleshooting=troubleshooting)
 
     # extract the results from model and store them in opentumflex['optplan'] dictionary
     my_ems = opentumflex.extract_res(m, my_ems)
