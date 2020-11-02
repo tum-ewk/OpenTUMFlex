@@ -26,12 +26,14 @@ The increasing share of renewable energy requires alternative methods to provide
 4. Install the optimization modeling language: [Pyomo](http://www.pyomo.org/installation)
     * PyCharm: Add Pyomo package using `File->Settings->Project->Python Interpreter->Add(+)->Search for Pyomo->Install`
     * Manual installation: `pip install pyomo` (only necessary if the automatic installation of packages did not detect Pyomo)
-5. Install a Solver: [GLPK](https://pypi.org/project/glpk/). You can also use Gurobi or other MILP solvers. 
+5. Install a solver such as GLPK, Gurobi or any other MILP solver: 
+	* Anaconda: [GLPK](https://anaconda.org/conda-forge/glpk)
+	* Pip: [GLPK](https://pypi.org/project/glpk/)
 
 
 ## Test your installation
 
-Run the [example.py](https://github.com/tum-ewk/OpenTUMFlex.py/blob/master/example_1.py) file to test if the OpenTUMflex model is correctly installed. You will obtain the following results if everything works perfectly:
+Run the [example_1.py](https://github.com/tum-ewk/OpenTUMFlex.py/blob/master/example_1.py) file to test if the OpenTUMflex model is correctly installed. You will obtain the following results if everything works perfectly:
 
 ![](https://user-images.githubusercontent.com/42935122/97186850-1b97b500-17a2-11eb-9a86-97674ffad6d0.png)|![](https://user-images.githubusercontent.com/40628466/97216385-09c80900-17c6-11eb-98ac-615b77bbed0b.png)
 :-------------------------:|:-------------------------:
@@ -39,10 +41,10 @@ Run the [example.py](https://github.com/tum-ewk/OpenTUMFlex.py/blob/master/examp
 
 
 ## Getting started
-A scenario-based approach is incorporated in OpenTUMflex design. Here, a scenario refers to the device configurations installed at the prosumer premises. For example, a scenario can refer to just a household with PV, BSS and EV. 
+A scenario-based approach is incorporated in the OpenTUMflex design. Here, a scenario refers to the device configurations installed at the prosumer premises. For example, a scenario can refer to just a household with PV, BSS and EV. 
 
 * **Change your scenario**
-   Once you have successfully installed OpenTUMflex, you can choose to change your scenario by replacing the desired name in line 11 in [example.py](https://github.com/tum-ewk/OpenTUMFlex.py/blob/master/example_1.py). To give an idea, we have already created 10 sample scenarios inside [scenario.py](https://github.com/tum-ewk/OpenTUMFlex.py/blob/master/opentumflex/scenarios/scenarios.py). 
+   Once you have successfully installed OpenTUMflex, you can choose to change your scenario by replacing the desired name in line 12 in [example.py](https://github.com/tum-ewk/OpenTUMFlex.py/blob/master/example_1.py). To give an idea, we have already created 10 sample scenarios inside [scenario.py](https://github.com/tum-ewk/OpenTUMFlex.py/blob/master/opentumflex/scenarios/scenarios.py). 
    
   *For example the following scenarios portray the devices installed at the prosumers premises*
    * `scenario_hp`: Heat storage, boiler and HP
