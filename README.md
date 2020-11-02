@@ -61,7 +61,7 @@ A scenario-based approach is incorporated in the OpenTUMflex design. Here, a sce
    * Refer our [documentation](https://github.com/tum-ewk/OpenTUMFlex.py/wiki).
    
 * **Analysis Toolbox:**
-   * [EV Case Study](analysis/README.md)
+   * [EV Case Study](analysis/)
 
 
 <!---
