@@ -138,7 +138,7 @@ def create_model(ems_local):
 
     # solar
     pv_param = devices['pv']
-    m.pv_effic = pyen.Param(initialize=pv_param['eta'])
+    # m.pv_effic = pyen.Param(initialize=pv_param['eta'])
     m.pv_peak_power = pyen.Param(initialize=pv_param['maxpow'])
     m.solar = pyen.Param(m.t, initialize=1, mutable=True)
 
@@ -155,20 +155,20 @@ def create_model(ems_local):
     for t in m.t:
         # weather data
         m.ele_price_in[t] = time_series.loc[t]['ele_price_in']
-        m.gas_price[t] = time_series.loc[t]['gas']
+        m.gas_price[t] = time_series.loc[t]['gas_price']
         m.ele_price_out[t] = time_series.loc[t]['ele_price_out']
-        m.lastprofil_heat[t] = time_series.loc[t]['last_heat']
-        m.lastprofil_elec[t] = time_series.loc[t]['last_elec']
-        m.solar[t] = time_series.loc[t]['solar']
+        m.lastprofil_heat[t] = time_series.loc[t]['load_heat']
+        m.lastprofil_elec[t] = time_series.loc[t]['load_elec']
+        m.solar[t] = time_series.loc[t]['solar_power']
         # fill the ev availability
         m.ev_aval[t] = ev_aval[t]
         # calculate the spline function for thermal power of heat pump
         spl_elec_pow = UnivariateSpline(list(map(float, hp_elec_cap.columns.values)),
                                         list(hp_elec_cap.loc[hp_supply_temp, :]))
-        m.hp_elec_pow[t] = spl_elec_pow(time_series.loc[t]['temp'] + 273.15).item(0)
+        m.hp_elec_pow[t] = spl_elec_pow(time_series.loc[t]['temperature'] + 273.15).item(0)
         # calculate the spline function for COP of heat pump
         spl_cop = UnivariateSpline(list(map(float, hp_cop.columns.values)), list(hp_cop.loc[hp_supply_temp, :]))
-        m.hp_COP[t] = spl_cop(time_series.loc[t]['temp'] + 273.15).item(0)
+        m.hp_COP[t] = spl_cop(time_series.loc[t]['temperature'] + 273.15).item(0)
         m.hp_ther_pow[t] = m.hp_elec_pow[t] * m.hp_COP[t]
         # calculate the chp electric and thermal power when it's running
         m.chp_heat_run[t] = m.chp_elec_run[t] / m.chp_elec_effic[t] * m.chp_ther_effic[t]
@@ -251,7 +251,7 @@ def create_model(ems_local):
                                        doc='battery_balance')
 
     def elec_balance_rule(m, t):
-        return m.elec_import[t] + m.CHP_run[t] * m.chp_elec_run[t] + m.PV_cap[t] * m.pv_effic * m.solar[t] - \
+        return m.elec_import[t] + m.CHP_run[t] * m.chp_elec_run[t] + m.PV_cap[t] * m.solar[t] - \
                m.elec_export[t] - m.hp_run[t] * m.hp_elec_pow[t] - m.lastprofil_elec[t] - \
                (m.bat_pow_pos[t] - m.bat_pow_neg[t]) - m.ev_power[t] == 0
 
@@ -491,7 +491,7 @@ def extract_res(m, ems):
         elec_import[i] = get_value(m.elec_import[idx])
         elec_export[i] = get_value(m.elec_export[idx])
         lastprofil_elec[i] = get_value(m.lastprofil_elec[idx])
-        pv_power[i] = get_value(m.PV_cap[idx] * m.pv_effic * m.solar[idx])
+        pv_power[i] = get_value(m.PV_cap[idx] * m.solar[idx])
 
         bat_cont[i] = get_value(m.bat_cont[idx])
         bat_power_pos[i] = get_value(m.bat_pow_neg[idx])
