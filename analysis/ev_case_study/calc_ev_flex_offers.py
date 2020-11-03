@@ -147,20 +147,22 @@ def calc_ev_flex_offers_parallel(param_variation,
     t_departure_floored = pd.Timestamp(param_variation[2][5]).floor(freq='15Min')
     # Check whether time between ceiled arrival and floored departure time are at least two time steps
     if t_arrival_ceiled >= t_departure_floored:
-        print('#' + str(param_variation[2][0]) + ': Time not sufficient.')
+        if param_fix['info']:
+            print('#' + str(param_variation[2][0]) + ': Time not sufficient.')
         return
     else:
-        print('#' + str(param_variation[2][0]) + ': Power=' + str(param_variation[0]) + ' Pricing=' + param_variation[1])
+        if param_fix['info']:
+            print('#' + str(param_variation[2][0]) + ': Power=' + str(param_variation[0]) + ' Pricing=' + param_variation[1])
 
     # change the time interval
     my_ems['time_data']['start_time'] = t_arrival_ceiled.strftime('%Y-%m-%d %H:%M')
     my_ems['time_data']['end_time'] = t_departure_floored.strftime('%Y-%m-%d %H:%M')
     my_ems.update(opentumflex.update_time_data(my_ems))
-    my_ems['fcst']['temp'] = [0] * my_ems['time_data']['nsteps']
-    my_ems['fcst']['solar'] = [0] * my_ems['time_data']['nsteps']
-    my_ems['fcst']['last_heat'] = [0] * my_ems['time_data']['nsteps']
-    my_ems['fcst']['last_elec'] = [0] * my_ems['time_data']['nsteps']
-    my_ems['fcst']['gas'] = [0] * my_ems['time_data']['nsteps']
+    my_ems['fcst']['temperature'] = [0] * my_ems['time_data']['nsteps']
+    my_ems['fcst']['solar_power'] = [0] * my_ems['time_data']['nsteps']
+    my_ems['fcst']['load_heat'] = [0] * my_ems['time_data']['nsteps']
+    my_ems['fcst']['load_elec'] = [0] * my_ems['time_data']['nsteps']
+    my_ems['fcst']['gas_price'] = [0] * my_ems['time_data']['nsteps']
     my_ems['fcst']['ele_price_out'] = [0] * my_ems['time_data']['nsteps']
 
     # Get simulated price forecast for given time period
