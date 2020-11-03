@@ -19,7 +19,7 @@ import opentumflex
 import os
 
 
-def run_scenario(scenario, path_input, path_results, fcst_only=True, solver='glpk', time_limit=30, troubleshooting=True,
+def run_scenario(scenario, path_input, path_results, solver='glpk', time_limit=30, troubleshooting=True,
                  show_opt_res=True, show_flex_res=True, save_opt_res=True, show_aggregated_flex=True,
                  convert_input_tocsv=True, show_aggregated_flex_price='bar'):
     """ run an OpenTUMFlex model for given scenario
@@ -41,11 +41,14 @@ def run_scenario(scenario, path_input, path_results, fcst_only=True, solver='glp
     # initialize with basic time settings
     my_ems = opentumflex.initialize_time_setting(t_inval=15, start_time='2019-12-18 00:00', end_time='2019-12-18 23:45')
 
-    # read devices parameters and forecasting data from xlsx or csv file
-    my_ems = opentumflex.read_data(my_ems, path_input, fcst_only=fcst_only, to_csv=convert_input_tocsv)
-
-    # modify the opentumflex regarding to predefined scenario
-    my_ems = scenario(my_ems)
+    if scenario == opentumflex.scenario_customized:
+        # read devices parameters and forecasting data from xlsx or csv file
+        my_ems = opentumflex.read_data(my_ems, path_input, fcst_only=False, to_csv=convert_input_tocsv)
+    else:
+        # read only the input time series from the excel table
+        my_ems = opentumflex.read_data(my_ems, path_input, fcst_only=True, to_csv=convert_input_tocsv)
+        # modify the opentumflex regarding to predefined scenario
+        my_ems = scenario(my_ems)
 
     # create Pyomo model from opentumflex data
     m = opentumflex.create_model(my_ems)
