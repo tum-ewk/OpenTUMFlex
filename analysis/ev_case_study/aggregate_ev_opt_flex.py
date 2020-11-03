@@ -11,12 +11,13 @@ __maintainer__ = "Michel Zadé"
 __email__ = "michel.zade@tum.de"
 __status__ = "Development"
 
+from pathlib import Path
+from tqdm import tqdm
 import pandas as pd
 import os
 import numpy as np
 import opentumflex
 import forecast
-from pathlib import Path
 
 
 def aggregate_ev_flex(veh_availabilities, output_path='../output/', rtp_input_data_path='../input/RTP/'):
@@ -43,7 +44,7 @@ def aggregate_ev_flex(veh_availabilities, output_path='../output/', rtp_input_da
     days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 
     # Go through all power levels
-    for power in power_levels:
+    for power in tqdm(power_levels):
         # Create folder for aggregated data
         Path(output_path + str(power) + '/Aggregated Data').mkdir(parents=True, exist_ok=True)
         # List all pricing strategies
