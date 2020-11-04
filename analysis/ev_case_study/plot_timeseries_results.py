@@ -20,10 +20,11 @@ from pathlib import Path
 register_matplotlib_converters()
 
 
-def plot_n_avail_veh(cs1_output_path, cs2_output_path, figure_path='figures/'):
+def plot_n_avail_veh(cs1_output_path, cs2_output_path, save_figure=True, figure_path='figures/'):
     """
     Plots the vehicle availabilities of two different case studies.
 
+    :param save_figure: boolean whether to save figure or not
     :param cs1_output_path: path to results of the first case study
     :param cs2_output_path: path to results of the second case study
     :param figure_path: folder where figures are stored
@@ -61,22 +62,22 @@ def plot_n_avail_veh(cs1_output_path, cs2_output_path, figure_path='figures/'):
     tick_range = np.linspace(start=0, stop=576, num=n_ticks)
     plt.xticks(tick_range, labels=chts_flex_per_daytime.loc[tick_range, 'Daytime_ID'], rotation=45)
     fig1.subplots_adjust(bottom=0.30, right=0.95, left=0.16, top=0.95)
-    plt.savefig(figure_path + 'veh_availabilities_time.png', dpi=600)
+    if save_figure:
+        plt.savefig(figure_path + 'veh_availabilities_time.png', dpi=600)
 
     print('mp_per_daytime[n_veh_avail]:', mp_opt_per_daytime['n_veh_avail'].max())
     print('chts_per_daytime[n_veh_avail]:', chts_opt_per_daytime['n_veh_avail'].max())
 
 
-def plot_n_avail_veh(output_path, figure_path='../figures/'):
+def plot_n_avail_veh(output_path, save_figure=True, figure_path='../figures/'):
     """
     Plots the vehicle availabilities of a case study.
 
+    :param save_figure: boolean whether to save figure or not
     :param output_path: path to results of the case study
     :param figure_path: folder where figures are stored
     :return:
     """
-    # Define figure path
-    Path(figure_path).mkdir(parents=True, exist_ok=True)
     # Read data from files
     opt_per_daytime = pd.read_hdf(output_path + 'Aggregated Data/opt_per_daytime_data.h5', key='df')
     flex_per_daytime = pd.read_hdf(output_path + 'Aggregated Data/flex_per_daytime_data.h5', key='df')
@@ -99,15 +100,17 @@ def plot_n_avail_veh(output_path, figure_path='../figures/'):
     tick_range = np.linspace(start=0, stop=576, num=n_ticks)
     plt.xticks(tick_range, labels=flex_per_daytime.loc[tick_range, 'Daytime_ID'], rotation=45)
     fig1.subplots_adjust(bottom=0.30, right=0.95, left=0.16, top=0.95)
-    # plt.savefig(figure_path + 'veh_availabilities_time.png', dpi=600)
+    if save_figure:
+        plt.savefig(figure_path + 'veh_availabilities_time.png', dpi=600)
 
     # print('Maximum number of available vehicles:', opt_per_daytime['n_veh_avail'].max())
 
 
-def plot_opt_flex_timeseries(cs1_output_path, cs2_output_path, figure_path='../figures/'):
+def plot_opt_flex_timeseries(cs1_output_path, cs2_output_path, save_figure=True, figure_path='../figures/'):
     """
     This function plots the flexibility results of two case studies over time
 
+    :param save_figure: boolean whether to save figure or not
     :param cs1_output_path: path to results of the first case study
     :param cs2_output_path: path to results of the second case study
     :param figure_path: folder where figures are stored
@@ -590,13 +593,15 @@ def plot_opt_flex_timeseries(cs1_output_path, cs2_output_path, figure_path='../f
     axs[0, 0].set_xticks(ticks)
     axs[0, 0].set_xticklabels(resulting_labels, rotation=45)
     plt.subplots_adjust(left=0.08, bottom=0.05, right=0.98, top=0.95, wspace=0.25, hspace=0.2)
-    plt.savefig(figure_path + 'opt_flex_average_day_plots.png', dpi=600)
+    if save_figure:
+        plt.savefig(figure_path + 'opt_flex_average_day_plots.png', dpi=600)
 
 
-def plot_opt_flex_timeseries(output_path, figure_path='figures/'):
+def plot_opt_flex_timeseries(output_path, save_figure=True, figure_path='figures/'):
     """
     This function plots the flexibility results of a study over time
 
+    :param save_figure: boolean whether to save figure or not
     :param output_path: path to results of the  case study
     :param figure_path: folder where figures are stored
     :return:
@@ -803,7 +808,8 @@ def plot_opt_flex_timeseries(output_path, figure_path='figures/'):
     axs[0, 0].set_xticks(ticks)
     axs[0, 0].set_xticklabels(resulting_labels, rotation=45)
     plt.subplots_adjust(left=0.08, bottom=0.05, right=0.98, top=0.95, wspace=0.25, hspace=0.2)
-    # plt.savefig(figure_path + 'opt_flex_average_day_plots.png', dpi=600)
+    if save_figure:
+        plt.savefig(figure_path + 'opt_flex_average_day_plots.png', dpi=600)
 
 
 if __name__ == '__main__':
