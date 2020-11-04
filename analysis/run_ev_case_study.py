@@ -73,6 +73,9 @@ ev_case_study.aggregate_ev_flex(veh_availabilities,
 
 print('4. Plot results.')
 
+# Create empty figures folder
+ev_case_study.create_figures_folder(figure_folder_path=figure_path)
+
 # Plot number of available vehicles at home over a week (only for one power level, since it won't change)
 ev_case_study.plot_n_avail_veh(output_path=output_path + str(params['power_levels'][0]) + '/',
                                figure_path=figure_path)

@@ -15,10 +15,11 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 
-def plot_overall_cost(overall_costs, figure_path='figures/'):
+def plot_overall_cost(overall_costs, save_figure=True, figure_path='figures/'):
     """
     Creates a bar plot of the overall costs of the optimal charging schedules.
 
+    :param save_figure: boolean for saving figures
     :param overall_costs: dataframe containing all costs for different charging power levels and pricing strategies
     :param figure_path: folder where figures are stored
     :return:
@@ -41,7 +42,8 @@ def plot_overall_cost(overall_costs, figure_path='figures/'):
     # Save
     plt.tight_layout()
     plt.show()  # -> optional
-    # plt.savefig(figure_path + 'total_charging_cost' + '.png', dpi=600)
+    if save_figure:
+        plt.savefig(figure_path + 'total_charging_cost' + '.png', dpi=600)
 
 
 if __name__ == '__main__':
