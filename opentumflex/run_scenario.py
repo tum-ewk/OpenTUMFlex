@@ -20,7 +20,8 @@ import os
 
 
 def run_scenario(scenario, path_input, path_results, solver='glpk', time_limit=30, troubleshooting=True,
-                 show_opt_res=True, show_flex_res=True, save_opt_res=True, show_aggregated_flex=True,
+                 show_opt_balance=True, show_opt_soc=True, show_flex_res=True,
+                 save_opt_res=True, show_aggregated_flex=True,
                  convert_input_tocsv=True, show_aggregated_flex_price='bar'):
     """ run an OpenTUMFlex model for given scenario
 
@@ -39,7 +40,7 @@ def run_scenario(scenario, path_input, path_results, solver='glpk', time_limit=3
     """
 
     # initialize with basic time settings
-    my_ems = opentumflex.initialize_time_setting(t_inval=15, start_time='2019-12-18 00:00', end_time='2019-12-18 23:45')
+    my_ems = opentumflex.initialize_time_setting(t_inval=15, start_time='2019-12-19 00:00', end_time='2019-12-20 14:45')
 
     if scenario == opentumflex.scenario_customized:
         # read devices parameters and forecasting data from xlsx or csv file
@@ -60,8 +61,7 @@ def run_scenario(scenario, path_input, path_results, solver='glpk', time_limit=3
     my_ems = opentumflex.extract_res(m, my_ems)
 
     # visualize the optimization results
-    if show_opt_res:
-        opentumflex.plot_optimal_results(my_ems)
+    opentumflex.plot_optimal_results(my_ems, show_balance=show_opt_balance, show_soc=show_opt_soc)
 
     # save the data in .xlsx in given path
     if save_opt_res:
