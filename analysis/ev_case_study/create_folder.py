@@ -20,3 +20,11 @@ def create_output_folder(output_path='output/',
             Path(output_path + str(power)).mkdir(parents=True, exist_ok=True)
             # Create subfolder for different pricing strategies
             Path(output_path + str(power) + '/' + price).mkdir(parents=True, exist_ok=True)
+
+
+def create_figures_folder(figure_folder_path='figures/'):
+    # Delete existing figures folder
+    if os.path.exists(figure_folder_path):
+        shutil.rmtree(path=figure_folder_path, ignore_errors=True)
+    # Create output folder
+    Path(figure_folder_path).mkdir(parents=True, exist_ok=False)
