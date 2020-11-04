@@ -72,6 +72,8 @@ def plot_aggregated_flex_power(ems, reopt=0):
         plt.ylabel("Flexibility power [kW]", fontsize=font_size)
         plt.xlabel("Time", fontsize=font_size)
         plt.title('Aggregated flex power', fontsize=font_size, pad=20)
+        plt.xlim([0, nsteps])
+        plt.grid()
         plt.tight_layout()
         plt.show()
     return
@@ -129,6 +131,8 @@ def plot_aggregated_flex_price(ems, reopt=0, plot_flexpr='bar'):
             plt.ylabel("Flexibility price [€/kWh]", fontsize=font_size)
             plt.xlabel("Time", fontsize=font_size)
             plt.title('Aggregated flex price', fontsize=font_size, pad=20)
+            plt.xlim([0, nsteps])
+            plt.grid()
             plt.tight_layout()
             plt.show()
 
@@ -154,6 +158,8 @@ def plot_aggregated_flex_price(ems, reopt=0, plot_flexpr='bar'):
             plt.ylabel("Flexibility price [€/kWh]", fontsize=font_size)
             plt.xlabel("Time", fontsize=font_size)
             plt.title('Aggregated flex price', fontsize=font_size, pad=20)
+            plt.xlim([0, nsteps])
+            plt.grid()
             plt.tight_layout()
             plt.show()
     return
