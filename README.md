@@ -22,7 +22,7 @@ The increasing share of renewable energy requires alternative methods to provide
 1. Install a Python distrubution (64-bit installation recommended): [PyCharm](https://www.jetbrains.com/pycharm/)/[Miniconda](https://docs.conda.io/en/latest/miniconda.html).
 2. [Download](https://github.com/tum-ewk/OpenTUMFlex.py/archive/master.zip) or clone the OpenTUMflex repository `git clone https://github.com/tum-ewk/OpenTUMFlex.py.git`
 3. Create an environment and install the [requirements](https://github.com/tum-ewk/OpenTUMFlex.py/blob/master/requirements.yml) file using [Anaconda prompt](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html#creating-an-environment-from-an-environment-yml-file) and add your environment to the Pycharm interpreter. 
-    * Pycharm: `File->Settings->Project->Python Interpreter->Setting icon->Add->Conda environment->Existing environment->Select the created environment`
+    * Pycharm: `File->Settings->Project->Python Interpreter->Setting icon->Add->Conda environment->Existing environment`
 4. Install the optimization modeling language: [Pyomo](http://www.pyomo.org/installation)
     * PyCharm: Add Pyomo package using `File->Settings->Project->Python Interpreter->Add(+)->Search for Pyomo->Install`
     * Manual installation: `pip install pyomo` (only necessary if the automatic installation of packages did not detect Pyomo)
