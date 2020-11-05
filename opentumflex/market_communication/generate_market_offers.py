@@ -23,7 +23,6 @@ def save_offers(my_ems, market='comax'):
     elif market == 'alf':
         for i in range(len(device)):
             save_offers_alf(my_ems,  device[i])
-        
 
 def save_offers_comax(my_ems,  device,  filetype='xlsx'):
     """
@@ -55,10 +54,10 @@ def save_offers_comax(my_ems,  device,  filetype='xlsx'):
     # Save flex offers in the requested format
     if filetype == '.xlsx':
         my_ems['flexopts'][device].to_excel(new_cwd+'.xlsx')
-        print("Excel file generated! Available on " + path)
+        # print("Excel file generated! Available on " + path)
     elif filetype == 'csv':
         my_ems['flexopts'][device].to_csv(new_cwd+'.csv', sep=';', decimal='.', index=False)
-        print("CSV file generated! Available on " + path)
+        # print("CSV file generated! Available on " + path)
     else:
         print('Unknown file format - .xlsx/.csv supported')
 
@@ -123,5 +122,5 @@ def save_offers_alf(my_ems, device):
 
     # Save CSV file
     df.to_csv(new_cwd, sep=';', index=False)
-    print("CSV file generated - flex offers for alf markt! Available on " + new_cwd)
+    # print("CSV file generated - flex offers for alf markt! Available on " + new_cwd)
     # return df

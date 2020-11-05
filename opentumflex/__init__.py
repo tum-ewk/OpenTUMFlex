@@ -20,8 +20,6 @@ from opentumflex.flexibility.flex_ev import calc_flex_ev
 from opentumflex.market_communication.generate_market_offers import save_offers_alf, save_offers_comax, save_offers
 from opentumflex.optimization.report import save_results
 from opentumflex.optimization.model import create_model, solve_model, extract_res
-# from opentumflex.market_communication.handle_market_call import calc_flex_response_bat, calc_flex_response_ev, calc_flex_response_pv, \
-#     calc_flex_response_hp
 from opentumflex.plot.plot_optimal_results import plot_optimal_results
 from opentumflex.plot.plot_flex_reoptimized import plot_cumm_energy_reoptimized, plot_flex_reoptimized, \
     plot_compare_optim_reoptim
