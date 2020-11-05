@@ -1,12 +1,12 @@
 OpenTUMflex
 =======
 
-An open-source Python based flexibility model to quantify and price the flexibility of household devices.
+An open-source python-based flexibility model to quantify and price the flexibility of household devices.
 
 
 ## Description
 
-The increasing share of renewable energy requires alternative methods to provide power system ancillary services to ensure a stable operation of the electricity grids. Recent research has inclined their interests towards the aggregation of the small-scale system flexibility potentials to accommodate the grid variations. The advancements towards local flexibility markets (LFMs) allow prosumers participation in solving grid congestion problems. In order to allow prosumers to interact with the LFMs and submit their bids, a flexibility estimation is required. This research proposes an open-source flexibility estimation model that quantifies all possible flexibilities from the available prosumer devices.
+The increasing share of renewable energy requires alternative methods to provide power system ancillary services to ensure a stable operation of the electricity grids. Recent research has inclined their interests towards the aggregation of small-scale system flexibility potentials to accommodate grid variations. The advancements towards local flexibility markets (LFMs) allow prosumers participation in solving grid congestion problems. In order to allow prosumers to interact with the LFMs and submit their bids, a flexibility model is required. This research proposes an open-source flexibility estimation model that quantifies all possible flexibilities from the available prosumer devices and prices them.
 
 #### Flexibility
 Within this open-source model, flexibility is defined as the deviation of a device operation from its optimal schedule. Flexibility can be both negative and positive. Negative flexibility refers to the delay of grid feed-in or the consumption of non-scheduled energy. Positive flexibility is the delay of grid energy consumption or the non-scheduled grid feed-in.  
@@ -16,8 +16,8 @@ Within this open-source model, flexibility is defined as the deviation of a devi
 OpenTUMFlex...
 * uses mixed-integer linear programming (MILP) to obtain cost-optimal operational schedules for household devices. 
 * calculates the flexibility potential and flexibility prices based on price, weather, generation and load forecasts of household devices.
-* supports the following devices: PV, Battery Storage Systems (BSS), Electric Vehicle (EV), Heat Pump (HP), Combined Heat and Power (CHP).
-* outputs flexibility offers of for each household device in formats that can be used in flexibility markets (e.g. comax by Tennet or ALF by FfE e.V.)
+* supports the following devices: PV, battery storage systems (BSS), electric vehicles (EV), heat pumps (HP), combined heat and power (CHP) units.
+* outputs flexibility offers for each household device in formats that can be used in flexibility markets (e.g. comax by Tennet or ALF by FfE e.V.)
 
 
 ## Installation
@@ -26,20 +26,20 @@ OpenTUMFlex...
 The easiest way to create the environment and install all required packages is via Ana- or Miniconda.
 1. Install Anaconda or Miniconda
 2. Create the virtual environment: open an "Anaconda Prompt" -> type `conda env create -f environment_v1.0.yml`
-3. Activate conda environment 
+3. Activate environment 
 
 	a. In the command prompt type `conda activate OpenTUMFlex`
 	
 	b. In an IDE like PyCharm go to `File->Settings->Project->Python Interpreter->Show all->Add->Conda Environment->Existing environment->Select folder->OK` 
 
 ### Clone repository
-After a succesful environment creation and activation you can clone the repository to a directory of your choice. You can use version control tools such as GitHub Desktop, Sourcetree, GitKraken or pure Git. The link for pure Git is: 
+After the environment has been successfully installed and activated, you can clone the repository to a directory of your choice. You can use version control tools such as GitHub Desktop, Sourcetree, GitKraken or pure Git. The link for pure Git is: 
 
 `git clone https://github.com/tum-ewk/OpenTUMFlex.git`
 
 ### Test your installation
 
-Run the [example_1.py](https://github.com/tum-ewk/OpenTUMFlex.py/blob/master/example_1.py) file to test if the OpenTUMflex model is correctly installed. If the installation was succesful, you will see the following results:
+Run the [example.py](https://github.com/tum-ewk/OpenTUMFlex.py/blob/master/example.py) file to test if the OpenTUMFlex model is correctly installed. If the installation was succesful, you will see the following results:
 
 ![](https://user-images.githubusercontent.com/42935122/97186850-1b97b500-17a2-11eb-9a86-97674ffad6d0.png)|![](https://user-images.githubusercontent.com/40628466/97216385-09c80900-17c6-11eb-98ac-615b77bbed0b.png)
 :-------------------------:|:-------------------------:
@@ -47,10 +47,10 @@ Run the [example_1.py](https://github.com/tum-ewk/OpenTUMFlex.py/blob/master/exa
 
 
 ## Getting started
-A scenario-based approach is incorporated in the OpenTUMflex design. Here, a scenario refers to the device configurations installed at the prosumer premises. For example, a scenario can refer to just a household with PV, BSS and EV. 
+A scenario-based approach is incorporated in the OpenTUMFlex design. Here, a scenario refers to the device configurations installed in a household. For example, a scenario can refer to just a household with PV, BSS and EV. 
 
 * **Change your scenario**
-   Once you have successfully installed OpenTUMflex, you can choose to change your scenario by replacing the desired name in line 12 in [example.py](https://github.com/tum-ewk/OpenTUMFlex.py/blob/master/example_1.py). To give an idea, we have already created 10 sample scenarios inside [scenario.py](https://github.com/tum-ewk/OpenTUMFlex.py/blob/master/opentumflex/scenarios/scenarios.py). 
+   Once you have successfully installed OpenTUMFlex, you can choose to change your scenario by replacing the desired name in line 12 in [example.py](https://github.com/tum-ewk/OpenTUMFlex.py/blob/master/example.py). To give an idea, we have already created 10 sample scenarios inside [scenario.py](https://github.com/tum-ewk/OpenTUMFlex.py/blob/master/opentumflex/scenarios/scenarios.py). 
    
   *For example the following scenarios portray the devices installed at the prosumers premises*
    * `scenario_hp`: Heat storage, boiler and HP
@@ -64,10 +64,10 @@ A scenario-based approach is incorporated in the OpenTUMflex design. Here, a sce
    * `show_aggregated_flex`: plot the cumulative flexibility power and price of all the available devices
 
 * **Create your own scenario:** 
-   * Refer our [documentation](https://github.com/tum-ewk/OpenTUMFlex.py/wiki).
+   * Refer our [documentation](https://github.com/tum-ewk/OpenTUMFlex/wiki/Create-your-scenario).
    
 * **Analysis Toolbox:**
-   * [EV Case Study](analysis/)
+   * [EV Case Study - Quantifying the Flexibility of Electric Vehicles](analysis/)
 
 
 <!---
