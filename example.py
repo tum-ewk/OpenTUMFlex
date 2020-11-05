@@ -3,13 +3,13 @@ import os
 
 
 base_dir = os.path.abspath(os.getcwd())
-input_file = r'\input\input_data.csv'
+input_file = r'\input\input_data.xlsx'
 output_dir = r'\output'
 
 path_input_data = base_dir + input_file
 path_results = base_dir + output_dir
 
-ems = opentumflex.run_scenario(opentumflex.scenario_mini_apartment,     # Select scenario from scenario.py
+ems = opentumflex.run_scenario(opentumflex.scenario_apartment,     # Select scenario from scenario.py
                                path_input=path_input_data,              # Input path
                                path_results=path_results,               # Output path
                                solver='glpk',                           # Select solver
