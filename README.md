@@ -8,13 +8,16 @@ An open-source Python based flexibility model to quantify and price the flexibil
 
 The increasing share of renewable energy requires alternative methods to provide power system ancillary services to ensure a stable operation of the electricity grids. Recent research has inclined their interests towards the aggregation of the small-scale system flexibility potentials to accommodate the grid variations. The advancements towards local flexibility markets (LFMs) allow prosumers participation in solving grid congestion problems. In order to allow prosumers to interact with the LFMs and submit their bids, a flexibility estimation is required. This research proposes an open-source flexibility estimation model that quantifies all possible flexibilities from the available prosumer devices.
 
+#### Flexibility
+Within this open-source model, flexibility is defined as the deviation of a device operation from its optimal schedule. Flexibility can be both negative and positive. Negative flexibility refers to the delay of grid feed-in or the consumption of non-scheduled energy. Positive flexibility is the delay of grid energy consumption or the non-scheduled grid feed-in.  
+
 
 ## Features
-
-* OpenTUMFlex uses mixed-integer linear programming (MILP) to obtain cost-optimal operational plans for household devices. 
-* Calculates the flexibility potential and flexibility prices of household devices.
-* Supported devices: PV, Battery Storage Systems (BSS), Electric Vehicle (EV), Heat Pump (HP), Combined Heat and Power (CHP).
-* Outputs flexibility offers of each device in suitable formats that can be directly used in FlexMarket (ReFlex, comax and ALF).
+OpenTUMFlex...
+* uses mixed-integer linear programming (MILP) to obtain cost-optimal operational schedules for household devices. 
+* calculates the flexibility potential and flexibility prices based on price, weather, generation and load forecasts of household devices.
+* supports the following devices: PV, Battery Storage Systems (BSS), Electric Vehicle (EV), Heat Pump (HP), Combined Heat and Power (CHP).
+* outputs flexibility offers of for each household device in formats that can be used in flexibility markets (e.g. comax by Tennet or ALF by FfE e.V.)
 
 
 ## Installation
@@ -29,9 +32,14 @@ The easiest way to create the environment and install all required packages is v
 	
 	b. In an IDE like PyCharm go to `File->Settings->Project->Python Interpreter->Show all->Add->Conda Environment->Existing environment->Select folder->OK` 
 
+### Clone repository
+After a succesful environment creation and activation you can clone the repository to a directory of your choice. You can use version control tools such as GitHub Desktop, Sourcetree, GitKraken or pure Git. The link for pure Git is: 
+
+`git clone https://github.com/tum-ewk/OpenTUMFlex.git`
+
 ### Test your installation
 
-Run the [example_1.py](https://github.com/tum-ewk/OpenTUMFlex.py/blob/master/example_1.py) file to test if the OpenTUMflex model is correctly installed. You will obtain the following results if everything works perfectly:
+Run the [example_1.py](https://github.com/tum-ewk/OpenTUMFlex.py/blob/master/example_1.py) file to test if the OpenTUMflex model is correctly installed. If the installation was succesful, you will see the following results:
 
 ![](https://user-images.githubusercontent.com/42935122/97186850-1b97b500-17a2-11eb-9a86-97674ffad6d0.png)|![](https://user-images.githubusercontent.com/40628466/97216385-09c80900-17c6-11eb-98ac-615b77bbed0b.png)
 :-------------------------:|:-------------------------:
@@ -69,6 +77,8 @@ The authors declare no conflict of interest. All authors have equally contribute
 --->
 
 ## References
+
+<sub>[Zade, M., You, Z., Kumaran Nalini, B., Tzscheutschler, P., & Wagner, U. (2020). Quantifying the Flexibility of Electric Vehicles in Germany and California—A Case Study. Energies, 13(21), 5617. doi:10.3390/en13215617](https://www.mdpi.com/1996-1073/13/21/5617)
 
 <sub>[Z. You, B. K. Nalini, M. Zade, P. Tzscheutschler and U. Wagner, "Flexibility quantification and pricing of household heat pump and combined heat and power unit," 2019 IEEE PES Innovative Smart Grid Technologies Europe (ISGT-Europe), Bucharest, Romania, 2019, pp. 1-5, doi: 10.1109/ISGTEurope.2019.8905594.](http://dx.doi.org/10.1109/isgteurope.2019.8905594)<sub>
 
