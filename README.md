@@ -19,19 +19,15 @@ The increasing share of renewable energy requires alternative methods to provide
 
 ## Installation
 
-1. Install a Python distrubution (64-bit installation recommended): [PyCharm](https://www.jetbrains.com/pycharm/)/[Miniconda](https://docs.conda.io/en/latest/miniconda.html).
-2. [Download](https://github.com/tum-ewk/OpenTUMFlex.py/archive/master.zip) or clone the OpenTUMflex repository `git clone https://github.com/tum-ewk/OpenTUMFlex.py.git`
-3. Create an environment and install the [requirements](https://github.com/tum-ewk/OpenTUMFlex.py/blob/master/requirements.txt) file using [Anaconda prompt](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html)/[PyCharm](https://www.jetbrains.com/help/idea/conda-support-creating-conda-virtual-environment.html) plugin.
-    * Pycharm: `File->Settings->Project->Python Interpreter->Setting icon->Add->New environment->Base interpretor-Python 3.7`
-4. Install the optimization modeling language: [Pyomo](http://www.pyomo.org/installation)
-    * PyCharm: Add Pyomo package using `File->Settings->Project->Python Interpreter->Add(+)->Search for Pyomo->Install`
-    * Manual installation: `pip install pyomo` (only necessary if the automatic installation of packages did not detect Pyomo)
-5. Install a solver such as GLPK, Gurobi or any other MILP solver: 
-	* Anaconda: [GLPK](https://anaconda.org/conda-forge/glpk)
-	* Pip: [GLPK](https://pypi.org/project/glpk/)
+### Environment and required packages
+The easiest way to create the environment and install all required packages is via Ana- or Miniconda.
+1. Install Anaconda or Miniconda
+2. Open an "Anaconda Prompt" -> create a new environment by typing <conda env create -f environment_v1.0.yml> (will automatically install all required packages). 
+3. Activate conda environment 
+	a. In the command prompt type <conda activate OpenTUMFlex>
+	b. In an IDE like PyCharm go to `File->Settings->Project->Python Interpreter->Show all->Add->Conda Environment->Existing environment->Select folder->OK` 
 
-
-## Test your installation
+### Test your installation
 
 Run the [example_1.py](https://github.com/tum-ewk/OpenTUMFlex.py/blob/master/example_1.py) file to test if the OpenTUMflex model is correctly installed. You will obtain the following results if everything works perfectly:
 

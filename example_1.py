@@ -11,7 +11,11 @@ path_results = base_dir + output_dir
 
 ems = opentumflex.run_scenario(opentumflex.scenario_customized,
                                path_input=path_input_data, path_results=path_results,
+<<<<<<< HEAD
                                solver='glpk', time_limit=50,
+=======
+                               solver='glpk', time_limit=3,
+>>>>>>> 8c23fe09e00ae956b3bad0ac7e5e8097e6d487f9
                                show_flex_res=False, save_opt_res=False,
                                convert_input_tocsv=True, show_aggregated_flex=False,
                                show_aggregated_flex_price='bar', troubleshooting=False)
