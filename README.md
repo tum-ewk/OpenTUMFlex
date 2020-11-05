@@ -38,12 +38,19 @@ After the environment has been successfully installed and activated, you can clo
 `git clone https://github.com/tum-ewk/OpenTUMFlex.git`
 
 ### Test your installation
-
 Run the [example.py](https://github.com/tum-ewk/OpenTUMFlex.py/blob/master/example.py) file to test if the OpenTUMFlex model is correctly installed. If the installation was succesful, you will see the following results:
 
-![](https://user-images.githubusercontent.com/42935122/97186850-1b97b500-17a2-11eb-9a86-97674ffad6d0.png)|![](https://user-images.githubusercontent.com/40628466/97216385-09c80900-17c6-11eb-98ac-615b77bbed0b.png)
-:-------------------------:|:-------------------------:
-![](https://user-images.githubusercontent.com/40628466/97215739-23b51c00-17c5-11eb-8915-19cce5d8f42c.png)|![](https://user-images.githubusercontent.com/40628466/97215750-26b00c80-17c5-11eb-8795-9c3032ef36a8.png)
+<p align="center">
+<img src = "https://user-images.githubusercontent.com/40628466/98255882-34605180-1f7e-11eb-9976-315a5942199d.png" width=600/>
+</p>	
+	
+	
+<p align="center">
+<img src = "https://user-images.githubusercontent.com/40628466/98258357-12b49980-1f81-11eb-83e0-beceff12dd1b.png" width="450"/>
+<img src = "https://user-images.githubusercontent.com/40628466/98255974-4fcb5c80-1f7e-11eb-822c-0565ddc97471.png" width="450"/>
+</p>
+
+
 
 
 ## Getting started
