@@ -15,7 +15,9 @@ from opentumflex.configuration.devices import create_device
 
 # Input only scenario. Read all parameters from input file with no modifications
 def scenario_fromfile(ems):
-    """ change the device parameters according to scenario heat pump 01
+    """ change the device parameters and obtain the input time series
+        according to customized scenario from spreadsheet(xlsx/csv)
+        this function is only a placeholder, which serves as tag for selector in run_scenario.py
 
     Args:
         - ems: ems model instance
@@ -26,9 +28,7 @@ def scenario_fromfile(ems):
 
 # HP only scenario
 def scenario_hp(ems):
-    """ change the device parameters and obtain the input time series
-        according to customized scenario from spreadsheet(xlsx)
-        this function is only a placeholder, which serves as tag for selector in run_scenario.py
+    """ only hp + boiler for satisfying heat load
 
     Args:
         - ems: ems model instance
@@ -45,7 +45,7 @@ def scenario_hp(ems):
 
 # PV only scenario
 def scenario_pv(ems):
-    """ change the device parameters according to scenario heat pump 01
+    """ only pv + boiler for satisfying heat load
 
     Args:
         - ems: ems model instance
@@ -60,7 +60,7 @@ def scenario_pv(ems):
 
 # Battery only scenario
 def scenario_bat(ems):
-    """ change the device parameters according to scenario heat pump 01
+    """ only battery + boiler for satisfying heat load
 
     Args:
         - ems: ems model instance
@@ -75,7 +75,7 @@ def scenario_bat(ems):
 
 # EV only scenario
 def scenario_ev(ems):
-    """ change the device parameters according to scenario heat pump 01
+    """ only ev + boiler for satisfying heat load
 
     Args:
         - ems: ems model instance
@@ -94,7 +94,7 @@ def scenario_ev(ems):
 
 # Simple house with PV and battery
 def scenario_simple_house(ems):
-    """ change the device parameters according to scenario heat pump 01
+    """ simple house with PV and battery + boiler for satisfying heat load
 
     Args:
         - ems: ems model instance
@@ -110,7 +110,7 @@ def scenario_simple_house(ems):
 
 # Residential house with PV, battery and HP
 def scenario_residential_house(ems):
-    """ change the device parameters according to scenario heat pump 01
+    """  residential house with pv, bat, heat storage and boiler
 
     Args:
         - ems: ems model instance
@@ -127,7 +127,7 @@ def scenario_residential_house(ems):
 
 # Apartment with PV, battery, HP and EV
 def scenario_mini_apartment(ems):
-    """ change the device parameters according to scenario heat pump 01
+    """ mini apartment with pv, bat, hp, ev, heat storage and boiler
 
     Args:
         - ems: ems model instance
@@ -149,7 +149,7 @@ def scenario_mini_apartment(ems):
 
 # Apartment with PV, battery, HP, CHP and EV
 def scenario_apartment(ems):
-    """ change the device parameters according to scenario heat pump 01
+    """ apartment with all devices
 
     Args:
         - ems: ems model instance
