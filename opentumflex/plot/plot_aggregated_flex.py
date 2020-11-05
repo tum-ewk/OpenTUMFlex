@@ -98,8 +98,17 @@ def plot_aggregated_flex_price(ems, reopt=0, plot_flexpr='bar'):
 
     """  
     # Get required defaults
+    timesteps = np.arange(ems['time_data']['isteps'], ems['time_data']['nsteps'])
+    N = len(timesteps)
+    isteps = ems['time_data']['isteps']
     nsteps = ems['time_data']['nsteps']
     ts = ems['time_data']['time_slots'].tolist()
+    ts_raw = ems['time_data']['time_slots'][isteps:nsteps]
+    ts_hr = pd.to_datetime(ts_raw).strftime('%H:%M').to_list()
+    ts = ts_hr
+    ts_date = pd.to_datetime(ts_raw).strftime('%d %b %Y')
+    
+    # Chart parameters
     chart_pos = ['skyblue', 'steelblue', 'cornflowerblue', 'lightskyblue', 'deepskyblue']     
     chart_neg = ['sandybrown', 'indianred', 'coral', 'mistyrose', 'lightsalmon'] 
     device = list(ems['flexopts'].keys())    
@@ -120,18 +129,34 @@ def plot_aggregated_flex_price(ems, reopt=0, plot_flexpr='bar'):
             # Change xtick intervals    
             req_ticks = 12   # ticks needed
             if nsteps > req_ticks:
-                plt.xticks(ts[::int(round(nsteps/req_ticks))], rotation=-45, ha="left", fontsize=font_size)
+                plt.xticks(ts[::int(round(nsteps/req_ticks))], rotation=0, fontsize=font_size)
             else:
-                plt.xticks(ts, rotation=-45, ha="left", fontsize=font_size)       
+                plt.xticks(ts, rotation=0, fontsize=font_size)       
                 
             # Plot legend
             plt.legend(loc='lower left', bbox_to_anchor=(1.01, 0), fontsize=font_size)
+            
+            # # draw text of dates
+            # def find_date_index(date_series):
+            #     date_list = date_series.values.tolist()
+            #     date_list_offset = iter(date_list[1:])
+            #     date_change_index = [i for i, j in enumerate(date_list[:-1], 1) if j != next(date_list_offset)]
+            #     date_change_index_total = [0] + date_change_index + [N-1]
+            #     _N_index = len(date_change_index_total) - 1
+            #     _date_index = np.zeros(_N_index)
+            #     for _i in np.arange(_N_index):
+            #         _date_index[_i] = (date_change_index_total[_i] + date_change_index_total[_i+1]) / 2
+            #     return _date_index, _N_index
+            
+            # date_index, N_dates = find_date_index(ts_date)
+            # for i in np.arange(N_dates):
+            #     plt.text(date_index[i], -15, ts_date[int(date_index[i])], size=font_size-2)
             
             # Axis labels
             plt.ylabel("Flexibility price [€/kWh]", fontsize=font_size)
             plt.xlabel("Time", fontsize=font_size)
             plt.title('Aggregated flex price', fontsize=font_size, pad=20)
-            plt.xlim([0, nsteps])
+            plt.xlim([0, N])
             plt.grid()
             plt.tight_layout()
             plt.show()
