@@ -46,8 +46,8 @@ Run the [example.py](https://github.com/tum-ewk/OpenTUMFlex.py/blob/master/examp
 	
 	
 <p align="center">
-<img src = "https://user-images.githubusercontent.com/40628466/98258357-12b49980-1f81-11eb-83e0-beceff12dd1b.png" width="450"/>
-<img src = "https://user-images.githubusercontent.com/40628466/98255974-4fcb5c80-1f7e-11eb-822c-0565ddc97471.png" width="450"/>
+<img src = "https://user-images.githubusercontent.com/40628466/98258357-12b49980-1f81-11eb-83e0-beceff12dd1b.png" width="300"/>
+<img src = "https://user-images.githubusercontent.com/40628466/98255974-4fcb5c80-1f7e-11eb-822c-0565ddc97471.png" width="300"/>
 </p>
 
 
