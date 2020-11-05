@@ -64,7 +64,7 @@ A scenario-based approach is incorporated in the OpenTUMFlex design. Here, a sce
    * `show_aggregated_flex`: plot the cumulative flexibility power and price of all the available devices
 
 * **Create your own scenario:** 
-   * Refer our [documentation](https://github.com/tum-ewk/OpenTUMFlex.py/wiki).
+   * Refer our [documentation](https://github.com/tum-ewk/OpenTUMFlex/wiki/Create-your-scenario).
    
 * **Analysis Toolbox:**
    * [EV Case Study](analysis/)
