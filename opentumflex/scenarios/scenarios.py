@@ -14,7 +14,7 @@ __status__ = "Development"
 from opentumflex.configuration.devices import create_device
 
 # Input only scenario. Read all parameters from input file with no modifications
-def scenario_asinput(ems):
+def scenario_fromfile(ems):
     """ change the device parameters according to scenario heat pump 01
 
     Args:
@@ -26,7 +26,9 @@ def scenario_asinput(ems):
 
 # HP only scenario
 def scenario_hp(ems):
-    """ change the device parameters according to scenario heat pump 01
+    """ change the device parameters and obtain the input time series
+        according to customized scenario from spreadsheet(xlsx)
+        this function is only a placeholder, which serves as tag for selector in run_scenario.py
 
     Args:
         - ems: ems model instance
@@ -219,13 +221,3 @@ def scenario_combination_test(my_ems, test_code):
     return my_ems
 
 
-def scenario_customized(ems):
-    """ change the device parameters and obtain the input time series
-        according to customized scenario from spreadsheet(xlsx)
-        this function is only a placeholder, which serves as tag for selector in run_scenario.py
-
-    Args:
-        - ems: ems model instance
-    """
-
-    return ems

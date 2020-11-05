@@ -71,7 +71,7 @@ def plot_optimal_results(ems, prnt_pgr=False, show_balance=True, show_soc=True):
         # ax1.set_xlabel('Time [h]', fontsize=font_size)
         ax1.tick_params(axis="x", labelsize=font_size - 2)
         ax1.tick_params(axis="y", labelsize=font_size - 2)
-        ax1.set_ylabel('Electrical demand [kW]', fontsize=font_size)
+        ax1.set_ylabel('Electrical demand [kW]', fontsize=font_size-2)
         ax1.set_title('Electricity balance', fontsize=font_size)
         ax1.set_xticks(ind[idx_plt])
         ax1.set_xticklabels(ts[idx_plt])
@@ -131,7 +131,7 @@ def plot_optimal_results(ems, prnt_pgr=False, show_balance=True, show_soc=True):
         ax2.tick_params(axis="x", labelsize=font_size - 2)
         ax2.tick_params(axis="y", labelsize=font_size - 2)
         # ax2.set_xlabel('time [1/4 h]', fontsize=font_size)
-        ax2.set_ylabel('Heat load [kW]', fontsize=font_size)
+        ax2.set_ylabel('Heat load [kW]', fontsize=font_size-2)
         ax2.set_title('Heat balance', fontsize=font_size)
         # select which legends are to be shown
         selector = {np.count_nonzero(opt_res['boiler_heat_power']): [p1[0], 'Boiler'],
@@ -163,11 +163,12 @@ def plot_optimal_results(ems, prnt_pgr=False, show_balance=True, show_soc=True):
         
         # Get Y limits
         ymin, ymax = ax2.get_ylim()
+        ylim = max(abs(ymin), abs(ymax))
         
         # Get dates to print
         date_index, N_dates = find_date_index(ts_date)
         for i in np.arange(N_dates):
-            ax2.text(date_index[i], ymin*1.7, ts_date[int(date_index[i])], size=font_size-2)
+            ax2.text(date_index[i], -ylim*1.5, ts_date[int(date_index[i])], size=font_size-2)
 
         # plot properties
         ax2.grid(color='lightgrey', linewidth=0.75)

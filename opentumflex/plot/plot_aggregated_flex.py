@@ -166,7 +166,7 @@ def plot_aggregated_flex_price(ems, reopt=0, plot_flexpr='bar'):
             # Get dates
             date_index, N_dates = find_date_index(ts_date, N)
             for i in np.arange(N_dates):
-                plt.text(date_index[i], ymin*1.2, ts_date[int(date_index[i])], size=font_size-2)
+                plt.text(date_index[i], -ylim*1.2, ts_date[int(date_index[i])], size=font_size-2)
             
             # Axis labels
             plt.ylabel("Flexibility price [€/kWh]", fontsize=font_size)
@@ -204,7 +204,7 @@ def plot_aggregated_flex_price(ems, reopt=0, plot_flexpr='bar'):
             # Get dates
             date_index, N_dates = find_date_index(ts_date, N)
             for i in np.arange(N_dates):
-                plt.text(date_index[i], ymin*1.3, ts_date[int(date_index[i])], size=font_size-2)            
+                plt.text(date_index[i], -ylim*1.2, ts_date[int(date_index[i])], size=font_size-2)            
             
             # Axis labels
             plt.ylabel("Flexibility price [€/kWh]", fontsize=font_size)

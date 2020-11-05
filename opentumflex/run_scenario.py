@@ -42,7 +42,7 @@ def run_scenario(scenario, path_input, path_results, solver='glpk', time_limit=3
     # initialize with basic time settings
     my_ems = opentumflex.initialize_time_setting(t_inval=15, start_time='2019-12-19 00:00', end_time='2019-12-20 10:45')
 
-    if scenario == opentumflex.scenario_customized:
+    if scenario == opentumflex.scenario_fromfile:
         # read devices parameters and forecasting data from xlsx or csv file
         my_ems = opentumflex.read_data(my_ems, path_input, fcst_only=False, to_csv=convert_input_tocsv)
     else:
