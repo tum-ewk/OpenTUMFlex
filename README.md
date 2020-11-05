@@ -22,9 +22,11 @@ The increasing share of renewable energy requires alternative methods to provide
 ### Environment and required packages
 The easiest way to create the environment and install all required packages is via Ana- or Miniconda.
 1. Install Anaconda or Miniconda
-2. Open an "Anaconda Prompt" -> create a new environment by typing <conda env create -f environment_v1.0.yml> (will automatically install all required packages). 
+2. Create the virtual environment: open an "Anaconda Prompt" -> type `conda env create -f environment_v1.0.yml`
 3. Activate conda environment 
-	a. In the command prompt type <conda activate OpenTUMFlex>
+
+	a. In the command prompt type `conda activate OpenTUMFlex`
+	
 	b. In an IDE like PyCharm go to `File->Settings->Project->Python Interpreter->Show all->Add->Conda Environment->Existing environment->Select folder->OK` 
 
 ### Test your installation
