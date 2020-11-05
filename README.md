@@ -39,7 +39,7 @@ After the environment has been successfully installed and activated, you can clo
 
 ### Test your installation
 
-Run the [example.py](https://github.com/tum-ewk/OpenTUMFlex.py/blob/master/example_1.py) file to test if the OpenTUMFlex model is correctly installed. If the installation was succesful, you will see the following results:
+Run the [example.py](https://github.com/tum-ewk/OpenTUMFlex.py/blob/master/example.py) file to test if the OpenTUMFlex model is correctly installed. If the installation was succesful, you will see the following results:
 
 ![](https://user-images.githubusercontent.com/42935122/97186850-1b97b500-17a2-11eb-9a86-97674ffad6d0.png)|![](https://user-images.githubusercontent.com/40628466/97216385-09c80900-17c6-11eb-98ac-615b77bbed0b.png)
 :-------------------------:|:-------------------------:
@@ -50,7 +50,7 @@ Run the [example.py](https://github.com/tum-ewk/OpenTUMFlex.py/blob/master/examp
 A scenario-based approach is incorporated in the OpenTUMFlex design. Here, a scenario refers to the device configurations installed in a household. For example, a scenario can refer to just a household with PV, BSS and EV. 
 
 * **Change your scenario**
-   Once you have successfully installed OpenTUMFlex, you can choose to change your scenario by replacing the desired name in line 12 in [example.py](https://github.com/tum-ewk/OpenTUMFlex.py/blob/master/example_1.py). To give an idea, we have already created 10 sample scenarios inside [scenario.py](https://github.com/tum-ewk/OpenTUMFlex.py/blob/master/opentumflex/scenarios/scenarios.py). 
+   Once you have successfully installed OpenTUMFlex, you can choose to change your scenario by replacing the desired name in line 12 in [example.py](https://github.com/tum-ewk/OpenTUMFlex.py/blob/master/example.py). To give an idea, we have already created 10 sample scenarios inside [scenario.py](https://github.com/tum-ewk/OpenTUMFlex.py/blob/master/opentumflex/scenarios/scenarios.py). 
    
   *For example the following scenarios portray the devices installed at the prosumers premises*
    * `scenario_hp`: Heat storage, boiler and HP
@@ -67,7 +67,7 @@ A scenario-based approach is incorporated in the OpenTUMFlex design. Here, a sce
    * Refer our [documentation](https://github.com/tum-ewk/OpenTUMFlex/wiki/Create-your-scenario).
    
 * **Analysis Toolbox:**
-   * [EV Case Study](analysis/)
+   * [EV Case Study - Quantifying the Flexibility of Electric Vehicles](analysis/)
 
 
 <!---
