@@ -22,7 +22,7 @@ def plot_optimal_results(ems, prnt_pgr=False, show_balance=True, show_soc=True):
     indplus1 = np.arange(N+1)  # extra index series for step plot
     ts_raw = ems['time_data']['time_slots'][isteps:nsteps]
     ts = pd.to_datetime(ts_raw).strftime('%H:%M')
-    ts_date = pd.to_datetime(ts_raw).strftime('%y-%m-%d')
+    ts_date = pd.to_datetime(ts_raw).strftime('%d %b %Y')
 
     # ind = ems_local['time_data']['time_slots'].tolist()
     width = 1  # the width of the bars: can also be len(x) sequence
