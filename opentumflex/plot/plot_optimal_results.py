@@ -159,10 +159,15 @@ def plot_optimal_results(ems, prnt_pgr=False, show_balance=True, show_soc=True):
             _date_index = np.zeros(_N_index)
             for _i in np.arange(_N_index):
                 _date_index[_i] = (date_change_index_total[_i] + date_change_index_total[_i+1]) / 2
-            return _date_index, _N_index
+            return _date_index, _N_index        
+        
+        # Get Y limits
+        ymin, ymax = ax2.get_ylim()
+        
+        # Get dates to print
         date_index, N_dates = find_date_index(ts_date)
         for i in np.arange(N_dates):
-            ax2.text(date_index[i], -15, ts_date[int(date_index[i])], size=font_size-2)
+            ax2.text(date_index[i], ymin*1.7, ts_date[int(date_index[i])], size=font_size-2)
 
         # plot properties
         ax2.grid(color='lightgrey', linewidth=0.75)

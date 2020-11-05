@@ -15,6 +15,15 @@ import pandas as pd
 from datetime import datetime
 import os
 
+def save_offers(my_ems, market='comax'):
+    device = list(my_ems['flexopts'].keys())   
+    if market == 'comax':
+        for i in range(len(device)):
+            save_offers_comax(my_ems,  device[i],  filetype='csv')
+    elif market == 'alf':
+        for i in range(len(device)):
+            save_offers_alf(my_ems,  device[i])
+        
 
 def save_offers_comax(my_ems,  device,  filetype='xlsx'):
     """
@@ -36,7 +45,7 @@ def save_offers_comax(my_ems,  device,  filetype='xlsx'):
     """
     # Find path and check for a result folder
     cwd = os.getcwd()
-    mdir = "results" 
+    mdir = "output" 
     path = os.path.join(cwd, mdir)
     if not os.path.exists(path):
         os.mkdir(path)
@@ -102,7 +111,7 @@ def save_offers_alf(my_ems, device):
     # Find path and check for a result folder
     cwd = os.getcwd()
     # back_cwd = os.path.dirname(cwd)
-    mdir = "flexoffers"
+    mdir = "output"
     path = os.path.join(cwd, mdir)
     if not os.path.exists(path):
         os.mkdir(path)

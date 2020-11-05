@@ -13,6 +13,7 @@ __status__ = "Development"
 
 
 import pandas as pd
+import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import gridspec
 
@@ -33,14 +34,20 @@ def plot_flex(my_ems, device):
     None.
 
     """
+    timesteps = np.arange(my_ems['time_data']['isteps'], my_ems['time_data']['nsteps'])
+    N = len(timesteps)
+    isteps = my_ems['time_data']['isteps']
     nsteps = my_ems['time_data']['nsteps']
     ntsteps = my_ems['time_data']['ntsteps']
     dat1 = pd.DataFrame.from_dict(my_ems['flexopts'][device])
+    ts_raw = my_ems['time_data']['time_slots'][isteps:nsteps]
+    ts_hr = pd.to_datetime(ts_raw).strftime('%H:%M').to_list()
+    ts_date = pd.to_datetime(ts_raw).strftime('%d %b %Y')
       
     # Initialize    
     neg_leg = 0
     pos_leg = 0
-    font_size = 20
+    font_size = 18
     fig = plt.figure(constrained_layout=True, figsize=(16, 12), dpi=80)
     spec = gridspec.GridSpec(ncols=1, nrows=4, figure=fig)
     plt_prc = fig.add_subplot(spec[3, 0])
@@ -94,39 +101,39 @@ def plot_flex(my_ems, device):
     # Legend
     if neg_leg == 1 and pos_leg == 1:
         plt_cum.legend((p1[0], p2[0], p3[0]), ('Cummulative', 'Neg_flex', 'Pos_flex'),
-                       prop={'size': font_size}, bbox_to_anchor=(1.01, 0), loc="lower left")
+                       prop={'size': font_size}, bbox_to_anchor=(1.01, 0), loc="lower left", frameon=False)
         plt_pow.legend((p4, p5), ('$P_{Neg\_flex}}$', '$P_{Pos\_flex}}$'),
-                       prop={'size': font_size+2}, bbox_to_anchor=(1.01, 0), loc="lower left")
+                       prop={'size': font_size+2}, bbox_to_anchor=(1.01, 0), loc="lower left", frameon=False)
         plt_prc.legend((p6, p7), ('$C_{Neg\_flex}}$', '$C_{Pos\_flex}}$'),
-                       prop={'size': font_size+2}, bbox_to_anchor=(1.01, 0), loc="lower left")
+                       prop={'size': font_size+2}, bbox_to_anchor=(1.01, 0), loc="lower left", frameon=False)
     elif neg_leg == 1:
         plt_cum.legend((p1[0], p2[0]), ('Cummulative', 'Neg_flex'),
-                       prop={'size': font_size}, bbox_to_anchor=(1.01, 0), loc="lower left")
+                       prop={'size': font_size}, bbox_to_anchor=(1.01, 0), loc="lower left", frameon=False)
         plt_pow.legend(p4, ['$P_{Neg\_flex}}$'],
-                       prop={'size': font_size+2}, bbox_to_anchor=(1.01, 0), loc="lower left")
+                       prop={'size': font_size+2}, bbox_to_anchor=(1.01, 0), loc="lower left", frameon=False)
         plt_prc.legend(p6, ['$C_{Neg\_flex}}$'],
-                       prop={'size': font_size+2}, bbox_to_anchor=(1.01, 0), loc="lower left")
+                       prop={'size': font_size+2}, bbox_to_anchor=(1.01, 0), loc="lower left", frameon=False)
     elif pos_leg == 1:
         plt_cum.legend((p1[0], p3[0]), ('Cummulative', 'Pos_flex'),
-                       prop={'size': font_size}, bbox_to_anchor=(1.01, 0), loc="lower left")
+                       prop={'size': font_size}, bbox_to_anchor=(1.01, 0), loc="lower left", frameon=False)
         plt_pow.legend((p5), ['$P_{Pos\_flex}}$'],
-                       prop={'size': font_size+2}, bbox_to_anchor=(1.01, 0), loc="lower left")
+                       prop={'size': font_size+2}, bbox_to_anchor=(1.01, 0), loc="lower left", frameon=False)
         plt_prc.legend((p7), ['$C_{Pos\_flex}}$'],
-                       prop={'size': font_size+2}, bbox_to_anchor=(1.01, 0), loc="lower left")
+                       prop={'size': font_size+2}, bbox_to_anchor=(1.01, 0), loc="lower left", frameon=False)
     else:
-        plt_cum.legend(['Cummulative'], prop={'size': font_size+2})
+        plt_cum.legend(['Cummulative'], prop={'size': font_size+2}, frameon=False)
 
     # Labels            
     plt_cum.set_title('Flexibility plots' + ' - ' + device.upper(), fontsize=font_size, pad=20)
     plt_cum.set_ylabel('$CE\ [kWh]$', fontsize=font_size+2)
-    plt_cum.tick_params(axis="x", labelsize=font_size, labelbottom=False)
+    plt_cum.tick_params(axis="x", labelsize=font_size, labelbottom=False, pad=20)
     plt_cum.tick_params(axis="y", labelsize=font_size)
     plt_cum.grid(color='lightgrey', linewidth=0.75)
     plt_pow.set_ylabel('$Power\ [kW]$', fontsize=font_size+2)
     plt_pow.tick_params(axis="x", labelsize=font_size, labelbottom=False)
     plt_pow.tick_params(axis="y", labelsize=font_size)
     plt_pow.grid(color='lightgrey', linewidth=0.75, zorder=0)
-    plt_prc.set_xlabel('Time', fontsize=font_size, labelpad=3)
+    # plt_prc.set_xlabel('Time', fontsize=font_size, labelpad=3)
     plt_prc.set_ylabel('$Price\ [€/kWh]$', fontsize=font_size+2)
     plt_prc.tick_params(axis="x", labelsize=font_size, pad=5)
     plt_prc.tick_params(axis="y", labelsize=font_size)
@@ -154,13 +161,34 @@ def plot_flex(my_ems, device):
     req_ticks = 12   # ticks needed
     if nsteps > req_ticks:
         plt_prc.set_xticks(plt_prc.get_xticks()[::int(round(nsteps/req_ticks))])
-        plt_prc.set_xticklabels(ts[::int(round(nsteps/req_ticks))], rotation=-45, ha="left")
+        plt_prc.set_xticklabels(ts_hr[::int(round(nsteps/req_ticks))])
     else:
         plt_prc.set_xticks(plt_prc.get_xticks())
-        plt_prc.set_xticklabels(ts, rotation=-45, ha="left")        
+        plt_prc.set_xticklabels(ts_hr)        
+        
+    # Get Y limits
+    ymin, ymax = plt_prc.get_ylim()
+        
+    # Get dates
+    date_index, N_dates = find_date_index(ts_date, N)
+    for i in np.arange(N_dates):
+        plt_prc.text(date_index[i], ymin*1.5, ts_date[int(date_index[i])], size=font_size-2)
 
     # Settings
     plt.rc('font', family='serif')
     plt.margins(x=0)
     plt.show()   
     return 
+
+# Get text from dates
+def find_date_index(date_series, N):
+    date_list = date_series.values.tolist()
+    date_list_offset = iter(date_list[1:])
+    date_change_index = [i for i, j in enumerate(date_list[:-1], 1) if j != next(date_list_offset)]
+    date_change_index_total = [0] + date_change_index + [N-1]
+    _N_index = len(date_change_index_total) - 1
+    _date_index = np.zeros(_N_index)
+    for _i in np.arange(_N_index):
+        _date_index[_i] = (date_change_index_total[_i] + date_change_index_total[_i+1]) / 2
+    return _date_index, _N_index
+

@@ -21,7 +21,7 @@ import os
 
 def run_scenario(scenario, path_input, path_results, solver='glpk', time_limit=30, troubleshooting=True,
                  show_opt_balance=True, show_opt_soc=True, show_flex_res=True,
-                 save_opt_res=True, show_aggregated_flex=True,
+                 save_opt_res=True, show_aggregated_flex=True, save_flex_offers=False,
                  convert_input_tocsv=True, show_aggregated_flex_price='bar'):
     """ run an OpenTUMFlex model for given scenario
 
@@ -91,6 +91,10 @@ def run_scenario(scenario, path_input, path_results, solver='glpk', time_limit=3
         opentumflex.plot_aggregated_flex_power(my_ems)
         opentumflex.plot_aggregated_flex_price(my_ems, plot_flexpr=show_aggregated_flex_price)
     return my_ems
+
+    # save flex offers
+    if save_flex_offers:
+        opentumflex.save_offers(my_ems, market='comax')
 
 
 if __name__ == '__main__':

@@ -17,7 +17,7 @@ from opentumflex.flexibility.flex_pv import calc_flex_pv
 from opentumflex.flexibility.flex_chp import calc_flex_chp
 from opentumflex.flexibility.flex_bat import calc_flex_bat
 from opentumflex.flexibility.flex_ev import calc_flex_ev
-from opentumflex.market_communication.generate_market_offers import save_offers_alf, save_offers_comax
+from opentumflex.market_communication.generate_market_offers import save_offers_alf, save_offers_comax, save_offers
 from opentumflex.optimization.report import save_results
 from opentumflex.optimization.model import create_model, solve_model, extract_res
 # from opentumflex.market_communication.handle_market_call import calc_flex_response_bat, calc_flex_response_ev, calc_flex_response_pv, \

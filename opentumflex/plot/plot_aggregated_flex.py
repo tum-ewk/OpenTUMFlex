@@ -68,27 +68,33 @@ def plot_aggregated_flex_power(ems, reopt=0):
             bottom_neg = list(map(add, bottom_neg,ems['flexopts'][device[i]]['Neg_P'].tolist()))
         
         # Change xtick intervals    
+        plt.yticks(fontsize=font_size-2)
         req_ticks = 12   # ticks needed
         # plt.xticks(ts_hr)
         if nsteps > req_ticks:
             plt.xticks(ts[::int(round(nsteps/req_ticks))], ts_hr[::int(round(nsteps/req_ticks))], rotation=0, fontsize=font_size)
         else:
-            plt.xticks(ts, ts_hr, rotation=0, fontsize=font_size)     
+            plt.xticks(ts, ts_hr, rotation=0, fontsize=font_size-2)             
             
         # Plot legend
-        plt.legend(loc='lower left', bbox_to_anchor=(1.01, 0), fontsize=font_size)
+        plt.legend(loc='lower left', bbox_to_anchor=(1.01, 0), fontsize=font_size, frameon=False)
         
+        # Set Y limits
+        ymin, ymax = plt.gca().get_ylim()
+        ylim = max(abs(ymin), abs(ymax))
+        plt.gca().set_ylim(-ylim,ylim)
+                
         # Get dates
         date_index, N_dates = find_date_index(ts_date, N)
         for i in np.arange(N_dates):
-            plt.text(date_index[i], -14, ts_date[int(date_index[i])], size=font_size-2) 
+            plt.text(date_index[i], ymin*1.15, ts_date[int(date_index[i])], size=font_size-2) 
                 
         # Axis labels
         plt.ylabel("Flexibility power [kW]", fontsize=font_size)
         # plt.xlabel("Time", fontsize=font_size)
         plt.title('Aggregated flex power', fontsize=font_size, pad=20)
-        plt.xlim([0, nsteps])
-        plt.grid()
+        plt.xlim([0, nsteps])        
+        plt.grid(zorder=0, alpha=0.3)
         plt.tight_layout()
         plt.show()
     return
@@ -136,32 +142,38 @@ def plot_aggregated_flex_price(ems, reopt=0, plot_flexpr='bar'):
             # Loop through the device list and stack plot
             for i in range(len(device)):
                 plt.bar(ts, ems['flexopts'][device[i]]['Pos_Pr'], color=chart_pos[i], 
-                                    alpha=0.8, align='edge', edgecolor='k', label=device[i]+'_pos')
+                                    alpha=0.8, align='edge', edgecolor='k', label=device[i].upper()+'_pos')
                 plt.bar(ts, ems['flexopts'][device[i]]['Neg_Pr'], color=chart_neg[i], 
-                                    alpha=0.7, align='edge', edgecolor='k', label=device[i]+'_neg')
+                                    alpha=0.7, align='edge', edgecolor='k', label=device[i].upper()+'_neg')
                        
             # Change xtick intervals    
+            plt.yticks(fontsize=font_size-2)
             req_ticks = 12   # ticks needed
             # plt.xticks(ts_hr)
             if nsteps > req_ticks:
                 plt.xticks(ts[::int(round(nsteps/req_ticks))], ts_hr[::int(round(nsteps/req_ticks))], rotation=0, fontsize=font_size)
             else:
-                plt.xticks(ts, ts_hr, rotation=0, fontsize=font_size)
+                plt.xticks(ts, ts_hr, rotation=0, fontsize=font_size-2)            
                 
             # Plot legend
-            plt.legend(loc='lower left', bbox_to_anchor=(1.01, 0), fontsize=font_size)
+            plt.legend(loc='lower left', bbox_to_anchor=(1.01, 0), fontsize=font_size, frameon=False)
+            
+            # Set Y limits
+            ymin, ymax = plt.gca().get_ylim()
+            ylim = max(abs(ymin), abs(ymax))
+            plt.gca().set_ylim(-ylim,ylim)
             
             # Get dates
             date_index, N_dates = find_date_index(ts_date, N)
             for i in np.arange(N_dates):
-                plt.text(date_index[i], -0.4, ts_date[int(date_index[i])], size=font_size-2)
+                plt.text(date_index[i], ymin*1.2, ts_date[int(date_index[i])], size=font_size-2)
             
             # Axis labels
             plt.ylabel("Flexibility price [€/kWh]", fontsize=font_size)
             # plt.xlabel("Time", fontsize=font_size)
             plt.title('Aggregated flex price', fontsize=font_size, pad=20)
             plt.xlim([0, N])
-            plt.grid()
+            plt.grid(zorder=0, alpha=0.3)
             plt.tight_layout()
             plt.show()
 
@@ -169,31 +181,37 @@ def plot_aggregated_flex_price(ems, reopt=0, plot_flexpr='bar'):
             # Loop through the device list and stack plot
             for i in range(len(device)):
                 plt.scatter(ts, ems['flexopts'][device[i]]['Pos_Pr'], color=chart_pos[i], 
-                                    label=device[i]+'_pos')
+                                    label=device[i].upper()+'_pos')
                 plt.scatter(ts, ems['flexopts'][device[i]]['Neg_Pr'], color=chart_neg[i],
-                                    label=device[i]+'_neg')
+                                    label=device[i].upper()+'_neg')
                        
             # Change xtick intervals    
+            plt.yticks(fontsize=font_size-2)
             req_ticks = 12   # ticks needed
             if nsteps > req_ticks:
                 plt.xticks(ts[::int(round(nsteps/req_ticks))], ts_hr[::int(round(nsteps/req_ticks))], rotation=0, fontsize=font_size)
             else:
-                plt.xticks(ts, ts_hr, rotation=0, fontsize=font_size)       
+                plt.xticks(ts, ts_hr, rotation=0, fontsize=font_size-2)       
                 
             # Plot legend
-            plt.legend(loc='lower left', bbox_to_anchor=(1.01, 0), fontsize=font_size)
+            plt.legend(loc='lower left', bbox_to_anchor=(1.01, 0), fontsize=font_size, frameon=False)
+            
+            # Set Y limits
+            ymin, ymax = plt.gca().get_ylim()
+            ylim = max(abs(ymin), abs(ymax))
+            plt.gca().set_ylim(-ylim,ylim)
             
             # Get dates
             date_index, N_dates = find_date_index(ts_date, N)
             for i in np.arange(N_dates):
-                plt.text(date_index[i], -0.38, ts_date[int(date_index[i])], size=font_size-2)            
+                plt.text(date_index[i], ymin*1.3, ts_date[int(date_index[i])], size=font_size-2)            
             
             # Axis labels
             plt.ylabel("Flexibility price [€/kWh]", fontsize=font_size)
-            plt.xlabel("Time", fontsize=font_size)
+            # plt.xlabel("Time", fontsize=font_size)
             plt.title('Aggregated flex price', fontsize=font_size, pad=20)
             plt.xlim([0, nsteps])
-            plt.grid()
+            plt.grid(zorder=0, alpha=0.3)
             plt.tight_layout()
             plt.show()
     return
