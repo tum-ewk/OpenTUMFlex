@@ -47,7 +47,7 @@ def run_scenario(scenario, path_input, path_results, solver='glpk', time_limit=3
         my_ems = opentumflex.read_data(my_ems, path_input, fcst_only=False, to_csv=convert_input_tocsv)
     else:
         # read only the input time series from the excel table
-        my_ems = opentumflex.read_data(my_ems, path_input, fcst_only=True, to_csv=convert_input_tocsv)
+        my_ems = opentumflex.read_data(my_ems, path_input, fcst_only=False, to_csv=convert_input_tocsv)
         # modify the opentumflex regarding to predefined scenario
         my_ems = scenario(my_ems)
 

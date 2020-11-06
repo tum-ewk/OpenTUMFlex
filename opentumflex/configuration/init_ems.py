@@ -111,7 +111,8 @@ def read_data(ems, path=None, to_csv=False, fcst_only=True):
                 if not fcst_only:
                     pd.concat([prop, ts], sort=False).to_csv(f, sep=';')
                 else:
-                    ts.to_csv(f, sep=';')
+                    prop = pd.DataFrame(index=range(len(ts)), columns=range(0, 2))
+                    pd.concat([prop, ts], sort=False).to_csv(f, sep=';')
 
     elif path.endswith('.csv'):
         csv_data = pd.read_csv(path, sep=';', index_col=0)

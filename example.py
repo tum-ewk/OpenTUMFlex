@@ -3,7 +3,7 @@ import os
 
 
 base_dir = os.path.abspath(os.getcwd())
-input_file = r'\input\input_data.xlsx'
+input_file = r'\input\input_data.csv'
 output_dir = r'\output'
 
 path_input_data = base_dir + input_file
@@ -21,6 +21,6 @@ ems = opentumflex.run_scenario(opentumflex.scenario_apartment,     # Select scen
                                show_aggregated_flex=True,               # Plot aggregated flex
                                show_aggregated_flex_price='bar',        # Plot aggregated price as bar/scatter
                                save_flex_offers=False,                  # Save flexibility offers in comax/alf format
-                               convert_input_tocsv=True,                # Save .xlsx file to .csv format
+                               convert_input_tocsv=False,                # Save .xlsx file to .csv format
                                troubleshooting=False)                   # Troubleshooting on/off
 
