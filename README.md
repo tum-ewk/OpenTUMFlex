@@ -3,6 +3,7 @@ OpenTUMflex
 
 An open-source python-based flexibility model to quantify and price the flexibility of household devices.
 
+[![DOI](https://zenodo.org/badge/212816117.svg)](https://zenodo.org/badge/latestdoi/212816117)
 
 ## Description
 
