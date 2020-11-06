@@ -41,13 +41,13 @@ After the environment has been successfully installed and activated, you can clo
 Run the [example.py](https://github.com/tum-ewk/OpenTUMFlex.py/blob/master/example.py) file to test if the OpenTUMFlex model is correctly installed. If the installation was succesful, you will see the following results:
 
 <p align="center">
-<img src = "https://user-images.githubusercontent.com/40628466/98255882-34605180-1f7e-11eb-9976-315a5942199d.png" width=600/>
+<img src = "https://user-images.githubusercontent.com/40628466/98377223-d6e30800-2044-11eb-8348-8fe4eefb0b5d.png" width=600/>
 </p>	
 	
 	
 <p align="center">
-<img src = "https://user-images.githubusercontent.com/40628466/98258357-12b49980-1f81-11eb-83e0-beceff12dd1b.png" width="400"/>
-<img src = "https://user-images.githubusercontent.com/40628466/98255974-4fcb5c80-1f7e-11eb-822c-0565ddc97471.png" width="400"/>
+<img src = "https://user-images.githubusercontent.com/40628466/98377226-d77b9e80-2044-11eb-8602-fd678da44c9f.png" width="400"/>
+<img src = "https://user-images.githubusercontent.com/40628466/98377228-d8143500-2044-11eb-8cb9-83d0ef9d8a95.png" width="400"/>
 </p>
 
 
