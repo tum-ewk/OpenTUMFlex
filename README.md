@@ -10,7 +10,7 @@ An open-source python-based flexibility model to quantify and price the flexibil
 The increasing share of renewable energy requires alternative methods to provide power system ancillary services to ensure a stable operation of the electricity grids. Recent research has inclined their interests towards the aggregation of small-scale system flexibility potentials to accommodate grid variations. The advancements towards local flexibility markets (LFMs) allow prosumers participation in solving grid congestion problems. In order to allow prosumers to interact with the LFMs and submit their bids, a flexibility model is required. This research proposes an open-source flexibility estimation model that quantifies all possible flexibilities from the available prosumer devices and prices them.
 
 #### Flexibility
-Within this open-source model, flexibility is defined as the deviation of a device operation from its optimal schedule. Flexibility can be both negative and positive. Negative flexibility refers to the delay of grid feed-in or the consumption of non-scheduled energy. Positive flexibility is the delay of grid energy consumption or the non-scheduled grid feed-in.  
+Within this open-source model, flexibility is defined as the deviation of a device operation from its optimal schedule. Flexibility can be both negative and positive. Negative flexibility refers to the delay of grid feed-in or the consumption of unscheduled energy. Positive flexibility is the delay of grid energy consumption or the unscheduled grid feed-in.  
 
 
 ## Features
@@ -23,20 +23,35 @@ OpenTUMFlex...
 
 ## Installation
 
-### Environment and required packages
-The easiest way to create the environment and install all required packages is via Ana- or Miniconda.
-1. Install Anaconda or Miniconda
-2. Create the virtual environment: open an "Anaconda Prompt" -> type `conda env create -f environment_v1.0.yml`
-3. Activate environment 
+### Clone repository
+You can download or clone the repository to a local directory of your choice. You can use version control tools such as GitHub Desktop, Sourcetree, GitKraken or pure Git. The link for pure Git is: 
+
+`git clone https://github.com/tum-ewk/OpenTUMFlex.git`
+
+### Create an environment and install required packages
+The easiest way to create the environment and install all required packages is via Ana- or Miniconda. 
+1. Install Anaconda or Miniconda.
+2. Shift to the local directory where OpenTUMFlex is installed: `cd "Path to local directory"`
+3. Install and configure an IDE.
+
+### Configure an IDE
+**Pycharm**:
+1. Create the virtual environment: open "Anaconda Prompt" -> type `conda env create -f environment_v1.0.yml`
+2. Activate the virtual environment:
 
 	a. In the command prompt type `conda activate OpenTUMFlex`
 	
-	b. In an IDE like PyCharm go to `File->Settings->Project->Python Interpreter->Show all->Add->Conda Environment->Existing environment->Select folder->OK` 
+	b. Go to `File->Settings->Project->Python Interpreter->Show all->Add->Conda Environment->Existing environment->Select folder->OK` 
 
-### Clone repository
-After the environment has been successfully installed and activated, you can clone the repository to a directory of your choice. You can use version control tools such as GitHub Desktop, Sourcetree, GitKraken or pure Git. The link for pure Git is: 
+**Spyder**:
+Since Spyder at the moment doesn't support Python 3.9 which is originally used in our enviroment file, we have added an additional enviroment file to support Python 3.7 for Spyder IDE.
+1. Create the virtual environment: open "Anaconda Prompt" -> type `conda env create -f environment_v1.0_py37.yml`
+2. Activate the virtual environment :
 
-`git clone https://github.com/tum-ewk/OpenTUMFlex.git`
+	a. In the command prompt type `conda activate OpenTUMFlex_py37`
+	
+	b. A new Spyder IDE application will be installed and can be found in the start menu.  
+
 
 ### Test your installation
 Run the [example.py](https://github.com/tum-ewk/OpenTUMFlex.py/blob/master/example.py) file to test if the OpenTUMFlex model is correctly installed. If the installation was succesful, you will see the following results:
