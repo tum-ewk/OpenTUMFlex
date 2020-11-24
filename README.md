@@ -29,28 +29,24 @@ You can download or clone the repository to a local directory of your choice. Yo
 `git clone https://github.com/tum-ewk/OpenTUMFlex.git`
 
 ### Create an environment and install required packages
-The easiest way to create the environment and install all required packages is via Ana- or Miniconda. 
+The easiest way to install an IDE, create a virtual environment and install all required packages via Anaconda. 
 1. Install Anaconda or Miniconda.
-2. Shift to the local directory where OpenTUMFlex is installed: `cd "Path to local directory"`
-3. Install and configure an IDE.
+2. Shift to the local directory: `cd "Path to OpenTUMFlex local directory"`
+3. Configure an IDE.
 
 ### Configure an IDE
 **Pycharm**:
 1. Create the virtual environment: open "Anaconda Prompt" -> type `conda env create -f environment_v1.0.yml`
 2. Activate the virtual environment:
-
-	a. In the command prompt type `conda activate OpenTUMFlex`
-	
-	b. Go to `File->Settings->Project->Python Interpreter->Show all->Add->Conda Environment->Existing environment->Select folder->OK` 
+	- In the command prompt type `conda activate OpenTUMFlex`
+	- Go to `File->Settings->Project->Python Interpreter->Show all->Add->Conda Environment->Existing environment->Select folder->OK` 
 
 **Spyder**:
 Since Spyder at the moment doesn't support Python 3.9 which is originally used in our enviroment file, we have added an additional enviroment file to support Python 3.7 for Spyder IDE.
 1. Create the virtual environment: open "Anaconda Prompt" -> type `conda env create -f environment_v1.0_py37.yml`
 2. Activate the virtual environment :
-
-	a. In the command prompt type `conda activate OpenTUMFlex_py37`
-	
-	b. A new Spyder IDE application will be installed and can be found in the start menu.  
+	- In the command prompt type `conda activate OpenTUMFlex_py37`
+	- A new Spyder IDE application will be installed and can be found in the start menu.  
 
 
 ### Test your installation
