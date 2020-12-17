@@ -89,12 +89,13 @@ def run_scenario(scenario, path_input, path_results, solver='glpk', time_limit=3
     # plot stacked flexibility of all devices
     if show_aggregated_flex:
         opentumflex.plot_aggregated_flex_power(my_ems)
-        opentumflex.plot_aggregated_flex_price(my_ems, plot_flexpr=show_aggregated_flex_price)
-    return my_ems
+        opentumflex.plot_aggregated_flex_price(my_ems, plot_flexpr=show_aggregated_flex_price)    
 
     # save flex offers
     if save_flex_offers:
         opentumflex.save_offers(my_ems, market='comax')
+    
+    return my_ems
 
 
 if __name__ == '__main__':
