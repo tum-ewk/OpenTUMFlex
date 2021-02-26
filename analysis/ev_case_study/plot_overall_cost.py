@@ -41,9 +41,9 @@ def plot_overall_cost(overall_costs, save_figure=True, figure_path='figures/'):
     plt.legend(bbox_to_anchor=(1.1, 0.5), loc="center right", borderaxespad=0.2)
     # Save
     plt.tight_layout()
-    plt.show()  # -> optional
     if save_figure:
         plt.savefig(figure_path + 'total_charging_cost' + '.png', dpi=600)
+    plt.show()  # -> optional
 
 
 if __name__ == '__main__':
