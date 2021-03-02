@@ -95,7 +95,7 @@ for power in power_levels:
     overall_costs[power]['Con_mi'] = pd.read_hdf(output_path + str(power) + '/Aggregated Data/opt_sum_data.h5')['c_con_mi_energy'].sum()
     overall_costs[power]['RTP'] = pd.read_hdf(output_path + str(power) + '/Aggregated Data/opt_sum_data.h5')['c_rtp_energy'].sum()
     # Plot aggregated flexibility offers over time
-    ev_case_study.plot_opt_flex_timeseries(output_path=output_path + str(power) + '/', figure_path=figure_path)
+    ev_case_study.plot_opt_flex_timeseries(power, output_path=output_path + str(power) + '/', figure_path=figure_path)
 
 # Plot overall cost
 ev_case_study.plot_overall_cost(overall_costs=overall_costs, figure_path=figure_path)
