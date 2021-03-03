@@ -52,7 +52,7 @@ def save_offers_comax(my_ems,  device,  filetype='xlsx'):
     new_cwd = os.path.join(path, file_name)
     
     # Save flex offers in the requested format
-    if filetype == '.xlsx':
+    if filetype == 'xlsx':
         my_ems['flexopts'][device].to_excel(new_cwd+'.xlsx')
         # print("Excel file generated! Available on " + path)
     elif filetype == 'csv':

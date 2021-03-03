@@ -106,7 +106,7 @@ def plot_n_avail_veh(output_path, save_figure=True, figure_path='../figures/'):
     # print('Maximum number of available vehicles:', opt_per_daytime['n_veh_avail'].max())
 
 
-def plot_opt_flex_timeseries(cs1_output_path, cs2_output_path, save_figure=True, figure_path='../figures/'):
+def plot_opt_flex_timeseries(power, cs1_output_path, cs2_output_path, save_figure=True, figure_path='../figures/'):
     """
     This function plots the flexibility results of two case studies over time
 
@@ -114,6 +114,7 @@ def plot_opt_flex_timeseries(cs1_output_path, cs2_output_path, save_figure=True,
     :param cs1_output_path: path to results of the first case study
     :param cs2_output_path: path to results of the second case study
     :param figure_path: folder where figures are stored
+    :param power: current power level
     :return:
     """
 
@@ -594,16 +595,17 @@ def plot_opt_flex_timeseries(cs1_output_path, cs2_output_path, save_figure=True,
     axs[0, 0].set_xticklabels(resulting_labels, rotation=45)
     plt.subplots_adjust(left=0.08, bottom=0.05, right=0.98, top=0.95, wspace=0.25, hspace=0.2)
     if save_figure:
-        plt.savefig(figure_path + 'opt_flex_average_day_plots.png', dpi=600)
+        plt.savefig(figure_path + str(power) + '_opt_flex_average_day_plots.png', dpi=600)
 
 
-def plot_opt_flex_timeseries(output_path, save_figure=True, figure_path='figures/'):
+def plot_opt_flex_timeseries(power, output_path, save_figure=True, figure_path='figures/'):
     """
     This function plots the flexibility results of a study over time
 
     :param save_figure: boolean whether to save figure or not
     :param output_path: path to results of the  case study
     :param figure_path: folder where figures are stored
+    :param power: current power level
     :return:
     """
 
@@ -809,7 +811,7 @@ def plot_opt_flex_timeseries(output_path, save_figure=True, figure_path='figures
     axs[0, 0].set_xticklabels(resulting_labels, rotation=45)
     plt.subplots_adjust(left=0.08, bottom=0.05, right=0.98, top=0.95, wspace=0.25, hspace=0.2)
     if save_figure:
-        plt.savefig(figure_path + 'opt_flex_average_day_plots.png', dpi=600)
+        plt.savefig(figure_path + str(power) + '_opt_flex_average_day_plots.png', dpi=600)
 
 
 if __name__ == '__main__':
