@@ -1,14 +1,15 @@
 """
-This module visualizes the optimal charging schedules and flexibility potentials over time.
+This module visualizes the flexibility prices and for a better overview includes the price forecast as well as the
+calculated flexibility power in combination with the scheduled optimal charging power over time.
 """
 
-__author__ = "Michel Zadé"
-__copyright__ = "2020 TUM-EWK"
+__author__ = "Helena Hahne"
+__copyright__ = "2021 TUM-EWK"
 __credits__ = []
 __license__ = "GPL v3.0"
-__version__ = "1.0"
-__maintainer__ = "Michel Zadé"
-__email__ = "michel.zade@tum.de"
+__version__ = "0"
+__maintainer__ = "?"
+__email__ = "?"
 __status__ = "Development"
 
 import pandas as pd
@@ -17,58 +18,10 @@ from matplotlib import rcParams
 import numpy as np
 from pandas.plotting import register_matplotlib_converters
 from pathlib import Path
+
 register_matplotlib_converters()
 
-
-def plot_n_avail_veh(cs1_output_path, cs2_output_path, save_figure=True, figure_path='figures/'):
-    """
-    Plots the vehicle availabilities of two different case studies.
-
-    :param save_figure: boolean whether to save figure or not
-    :param cs1_output_path: path to results of the first case study
-    :param cs2_output_path: path to results of the second case study
-    :param figure_path: folder where figures are stored
-    :return:
-    """
-    # Define figure path
-    Path(figure_path).mkdir(parents=True, exist_ok=True)
-
-    chts_opt_per_daytime = pd.read_hdf(cs1_output_path + 'Aggregated Data/opt_per_daytime_data.h5', key='df')
-    mp_opt_per_daytime = pd.read_hdf(cs2_output_path + 'Aggregated Data/opt_per_daytime_data.h5', key='df')
-    chts_flex_per_daytime = pd.read_hdf(cs1_output_path + 'Aggregated Data/flex_per_daytime_data.h5', key='df')
-
-    # Set font/figure style
-    rcParams["font.family"] = "Times New Roman"
-    rcParams["font.size"] = 10
-    rcParams["figure.figsize"] = [11.69, 8.27]
-    chts_color = 'tab:blue'
-    mp_color = 'brown'
-
-    # Subplots
-    fig1 = plt.figure(figsize=[6, 3.5])
-    # Number of available vehicles ##############################################
-    plt.plot(mp_opt_per_daytime.index, mp_opt_per_daytime['n_veh_avail'] /
-             mp_opt_per_daytime['n_veh_avail'].max() * 100,
-             label='GER MP', linestyle='solid', color=mp_color)
-    plt.plot(chts_opt_per_daytime.index, chts_opt_per_daytime['n_veh_avail'] /
-             chts_opt_per_daytime['n_veh_avail'].max() * 100,
-             label='US CHTS', linestyle='solid', color=chts_color)
-    plt.ylabel('Available vehicles (%)')
-    plt.grid()
-    plt.legend(loc='lower center')
-    plt.xlim([0, 672])
-    plt.ylim([0, 100])
-    n_ticks = 7
-    tick_range = np.linspace(start=0, stop=576, num=n_ticks)
-    plt.xticks(tick_range, labels=chts_flex_per_daytime.loc[tick_range, 'Daytime_ID'], rotation=45)
-    fig1.subplots_adjust(bottom=0.30, right=0.95, left=0.16, top=0.95)
-    if save_figure:
-        plt.savefig(figure_path + 'veh_availabilities_time.png', dpi=600)
-
-    print('mp_per_daytime[n_veh_avail]:', mp_opt_per_daytime['n_veh_avail'].max())
-    print('chts_per_daytime[n_veh_avail]:', chts_opt_per_daytime['n_veh_avail'].max())
-
-
+'''
 def plot_n_avail_veh(output_path, save_figure=True, figure_path='../figures/'):
     """
     Plots the vehicle availabilities of a case study.
@@ -104,8 +57,8 @@ def plot_n_avail_veh(output_path, save_figure=True, figure_path='../figures/'):
         plt.savefig(figure_path + 'veh_availabilities_time.png', dpi=600)
 
     # print('Maximum number of available vehicles:', opt_per_daytime['n_veh_avail'].max())
-
-
+'''
+'''
 def plot_opt_flex_timeseries(power, cs1_output_path, cs2_output_path, save_figure=True, figure_path='../figures/'):
     """
     This function plots the flexibility results of two case studies over time
@@ -596,11 +549,12 @@ def plot_opt_flex_timeseries(power, cs1_output_path, cs2_output_path, save_figur
     plt.subplots_adjust(left=0.08, bottom=0.05, right=0.98, top=0.95, wspace=0.25, hspace=0.2)
     if save_figure:
         plt.savefig(figure_path + str(power) + '_opt_flex_average_day_plots.png', dpi=600)
+'''
 
 
-def plot_opt_flex_timeseries(power, output_path, save_figure=True, figure_path='figures/'):
+def plot_flex_prices(power, output_path, save_figure=True, figure_path='figures/'):
     """
-    This function plots the flexibility results of a study over time
+    This function plots the flexibility prices of a study over time
 
     :param save_figure: boolean whether to save figure or not
     :param output_path: path to results of the  case study
@@ -620,200 +574,334 @@ def plot_opt_flex_timeseries(power, output_path, save_figure=True, figure_path='
     weekend_opt_per_daytime = pd.read_hdf(output_path + 'Aggregated Data/weekend_opt_per_daytime_data.h5', key='df')
     weekend_flex_per_daytime = pd.read_hdf(output_path + 'Aggregated Data/weekend_flex_per_daytime_data.h5', key='df')
     weekday_opt_per_daytime = pd.read_hdf(output_path + 'Aggregated Data/weekday_opt_per_daytime_data.h5', key='df')
+    day_flex_per_daytime = pd.read_hdf(output_path + 'Aggregated Data/day_flex_per_daytime_data.h5', key='df')
+    day_opt_per_daytime = pd.read_hdf(output_path + 'Aggregated Data/day_opt_per_daytime_data.h5', key='df')
 
-    # Plot only weekdays and weekends
+    flex_sum_df = pd.read_hdf(output_path + 'Aggregated Data/flex_sum_data.h5', key='df')
+    opt_sum_df = pd.read_hdf(output_path + 'Aggregated Data/opt_sum_data.h5', key='df')
+
+    # Plot preparations
     tick_range = np.linspace(start=0, stop=96, num=96)
     # Figure settings
     rcParams["font.family"] = "Times New Roman"
+    rcParams["mathtext.default"] = "regular"
     font_size = rcParams["font.size"] = 10
-    rcParams["figure.figsize"] = [9.5, 7.16]
+    rcParams["figure.figsize"] = [13, 9]
     #
-    fig5, axs = plt.subplots(nrows=4, ncols=5, sharex=True, sharey='row')
-    # Con
-    axs[0, 0].plot(tick_range, weekday_opt_per_daytime['P_ev_opt_sum_con'] / weekday_opt_per_daytime['n_veh_avail'],
-                   color=plot_color, linestyle='solid')
-    axs[0, 0].grid()
-    axs[0, 0].set_ylim([0, 7])
-    axs[0, 0].set_title('Con', fontsize=font_size)
-    axs[1, 0].plot(tick_range, weekend_opt_per_daytime['P_ev_opt_sum_con'] / weekend_opt_per_daytime['n_veh_avail'],
-                   color=plot_color, linestyle='solid')
-    axs[1, 0].grid()
-    axs[1, 0].set_ylim([0, 7])
+    nrows = 3
+    ncols = 5
+    range_cols = range(ncols)
+    price_tariff_l = ['Con', 'Con + MI', 'ToU', 'ToU + MI', 'RTP']
+    price_fcast_l = ['c_con_kwh', 'c_con_mi_kwh', 'c_tou_kwh', 'c_tou_mi_kwh', 'c_rtp_kwh']
+    opt_per_daytime_l = [weekday_opt_per_daytime, weekend_opt_per_daytime, day_opt_per_daytime]
+    flex_per_daytime_l = ['weekday_flex_per_daytime', 'weekend_flex_per_daytime', 'day_flex_per_daytime']
+    fig1, axs = plt.subplots(nrows=nrows, ncols=ncols, sharex=True, sharey='row')
 
-    # ToU
-    axs[0, 1].plot(tick_range, weekday_opt_per_daytime['P_ev_opt_sum_tou'] / weekday_opt_per_daytime['n_veh_avail'],
+    # # Price Forecast Weekday
+    # Con
+    for i, tariff, pricefcast in zip(range_cols, price_fcast_l_l, price_tariffs_kwh_l):
+        axs[0, i].plot(tick_range, weekday_opt_per_daytime[pricefcast], color=plot_color, linestyle='solid')
+        axs[0, i].grid()
+        axs[0, i].set_title(tariff, fontsize=font_size)
+    axs[0, 0].set_ylim([0, .5])
+
+    # # ToU
+    # axs[0, 1].plot(tick_range, weekday_opt_per_daytime['c_tou_kwh'], color=plot_color, linestyle='solid')
+    # axs[0, 1].grid()
+    # axs[0, 1].set_title('ToU', fontsize=font_size)
+    #
+    # # Con + MI
+    # axs[0, 2].plot(tick_range, weekday_opt_per_daytime['c_con_mi_kwh'], color=plot_color, linestyle='solid')
+    # axs[0, 2].grid()
+    # axs[0, 2].set_title('Con + MI', fontsize=font_size)
+    #
+    # # ToU + MI
+    # axs[0, 3].plot(tick_range, weekday_opt_per_daytime['c_tou_mi_kwh'], color=plot_color, linestyle='solid')
+    # axs[0, 3].grid()
+    # axs[0, 3].set_title('ToU + MI', fontsize=font_size)
+    #
+    # # RTP
+    # axs[0, 4].plot(tick_range, weekday_opt_per_daytime['c_rtp_kwh'], color=plot_color, linestyle='solid')
+    # axs[0, 4].grid()
+    # axs[0, 4].set_title('RTP', fontsize=font_size)
+
+    # Price Forecast general
+    # Con
+    # axs[2, 0].plot(tick_range, day_opt_per_daytime['c_con_kwh'], color=plot_color, linestyle='solid')
+    # axs[2, 0].grid()
+    # axs[2, 0].set_ylim([0, .5])
+    # axs[2, 0].set_title('Con', fontsize=font_size)
+    #
+    # # ToU
+    # axs[2, 1].plot(tick_range, day_opt_per_daytime['c_tou_kwh'], color=plot_color, linestyle='solid')
+    # axs[2, 1].grid()
+    # axs[2, 1].set_title('ToU', fontsize=font_size)
+
+    # # Con + MI
+    # axs[2, 2].plot(tick_range, day_opt_per_daytime['c_con_mi_kwh'], color=plot_color, linestyle='solid')
+    # axs[2, 2].grid()
+    # axs[2, 2].set_title('Con + MI', fontsize=font_size)
+    #
+    # # ToU + MI
+    # axs[2, 3].plot(tick_range, day_opt_per_daytime['c_tou_mi_kwh'], color=plot_color, linestyle='solid')
+    # axs[2, 3].grid()
+    # axs[2, 3].set_title('ToU + MI', fontsize=font_size)
+    #
+    # # RTP
+    # axs[2, 4].plot(tick_range, day_opt_per_daytime['c_rtp_kwh'], color=plot_color, linestyle='solid')
+    # axs[2, 4].grid()
+    # axs[2, 4].set_title('RTP', fontsize=font_size)
+
+    # Price Forecast Weekend
+    # Con
+    # axs[1, 0].plot(tick_range, weekend_opt_per_daytime['c_con_kwh'], color=plot_color, linestyle='solid')
+    # axs[1, 0].grid()
+    # axs[1, 0].set_ylim([0, .5])
+    # axs[1, 0].set_title('Con', fontsize=font_size)
+    #
+    # # ToU
+    # axs[1, 1].plot(tick_range, weekend_opt_per_daytime['c_tou_kwh'], color=plot_color, linestyle='solid')
+    # axs[1, 1].grid()
+    # axs[1, 1].set_title('ToU', fontsize=font_size)
+    #
+    # # Con + MI
+    # axs[1, 2].plot(tick_range, weekend_opt_per_daytime['c_con_mi_kwh'], color=plot_color, linestyle='solid')
+    # axs[1, 2].grid()
+    # axs[1, 2].set_title('Con + MI', fontsize=font_size)
+    #
+    # # ToU + MI
+    # axs[1, 3].plot(tick_range, weekend_opt_per_daytime['c_tou_mi_kwh'], color=plot_color, linestyle='solid')
+    # axs[1, 3].grid()
+    # axs[1, 3].set_title('ToU + MI', fontsize=font_size)
+    #
+    # # RTP
+    # axs[1, 4].plot(tick_range, weekend_opt_per_daytime['c_rtp_kwh'], color=plot_color, linestyle='solid')
+    # axs[1, 4].grid()
+    # axs[1, 4].set_title('RTP', fontsize=font_size)
+
+    # Flexibility (area plot) + Optimal power (red line on top)
+    # Con on weekdays
+    axs[1, 0].fill_between(tick_range,
+                           day_flex_per_daytime['P_pos_sum_con'] / day_opt_per_daytime['n_veh_avail'],
+                           day_flex_per_daytime['P_neg_sum_con'] / day_opt_per_daytime['n_veh_avail'],
+                           alpha=0.5, zorder=5, linestyle='solid', facecolor=plot_color)
+    axs[1, 0].plot(tick_range,
+                   day_flex_per_daytime['P_pos_sum_con'] / day_opt_per_daytime['n_veh_avail'],
                    color=plot_color, linestyle='solid')
-    axs[0, 1].grid()
-    axs[0, 1].set_title('ToU', fontsize=font_size)
-    axs[1, 1].plot(tick_range, weekend_opt_per_daytime['P_ev_opt_sum_tou'] / weekend_opt_per_daytime['n_veh_avail'],
+    axs[1, 0].plot(tick_range,
+                   day_flex_per_daytime['P_neg_sum_con'] / day_opt_per_daytime['n_veh_avail'],
                    color=plot_color, linestyle='solid')
+    axs[1, 0].plot(tick_range,
+                   day_opt_per_daytime['P_ev_opt_sum_con']/ day_opt_per_daytime['n_veh_avail'],
+                   color='r', alpha=0.5, zorder=10, linestyle='solid')
+    axs[1, 0].grid()
+
+    # # Con on weekdays
+    # axs[1, 1].fill_between(tick_range,
+    #                        weekend_flex_per_daytime['P_pos_sum_con'] / weekend_opt_per_daytime['n_veh_avail'],
+    #                        weekend_flex_per_daytime['P_neg_sum_con'] / weekend_opt_per_daytime['n_veh_avail'],
+    #                        alpha=0.5, zorder=5, linestyle='solid', facecolor=plot_color)
+    # axs[1, 1].plot(tick_range,
+    #                weekend_flex_per_daytime['P_pos_sum_con'] / weekend_opt_per_daytime['n_veh_avail'],
+    #                color=plot_color, linestyle='solid')
+    # axs[1, 1].plot(tick_range,
+    #                weekend_flex_per_daytime['P_neg_sum_con'] / weekend_opt_per_daytime['n_veh_avail'],
+    #                color=plot_color, linestyle='solid')
+    # axs[1, 1].plot(tick_range,
+    #                weekend_opt_per_daytime['P_ev_opt_sum_con'] / weekend_opt_per_daytime['n_veh_avail'],
+    #                color='r', alpha=0.5, zorder=10, linestyle='solid')
+    # axs[1, 1].grid()
+    #
+    # # Con on days
+    # axs[1, 2].fill_between(tick_range,
+    #                        day_flex_per_daytime['P_pos_sum_con'] / day_opt_per_daytime['n_veh_avail'],
+    #                        day_flex_per_daytime['P_neg_sum_con'] / day_opt_per_daytime['n_veh_avail'],
+    #                        alpha=0.5, zorder=5, linestyle='solid', facecolor=plot_color)
+    # axs[1, 2].plot(tick_range,
+    #                day_flex_per_daytime['P_pos_sum_con'] / day_opt_per_daytime['n_veh_avail'],
+    #                color=plot_color, linestyle='solid')
+    # axs[1, 2].plot(tick_range,
+    #                day_flex_per_daytime['P_neg_sum_con'] / day_opt_per_daytime['n_veh_avail'],
+    #                color=plot_color, linestyle='solid')
+    # axs[1, 2].plot(tick_range,
+    #                day_opt_per_daytime['P_ev_opt_sum_con'] / day_opt_per_daytime['n_veh_avail'],
+    #                color='r', alpha=0.5, zorder=10, linestyle='solid')
+    # axs[1, 2].grid()
+
+    # ToU on weekdays
+    axs[1, 1].fill_between(tick_range,
+                           day_flex_per_daytime['P_pos_sum_tou'] / day_opt_per_daytime['n_veh_avail'],
+                           day_flex_per_daytime['P_neg_sum_tou'] / day_opt_per_daytime['n_veh_avail'],
+                           alpha=0.5, zorder=5, linestyle='solid', facecolor=plot_color)
+    axs[1, 1].plot(tick_range,
+                   day_flex_per_daytime['P_pos_sum_tou'] / day_opt_per_daytime['n_veh_avail'],
+                   color=plot_color, linestyle='solid')
+    axs[1, 1].plot(tick_range,
+                   day_flex_per_daytime['P_neg_sum_tou'] / day_opt_per_daytime['n_veh_avail'],
+                   color=plot_color, linestyle='solid')
+    axs[1, 1].plot(tick_range,
+                   day_opt_per_daytime['P_ev_opt_sum_tou']/ day_opt_per_daytime['n_veh_avail'],
+                   color='r', alpha=0.5, zorder=10, linestyle='solid')
     axs[1, 1].grid()
 
-    # Con + MI
-    axs[0, 2].plot(tick_range, weekday_opt_per_daytime['P_ev_opt_sum_con_mi'] / weekday_opt_per_daytime['n_veh_avail'],
-                   color=plot_color, linestyle='solid')
-    axs[0, 2].grid()
-    axs[0, 2].set_title('Con + MI', fontsize=font_size)
-    axs[1, 2].plot(tick_range, weekend_opt_per_daytime['P_ev_opt_sum_con_mi'] / weekend_opt_per_daytime['n_veh_avail'],
-                   color=plot_color, linestyle='solid')
-    axs[1, 2].grid()
-    # ToU + MI
-    axs[0, 3].plot(tick_range, weekday_opt_per_daytime['P_ev_opt_sum_tou_mi'] / weekday_opt_per_daytime['n_veh_avail'],
-                   color=plot_color, linestyle='solid')
-    axs[0, 3].grid()
-    axs[0, 3].set_title('ToU + MI', fontsize=font_size)
-    axs[1, 3].plot(tick_range, weekend_opt_per_daytime['P_ev_opt_sum_tou_mi'] / weekend_opt_per_daytime['n_veh_avail'],
-                   color=plot_color, linestyle='solid')
-    axs[1, 3].grid()
-    # RTP
-    axs[0, 4].plot(tick_range, weekday_opt_per_daytime['P_ev_opt_sum_rtp'] / weekday_opt_per_daytime['n_veh_avail'],
-                   color=plot_color, linestyle='solid', label='Weekday')
-    axs[0, 4].grid()
-    axs[0, 4].set_title('RTP', fontsize=font_size)
-    axs[1, 4].plot(tick_range, weekend_opt_per_daytime['P_ev_opt_sum_rtp'] / weekend_opt_per_daytime['n_veh_avail'],
-                   color=plot_color, linestyle='solid')
-    axs[1, 4].grid()
-    # Flexibility
-    # Con on weekdays
-    axs[2, 0].fill_between(tick_range,
-                           weekday_flex_per_daytime['P_pos_sum_con'] / weekday_opt_per_daytime['n_veh_avail'],
-                           weekday_flex_per_daytime['P_neg_sum_con'] / weekday_opt_per_daytime['n_veh_avail'],
-                           alpha=0.5, zorder=5, linestyle='solid', facecolor=plot_color)
-    axs[2, 0].plot(tick_range,
-                   weekday_flex_per_daytime['P_pos_sum_con'] / weekday_opt_per_daytime['n_veh_avail'],
-                   color=plot_color, linestyle='solid')
-    axs[2, 0].plot(tick_range,
-                   weekday_flex_per_daytime['P_neg_sum_con'] / weekday_opt_per_daytime['n_veh_avail'],
-                   color=plot_color, linestyle='solid')
-    axs[2, 0].grid()
-    # Con on weekends
-    axs[3, 0].fill_between(tick_range,
-                           weekend_flex_per_daytime['P_pos_sum_con'] / weekend_opt_per_daytime['n_veh_avail'],
-                           weekend_flex_per_daytime['P_neg_sum_con'] / weekend_opt_per_daytime['n_veh_avail'],
-                           alpha=0.5, zorder=5, linestyle='solid', facecolor=plot_color)
-    axs[3, 0].plot(tick_range,
-                   weekend_flex_per_daytime['P_pos_sum_con'] / weekend_opt_per_daytime['n_veh_avail'],
-                   color=plot_color, linestyle='solid')
-    axs[3, 0].plot(tick_range,
-                   weekend_flex_per_daytime['P_neg_sum_con'] / weekend_opt_per_daytime['n_veh_avail'],
-                   color=plot_color, linestyle='solid')
-    axs[3, 0].grid()
-    # ToU on weekdays
-    axs[2, 1].fill_between(tick_range,
-                           weekday_flex_per_daytime['P_pos_sum_tou'] / weekday_opt_per_daytime['n_veh_avail'],
-                           weekday_flex_per_daytime['P_neg_sum_tou'] / weekday_opt_per_daytime['n_veh_avail'],
-                           alpha=0.5, zorder=5, linestyle='solid', facecolor=plot_color)
-    axs[2, 1].plot(tick_range,
-                   weekday_flex_per_daytime['P_pos_sum_tou'] / weekday_opt_per_daytime['n_veh_avail'],
-                   color=plot_color, linestyle='solid')
-    axs[2, 1].plot(tick_range,
-                   weekday_flex_per_daytime['P_neg_sum_tou'] / weekday_opt_per_daytime['n_veh_avail'],
-                   color=plot_color, linestyle='solid')
-    axs[2, 1].grid()
-    # ToU on weekends
-    axs[3, 1].fill_between(tick_range,
-                           weekend_flex_per_daytime['P_pos_sum_tou'] / weekend_opt_per_daytime['n_veh_avail'],
-                           weekend_flex_per_daytime['P_neg_sum_tou'] / weekend_opt_per_daytime['n_veh_avail'],
-                           alpha=0.5, zorder=5, linestyle='solid', facecolor=plot_color)
-    axs[3, 1].plot(tick_range,
-                   weekend_flex_per_daytime['P_pos_sum_tou'] / weekend_opt_per_daytime['n_veh_avail'],
-                   color=plot_color, linestyle='solid')
-    axs[3, 1].plot(tick_range,
-                   weekend_flex_per_daytime['P_neg_sum_tou'] / weekend_opt_per_daytime['n_veh_avail'],
-                   color=plot_color, linestyle='solid')
-    axs[3, 1].grid()
     # ToU + MI on weekdays
-    axs[2, 3].fill_between(tick_range,
-                           weekday_flex_per_daytime['P_pos_sum_tou_mi'] / weekday_opt_per_daytime['n_veh_avail'],
-                           weekday_flex_per_daytime['P_neg_sum_tou_mi'] / weekday_opt_per_daytime['n_veh_avail'],
+    axs[1, 3].fill_between(tick_range,
+                           day_flex_per_daytime['P_pos_sum_tou_mi'] / day_opt_per_daytime['n_veh_avail'],
+                           day_flex_per_daytime['P_neg_sum_tou_mi'] / day_opt_per_daytime['n_veh_avail'],
                            alpha=0.5, zorder=5, linestyle='solid', facecolor=plot_color)
-    axs[2, 3].plot(tick_range,
-                   weekday_flex_per_daytime['P_pos_sum_tou_mi'] / weekday_opt_per_daytime['n_veh_avail'],
+    axs[1, 3].plot(tick_range,
+                   day_flex_per_daytime['P_pos_sum_tou_mi'] / day_opt_per_daytime['n_veh_avail'],
                    color=plot_color, linestyle='solid')
-    axs[2, 3].plot(tick_range,
-                   weekday_flex_per_daytime['P_neg_sum_tou_mi'] / weekday_opt_per_daytime['n_veh_avail'],
+    axs[1, 3].plot(tick_range,
+                   day_flex_per_daytime['P_neg_sum_tou_mi'] / day_opt_per_daytime['n_veh_avail'],
                    color=plot_color, linestyle='solid')
-    axs[2, 3].grid()
+    axs[1, 3].plot(tick_range,
+                   day_opt_per_daytime['P_ev_opt_sum_tou_mi']/ day_opt_per_daytime['n_veh_avail'],
+                   color='r', alpha=0.5, zorder=10, linestyle='solid')
+    axs[1, 3].grid()
+
     # Con + MI on weekdays
-    axs[2, 2].fill_between(tick_range,
-                           weekday_flex_per_daytime['P_pos_sum_con_mi'] / weekday_opt_per_daytime['n_veh_avail'],
-                           weekday_flex_per_daytime['P_neg_sum_con_mi'] / weekday_opt_per_daytime['n_veh_avail'],
+    axs[1, 2].fill_between(tick_range,
+                           day_flex_per_daytime['P_pos_sum_con_mi'] / day_opt_per_daytime['n_veh_avail'],
+                           day_flex_per_daytime['P_neg_sum_con_mi'] / day_opt_per_daytime['n_veh_avail'],
                            alpha=0.5, zorder=5, linestyle='solid', facecolor=plot_color)
-    axs[2, 2].plot(tick_range,
-                   weekday_flex_per_daytime['P_pos_sum_con_mi'] / weekday_opt_per_daytime['n_veh_avail'],
+    axs[1, 2].plot(tick_range,
+                   day_flex_per_daytime['P_pos_sum_con_mi'] / day_opt_per_daytime['n_veh_avail'],
                    color=plot_color, linestyle='solid')
-    axs[2, 2].plot(tick_range,
-                   weekday_flex_per_daytime['P_neg_sum_con_mi'] / weekday_opt_per_daytime['n_veh_avail'],
+    axs[1, 2].plot(tick_range,
+                   day_flex_per_daytime['P_neg_sum_con_mi'] / day_opt_per_daytime['n_veh_avail'],
                    color=plot_color, linestyle='solid')
-    axs[2, 2].grid()
-    # Con + MI on weekends
-    axs[3, 2].fill_between(tick_range,
-                           weekend_flex_per_daytime['P_pos_sum_con_mi'] / weekend_opt_per_daytime['n_veh_avail'],
-                           weekend_flex_per_daytime['P_neg_sum_con_mi'] / weekend_opt_per_daytime['n_veh_avail'],
-                           alpha=0.5, label='Con+MI', zorder=5, linestyle='solid', facecolor=plot_color)
-    axs[3, 2].plot(tick_range,
-                   weekend_flex_per_daytime['P_pos_sum_con_mi'] / weekend_opt_per_daytime['n_veh_avail'],
-                   color=plot_color, linestyle='solid')
-    axs[3, 2].plot(tick_range,
-                   weekend_flex_per_daytime['P_neg_sum_con_mi'] / weekend_opt_per_daytime['n_veh_avail'],
-                   color=plot_color, linestyle='solid')
-    axs[3, 2].grid()
-    # ToU + MI on weekends
-    axs[3, 3].fill_between(tick_range,
-                           weekend_flex_per_daytime['P_pos_sum_tou_mi'] / weekend_opt_per_daytime['n_veh_avail'],
-                           weekend_flex_per_daytime['P_neg_sum_tou_mi'] / weekend_opt_per_daytime['n_veh_avail'],
-                           alpha=0.5, label='ToU+MI', zorder=5, linestyle='solid', facecolor=plot_color)
-    axs[3, 3].plot(tick_range,
-                   weekend_flex_per_daytime['P_pos_sum_tou_mi'] / weekend_opt_per_daytime['n_veh_avail'],
-                   color=plot_color, linestyle='solid')
-    axs[3, 3].plot(tick_range,
-                   weekend_flex_per_daytime['P_neg_sum_tou_mi'] / weekend_opt_per_daytime['n_veh_avail'],
-                   color=plot_color, linestyle='solid')
-    axs[3, 3].grid()
+    axs[1, 2].plot(tick_range,
+                   day_opt_per_daytime['P_ev_opt_sum_con_mi']/ day_opt_per_daytime['n_veh_avail'],
+                   color='r', alpha=0.5, zorder=10, linestyle='solid')
+    axs[1, 2].grid()
+
     # RTP on weekdays
-    axs[2, 4].fill_between(tick_range,
-                           weekday_flex_per_daytime['P_pos_sum_rtp'] / weekday_opt_per_daytime['n_veh_avail'],
-                           weekday_flex_per_daytime['P_neg_sum_rtp'] / weekday_opt_per_daytime['n_veh_avail'],
+    axs[1, 4].fill_between(tick_range,
+                           day_flex_per_daytime['P_pos_sum_rtp'] / day_opt_per_daytime['n_veh_avail'],
+                           day_flex_per_daytime['P_neg_sum_rtp'] / day_opt_per_daytime['n_veh_avail'],
                            alpha=0.5, label='RTP', zorder=5, linestyle='solid', facecolor=plot_color)
-    axs[2, 4].plot(tick_range,
-                   weekday_flex_per_daytime['P_pos_sum_rtp'] / weekday_opt_per_daytime['n_veh_avail'],
+    axs[1, 4].plot(tick_range,
+                   day_flex_per_daytime['P_pos_sum_rtp'] / day_opt_per_daytime['n_veh_avail'],
                    color=plot_color, linestyle='solid')
-    axs[2, 4].plot(tick_range,
-                   weekday_flex_per_daytime['P_neg_sum_rtp'] / weekday_opt_per_daytime['n_veh_avail'],
+    axs[1, 4].plot(tick_range,
+                   day_flex_per_daytime['P_neg_sum_rtp'] / day_opt_per_daytime['n_veh_avail'],
                    color=plot_color, linestyle='solid')
-    axs[2, 4].grid()
-    axs[2, 4].set_ylim([-10, 7])
-    # RTP on weekends
-    axs[3, 4].fill_between(tick_range,
-                           weekend_flex_per_daytime['P_pos_sum_rtp'] / weekend_opt_per_daytime['n_veh_avail'],
-                           weekend_flex_per_daytime['P_neg_sum_rtp'] / weekend_opt_per_daytime['n_veh_avail'],
-                           alpha=0.5, label='RTP', zorder=5, linestyle='solid', facecolor=plot_color)
-    axs[3, 4].plot(tick_range,
-                   weekend_flex_per_daytime['P_pos_sum_rtp'] / weekend_opt_per_daytime['n_veh_avail'],
-                   color=plot_color, linestyle='solid')
-    axs[3, 4].plot(tick_range,
-                   weekend_flex_per_daytime['P_neg_sum_rtp'] / weekend_opt_per_daytime['n_veh_avail'],
-                   color=plot_color, linestyle='solid')
-    axs[3, 4].grid()
-    axs[3, 4].set_ylim([-10, 7])
-    axs[0, 0].set_ylabel('Charging power per available vehicle $(kW \cdot EV^{-1})$ \n '
-                         'Weekend                              Weekday',
-                         position=(0, -0.1))
-    axs[2, 0].set_ylabel('Flexible power per available vehicle $(kW \cdot EV^{-1})$ \n '
-                         'Weekend                              Weekday',
-                         position=(0, -0.1))
+    axs[1, 4].plot(tick_range,
+                   day_opt_per_daytime['P_ev_opt_sum_rtp']/ day_opt_per_daytime['n_veh_avail'],
+                   color='r', alpha=0.5, zorder=10, linestyle='solid')
+    axs[1, 4].grid()
+    axs[1, 4].set_ylim([-10, 7])
+
+    # # Con on weekends
+    # axs[2, 0].fill_between(tick_range,
+    #                        weekend_flex_per_daytime['P_pos_sum_con'] / weekend_opt_per_daytime['n_veh_avail'],
+    #                        weekend_flex_per_daytime['P_neg_sum_con'] / weekend_opt_per_daytime['n_veh_avail'],
+    #                        alpha=0.5, zorder=5, linestyle='solid', facecolor=plot_color)
+    # axs[2, 0].plot(tick_range,
+    #                weekend_flex_per_daytime['P_pos_sum_con'] / weekend_opt_per_daytime['n_veh_avail'],
+    #                color=plot_color, linestyle='solid')
+    # axs[2, 0].plot(tick_range,
+    #                weekend_flex_per_daytime['P_neg_sum_con'] / weekend_opt_per_daytime['n_veh_avail'],
+    #                color=plot_color, linestyle='solid')
+    # axs[2, 0].grid()
+
+    # # ToU on weekends
+    # axs[2, 1].fill_between(tick_range,
+    #                        weekend_flex_per_daytime['P_pos_sum_tou'] / weekend_opt_per_daytime['n_veh_avail'],
+    #                        weekend_flex_per_daytime['P_neg_sum_tou'] / weekend_opt_per_daytime['n_veh_avail'],
+    #                        alpha=0.5, zorder=5, linestyle='solid', facecolor=plot_color)
+    # axs[2, 1].plot(tick_range,
+    #                weekend_flex_per_daytime['P_pos_sum_tou'] / weekend_opt_per_daytime['n_veh_avail'],
+    #                color=plot_color, linestyle='solid')
+    # axs[2, 1].plot(tick_range,
+    #                weekend_flex_per_daytime['P_neg_sum_tou'] / weekend_opt_per_daytime['n_veh_avail'],
+    #                color=plot_color, linestyle='solid')
+    # axs[2, 1].grid()
+
+    # # Con + MI on weekends
+    # axs[2, 2].fill_between(tick_range,
+    #                        weekend_flex_per_daytime['P_pos_sum_con_mi'] / weekend_opt_per_daytime['n_veh_avail'],
+    #                        weekend_flex_per_daytime['P_neg_sum_con_mi'] / weekend_opt_per_daytime['n_veh_avail'],
+    #                        alpha=0.5, label='Con+MI', zorder=5, linestyle='solid', facecolor=plot_color)
+    # axs[2, 2].plot(tick_range,
+    #                weekend_flex_per_daytime['P_pos_sum_con_mi'] / weekend_opt_per_daytime['n_veh_avail'],
+    #                color=plot_color, linestyle='solid')
+    # axs[2, 2].plot(tick_range,
+    #                weekend_flex_per_daytime['P_neg_sum_con_mi'] / weekend_opt_per_daytime['n_veh_avail'],
+    #                color=plot_color, linestyle='solid')
+    # axs[2, 2].grid()
+
+    # # ToU + MI on weekends
+    # axs[2, 3].fill_between(tick_range,
+    #                        weekend_flex_per_daytime['P_pos_sum_tou_mi'] / weekend_opt_per_daytime['n_veh_avail'],
+    #                        weekend_flex_per_daytime['P_neg_sum_tou_mi'] / weekend_opt_per_daytime['n_veh_avail'],
+    #                        alpha=0.5, label='ToU+MI', zorder=5, linestyle='solid', facecolor=plot_color)
+    # axs[2, 3].plot(tick_range,
+    #                weekend_flex_per_daytime['P_pos_sum_tou_mi'] / weekend_opt_per_daytime['n_veh_avail'],
+    #                color=plot_color, linestyle='solid')
+    # axs[2, 3].plot(tick_range,
+    #                weekend_flex_per_daytime['P_neg_sum_tou_mi'] / weekend_opt_per_daytime['n_veh_avail'],
+    #                color=plot_color, linestyle='solid')
+    # axs[2, 3].grid()
+
+    # # RTP on weekends
+    # axs[2, 4].fill_between(tick_range,
+    #                        weekend_flex_per_daytime['P_pos_sum_rtp'] / weekend_opt_per_daytime['n_veh_avail'],
+    #                        weekend_flex_per_daytime['P_neg_sum_rtp'] / weekend_opt_per_daytime['n_veh_avail'],
+    #                        alpha=0.5, label='RTP', zorder=5, linestyle='solid', facecolor=plot_color)
+    # axs[2, 4].plot(tick_range,
+    #                weekend_flex_per_daytime['P_pos_sum_rtp'] / weekend_opt_per_daytime['n_veh_avail'],
+    #                color=plot_color, linestyle='solid')
+    # axs[2, 4].plot(tick_range,
+    #                weekend_flex_per_daytime['P_neg_sum_rtp'] / weekend_opt_per_daytime['n_veh_avail'],
+    #                color=plot_color, linestyle='solid')
+    # axs[2, 4].grid()
+
+    # Flexibility Prices and weighted average price
+    # Con on weekdays
+    # ToU on weekdays
+    # Con + MI on weekdays
+    # ToU + MI on weekdays
+    # RTP on weekdays - muss noch angepasst werden!
+    # axs[2, 4].fill_between(tick_range,
+    #                        weekend_flex_per_daytime['P_pos_sum_rtp'] / weekend_opt_per_daytime['n_veh_avail'],
+    #                        weekend_flex_per_daytime['P_neg_sum_rtp'] / weekend_opt_per_daytime['n_veh_avail'],
+    #                        alpha=0.5, label='RTP', zorder=5, linestyle='solid', facecolor=plot_color)
+    # axs[2, 4].plot(tick_range,
+    #                weekend_flex_per_daytime['P_pos_sum_rtp'] / weekend_opt_per_daytime['n_veh_avail'],
+    #                color=plot_color, linestyle='solid')
+    # axs[2, 4].plot(tick_range,
+    #                weekend_flex_per_daytime['P_neg_sum_rtp'] / weekend_opt_per_daytime['n_veh_avail'],
+    #                color=plot_color, linestyle='solid')
+    # axs[2, 4].grid()
+    # axs[2, 4].set_ylim([-10, 7])
+
+    # Set labels
+    axs[0, 0].set_ylabel('Price forecast $(€ \cdot kWh^{-1})$')
+    axs[1, 0].set_ylabel('Flexible power per available vehicle $(kW \cdot EV^{-1})$ \n '
+                         'Optimal scheduled power $(kW) \cdot EV^{-1})$')
+    axs[2, 0].set_ylabel('Flexibility price per available vehicle $(€ \cdot (EV \cdot kW^{-1})$')
     n_ticks = 5
     ticks = [int(x) for x in np.linspace(start=0, stop=96, num=n_ticks)]
-    tick_labels = pd.date_range(start='2020-01-01 00:00', end='2020-01-02 00:00', freq='15Min').strftime('%H:%M').to_list()
+    tick_labels = pd.date_range(start='2020-01-01 00:00', end='2020-01-02 00:00', freq='15Min').strftime(
+        '%H:%M').to_list()
     resulting_labels = [tick_labels[i] for i in ticks]
     axs[0, 0].set_xlim([0, 97])
     axs[0, 0].set_xticks(ticks)
-    axs[0, 0].set_xticklabels(resulting_labels, rotation=45)
+
+    for i in range(ncols):
+        axs[nrows-1, i].set_xticklabels(resulting_labels, rotation=45)
+    #axs[2, :].set_xticklabels(resulting_labels, rotation=45)
     plt.subplots_adjust(left=0.08, bottom=0.05, right=0.98, top=0.95, wspace=0.25, hspace=0.2)
+
     if save_figure:
-        plt.savefig(figure_path + str(power) + '_opt_flex_average_day_plots.png', dpi=600)
+        plt.savefig(figure_path + str(power) + 'test_flex_prices_plots.png', dpi=600)
+
+    plt.show()
 
 
 if __name__ == '__main__':
-    plot_n_avail_veh(output_path='../output/3.7/', figure_path='../figures/')
-    plot_opt_flex_timeseries(output_path='../output/3.7/', figure_path='../figures/')
+    # plot_n_avail_veh(output_path='../output/3.7/', figure_path='../figures/')
+    plot_flex_prices(power = '3.7', output_path='../output/3.7/', figure_path='../figures/')
+

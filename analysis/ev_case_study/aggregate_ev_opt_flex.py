@@ -93,15 +93,35 @@ def aggregate_ev_flex(veh_availabilities, output_path='../output/', rtp_input_da
                                                               'E_neg_sum_con_mi',
                                                               'E_neg_sum_rtp',
                                                               'c_flex_pos_tou',
+                                                              'max_c_flex_pos_tou',
+                                                              'min_c_flex_pos_tou',
                                                               'c_flex_pos_tou_mi',
+                                                              'max_c_flex_pos_tou_mi',
+                                                              'min_c_flex_pos_tou_mi',
                                                               'c_flex_pos_con',
+                                                              'max_c_flex_pos_con',
+                                                              'min_c_flex_pos_con',
                                                               'c_flex_pos_con_mi',
+                                                              'max_c_flex_pos_con_mi',
+                                                              'min_c_flex_pos_con_mi',
                                                               'c_flex_pos_rtp',
+                                                              'max_c_flex_pos_rtp',
+                                                              'min_c_flex_pos_rtp',
                                                               'c_flex_neg_tou',
+                                                              'max_c_flex_neg_tou',
+                                                              'min_c_flex_neg_tou',
                                                               'c_flex_neg_tou_mi',
+                                                              'max_c_flex_neg_tou_mi',
+                                                              'min_c_flex_neg_tou_mi',
                                                               'c_flex_neg_con',
+                                                              'max_c_flex_neg_con',
+                                                              'min_c_flex_neg_con',
                                                               'c_flex_neg_con_mi',
+                                                              'max_c_flex_neg_con_mi',
+                                                              'min_c_flex_neg_con_mi',
                                                               'c_flex_neg_rtp',
+                                                              'max_c_flex_neg_rtp',
+                                                              'min_c_flex_neg_rtp',
                                                               'Daytime_ID'})
         # Get forecast electricity prices for each time step
         price_forecast = forecast.simulate_elect_price_fcst(rtp_input_data_path=rtp_input_data_path,
@@ -116,7 +136,7 @@ def aggregate_ev_flex(veh_availabilities, output_path='../output/', rtp_input_da
         # Create a daytime identifier for weekday and time for heat map
         opt_sum_df['Daytime_ID'] = opt_sum_df.index.day_name().array + ', ' + opt_sum_df.index.strftime('%H:%M').array
         flex_sum_df['Daytime_ID'] = opt_sum_df.index.day_name().array + ', ' + opt_sum_df.index.strftime('%H:%M').array
-        # Go through all files
+                # Go through all files
         for result_name in file_names:
             my_ems_tou_mi = opentumflex.init_ems_js(path=output_path + str(power) + '/ToU_mi/' + result_name)
             my_ems_tou = opentumflex.init_ems_js(path=output_path + str(power) + '/ToU/' + result_name)
@@ -151,7 +171,17 @@ def aggregate_ev_flex(veh_availabilities, output_path='../output/', rtp_input_da
                                            'E_neg_tou_mi': my_ems_tou_mi['flexopts']['ev']['Neg_E'],
                                            'E_neg_con': my_ems_con['flexopts']['ev']['Neg_E'],
                                            'E_neg_con_mi': my_ems_con_mi['flexopts']['ev']['Neg_E'],
-                                           'E_neg_rtp': my_ems_rtp['flexopts']['ev']['Neg_E']
+                                           'E_neg_rtp': my_ems_rtp['flexopts']['ev']['Neg_E'],
+                                           'c_flex_pos_tou': my_ems_tou['flexopts']['ev']['Pos_Pr'],
+                                           'c_flex_pos_tou_mi': my_ems_tou_mi['flexopts']['ev']['Pos_Pr'],
+                                           'c_flex_pos_con': my_ems_con['flexopts']['ev']['Pos_Pr'],
+                                           'c_flex_pos_con_mi': my_ems_con_mi['flexopts']['ev']['Pos_Pr'],
+                                           'c_flex_pos_rtp': my_ems_rtp['flexopts']['ev']['Pos_Pr'],
+                                           'c_flex_neg_tou': my_ems_tou['flexopts']['ev']['Neg_Pr'],
+                                           'c_flex_neg_tou_mi': my_ems_tou_mi['flexopts']['ev']['Neg_Pr'],
+                                           'c_flex_neg_con': my_ems_con['flexopts']['ev']['Neg_Pr'],
+                                           'c_flex_neg_con_mi': my_ems_con_mi['flexopts']['ev']['Neg_Pr'],
+                                           'c_flex_neg_rtp': my_ems_rtp['flexopts']['ev']['Neg_Pr']
                                            },
                                           index=pd.date_range(start=my_ems_tou_mi['time_data']['time_slots'][0],
                                                               end=my_ems_tou_mi['time_data']['time_slots'][-1],
@@ -211,6 +241,60 @@ def aggregate_ev_flex(veh_availabilities, output_path='../output/', rtp_input_da
             flex_sum_df.loc[flex_result_df.index[0]:flex_result_df.index[-1], 'E_neg_sum_rtp'] \
                 += flex_result_df['E_neg_rtp']
 
+            # lists of all flex prices for combination in for loop, min/max NOT from absolute values
+            flex_prices_list = ['c_flex_pos_tou', 'c_flex_pos_tou_mi', 'c_flex_pos_con',
+                                'c_flex_pos_con_mi', 'c_flex_pos_rtp', 'c_flex_neg_tou',
+                                'c_flex_neg_tou_mi', 'c_flex_neg_con', 'c_flex_neg_con_mi',
+                                'c_flex_neg_rtp']
+            max_prices_list = ['max_c_flex_pos_tou', 'max_c_flex_pos_tou_mi', 'max_c_flex_pos_con',
+                               'max_c_flex_pos_con_mi', 'max_c_flex_pos_rtp','max_c_flex_neg_tou',
+                               'max_c_flex_neg_tou_mi', 'max_c_flex_neg_con', 'max_c_flex_neg_con_mi',
+                               'max_c_flex_neg_rtp']
+            min_prices_list = ['min_c_flex_pos_tou', 'min_c_flex_pos_tou_mi', 'min_c_flex_pos_con',
+                               'min_c_flex_pos_con_mi', 'min_c_flex_pos_rtp', 'min_c_flex_neg_tou',
+                               'min_c_flex_neg_tou_mi', 'min_c_flex_neg_con', 'min_c_flex_neg_con_mi',
+                               'min_c_flex_neg_rtp']
+            # pos_neg_list = ['Pos_Pr', 'Neg_Pr'] #ursprünglich für 2. geschachtelte for loop aber nicht nötig?
+
+            # preparing the columns with zeros (necessary?)
+            # for flexprice in flex_prices_list:
+            #     flex_sum_df[flexprice] = 0
+            # flex_sum_df['c_flex_pos_tou'] = 0
+            # flex_sum_df['c_flex_pos_tou_mi'] = 0
+            # flex_sum_df['c_flex_pos_con'] = 0
+            # flex_sum_df['c_flex_pos_con_mi'] = 0
+            # flex_sum_df['c_flex_pos_rtp'] = 0
+            # flex_sum_df['c_flex_neg_tou'] = 0
+            # flex_sum_df['c_flex_neg_tou_mi'] = 0
+            # flex_sum_df['c_flex_neg_con'] = 0
+            # flex_sum_df['c_flex_neg_con_mi'] = 0
+            # flex_sum_df['c_flex_neg_rtp'] = 0
+
+
+            for maxprice, flexprice in zip(max_prices_list, flex_prices_list):
+                #flex_sum_df[maxprice] = 0 #scheint nicht nötig zu sein, würde auch sonst hier immer vorher wieder alles löschen
+                df_temp = flex_sum_df.loc[flex_result_df.index, :]
+                flex_sum_df.loc[df_temp.index, maxprice] = np.where(
+                    df_temp[flexprice] <= flex_result_df[flexprice],
+                    flex_result_df[flexprice], df_temp[flexprice])
+            for minprice, flexprice in zip(min_prices_list, flex_prices_list):
+                #flex_sum_df[minprice] = 0
+                df_temp = flex_sum_df.loc[flex_result_df.index, :]
+                flex_sum_df.loc[df_temp.index, minprice] = np.where(
+                    df_temp[flexprice].abs() >= flex_result_df[flexprice].abs(),
+                    flex_result_df[flexprice], df_temp[flexprice])
+            for flexprice in flex_prices_list:
+                #flex_sum_df[flexprice] = 0
+                flex_sum_df.loc[flex_result_df.index[0]:flex_result_df.index[-1], flexprice] \
+                    += flex_result_df[flexprice]
+            # for flexprice in flex_prices_list:
+            #     flex_sum_df[]
+            # for flexprice in flex_prices_list:
+            #     if flex_sum_df[flexprice].abs().le(flex_result_df[flexprice]).abs():
+            #         flex_sum_df[flexprice] = flex_result_df[flexprice]
+            #     else:
+            #         flex_sum_df[flexprice] = flex_sum_df[flexprice]
+
         # Calculate energy costs
         opt_sum_df['c_tou_energy'] = opt_sum_df['c_tou_kwh'] * opt_sum_df['P_ev_opt_sum_tou'] \
                                      / my_ems_tou['time_data']['ntsteps']
@@ -251,7 +335,7 @@ def aggregate_ev_flex(veh_availabilities, output_path='../output/', rtp_input_da
         opt_per_daytime = opt_per_daytime.append(opt_per_daytime_temp.iloc[192:384, :])
         opt_per_daytime = opt_per_daytime.reset_index()
 
-        # Calculate weekday and weekend optimal schedule averages per daytime
+        # Calculate weekday and weekend and day optimal schedule averages per daytime
         weekday_opt_per_daytime = (opt_per_daytime_temp.iloc[96:192, :] +
                                    opt_per_daytime_temp.iloc[480:576, :].values +
                                    opt_per_daytime_temp.iloc[576:, :].values +
@@ -265,6 +349,16 @@ def aggregate_ev_flex(veh_availabilities, output_path='../output/', rtp_input_da
         weekend_opt_per_daytime = weekend_opt_per_daytime.set_index('Weekend, ' + pd.date_range(start='00:00',
                                                                                                 end='23:45',
                                                                                                 freq='15Min').strftime('%H:%M'))
+        day_opt_per_daytime = (opt_per_daytime_temp.iloc[96:192, :] +
+                               opt_per_daytime_temp.iloc[480:576, :].values +
+                               opt_per_daytime_temp.iloc[576:, :].values +
+                               opt_per_daytime_temp.iloc[384:480, :].values +
+                               opt_per_daytime_temp.iloc[0:96, :].values +
+                               opt_per_daytime_temp.iloc[192:288, :].values +
+                               opt_per_daytime_temp.iloc[288:384, :].values) / 7
+        day_opt_per_daytime = day_opt_per_daytime.set_index('Day, ' + pd.date_range(start='00:00', end='23:45',
+                                                                                    freq='15Min').strftime('%H:%M'))
+
         # Calculate percentiles per daytime
         opt_per_daytime_qt = pd.DataFrame()
         n_percentiles = 11           # Define number of percentiles
@@ -278,7 +372,57 @@ def aggregate_ev_flex(veh_availabilities, output_path='../output/', rtp_input_da
         opt_per_daytime_qt = opt_per_daytime_qt.reset_index()
         # Prepare heat map for flexible power
         flex_per_daytime = pd.DataFrame()
-        flex_per_daytime_temp = flex_sum_df.groupby(by='Daytime_ID').mean()
+        # flex_per_daytime_temp = flex_sum_df.groupby(by='Daytime_ID').mean()
+        flex_per_daytime_temp = flex_sum_df.groupby(by='Daytime_ID').agg({'P_pos_sum_tou': 'mean',
+                                                                'P_pos_sum_tou_mi': 'mean',
+                                                                'P_pos_sum_con': 'mean',
+                                                                'P_pos_sum_con_mi': 'mean',
+                                                                'P_pos_sum_rtp': 'mean',
+                                                                'P_neg_sum_tou': 'mean',
+                                                                'P_neg_sum_tou_mi': 'mean',
+                                                                'P_neg_sum_con': 'mean',
+                                                                'P_neg_sum_con_mi': 'mean',
+                                                                'P_neg_sum_rtp': 'mean',
+                                                                'E_pos_sum_tou': 'mean',
+                                                                'E_pos_sum_tou_mi': 'mean',
+                                                                'E_pos_sum_con': 'mean',
+                                                                'E_pos_sum_con_mi': 'mean',
+                                                                'E_pos_sum_rtp': 'mean',
+                                                                'E_neg_sum_tou': 'mean',
+                                                                'E_neg_sum_tou_mi': 'mean',
+                                                                'E_neg_sum_con': 'mean',
+                                                                'E_neg_sum_con_mi': 'mean',
+                                                                'E_neg_sum_rtp': 'mean',
+                                                                'c_flex_pos_tou': 'mean',
+                                                                'max_c_flex_pos_tou': 'max',
+                                                                'min_c_flex_pos_tou': 'min',
+                                                                'c_flex_pos_tou_mi': 'mean',
+                                                                'max_c_flex_pos_tou_mi': 'max',
+                                                                'min_c_flex_pos_tou_mi': 'min',
+                                                                'c_flex_pos_con': 'mean',
+                                                                'max_c_flex_pos_con': 'max',
+                                                                'min_c_flex_pos_con': 'min',
+                                                                'c_flex_pos_con_mi': 'mean',
+                                                                'max_c_flex_pos_con_mi': 'max',
+                                                                'min_c_flex_pos_con_mi': 'min',
+                                                                'c_flex_pos_rtp': 'mean',
+                                                                'max_c_flex_pos_rtp': 'max',
+                                                                'min_c_flex_pos_rtp': 'min',
+                                                                'c_flex_neg_tou': 'mean',
+                                                                'max_c_flex_neg_tou': 'max',
+                                                                'min_c_flex_neg_tou': 'min',
+                                                                'c_flex_neg_tou_mi': 'mean',
+                                                                'max_c_flex_neg_tou_mi': 'max',
+                                                                'min_c_flex_neg_tou_mi': 'min',
+                                                                'c_flex_neg_con': 'mean',
+                                                                'max_c_flex_neg_con': 'max',
+                                                                'min_c_flex_neg_con': 'min',
+                                                                'c_flex_neg_con_mi': 'mean',
+                                                                'max_c_flex_neg_con_mi': 'max',
+                                                                'min_c_flex_neg_con_mi': 'min',
+                                                                'c_flex_neg_rtp': 'mean',
+                                                                'max_c_flex_neg_rtp': 'max',
+                                                                'min_c_flex_neg_rtp': 'min'})
         flex_per_daytime = flex_per_daytime.append(flex_per_daytime_temp.iloc[96:192, :])
         flex_per_daytime = flex_per_daytime.append(flex_per_daytime_temp.iloc[480:, :])
         flex_per_daytime = flex_per_daytime.append(flex_per_daytime_temp.iloc[384:480, :])
@@ -286,7 +430,7 @@ def aggregate_ev_flex(veh_availabilities, output_path='../output/', rtp_input_da
         flex_per_daytime = flex_per_daytime.append(flex_per_daytime_temp.iloc[192:384, :])
         flex_per_daytime = flex_per_daytime.reset_index()
 
-        # Calculate weekday and weekend flexibility averages per daytime
+        # Calculate weekday and weekend and day flexibility averages per daytime
         weekday_flex_per_daytime = (flex_per_daytime_temp.iloc[96:192, :] +
                                     flex_per_daytime_temp.iloc[480:576, :].values +
                                     flex_per_daytime_temp.iloc[576:, :].values +
@@ -300,15 +444,25 @@ def aggregate_ev_flex(veh_availabilities, output_path='../output/', rtp_input_da
         weekend_flex_per_daytime = weekend_flex_per_daytime.set_index('Weekend, ' + pd.date_range(start='00:00',
                                                                                                   end='23:45',
                                                                                                   freq='15Min').strftime('%H:%M'))
-
+        day_flex_per_daytime = (flex_per_daytime_temp.iloc[96:192, :] +
+                                flex_per_daytime_temp.iloc[480:576, :].values +
+                                flex_per_daytime_temp.iloc[576:, :].values +
+                                flex_per_daytime_temp.iloc[384:480, :].values +
+                                flex_per_daytime_temp.iloc[0:96, :].values +
+                                flex_per_daytime_temp.iloc[192:288, :].values +
+                                flex_per_daytime_temp.iloc[288:384, :].values) / 7
+        day_flex_per_daytime = day_flex_per_daytime.set_index('Day, ' + pd.date_range(start='00:00', end='23:45',
+                                                                                      freq='15Min').strftime('%H:%M'))
         # Save data to hdf files for further analysis
         opt_per_daytime.to_hdf(output_path + str(power) + '/Aggregated Data/opt_per_daytime_data.h5', mode='w', key='df')
         opt_per_daytime_qt.to_hdf(output_path + str(power) + '/Aggregated Data/opt_per_daytime_qt_data.h5', mode='w', key='df')
         flex_per_daytime.to_hdf(output_path + str(power) + '/Aggregated Data/flex_per_daytime_data.h5', mode='w', key='df')
         weekday_opt_per_daytime.to_hdf(output_path + str(power) + '/Aggregated Data/weekday_opt_per_daytime_data.h5', mode='w', key='df')
         weekend_opt_per_daytime.to_hdf(output_path + str(power) + '/Aggregated Data/weekend_opt_per_daytime_data.h5', mode='w', key='df')
+        day_opt_per_daytime.to_hdf(output_path + str(power) + '/Aggregated Data/day_opt_per_daytime_data.h5', mode='w', key='df')
         weekday_flex_per_daytime.to_hdf(output_path + str(power) + '/Aggregated Data/weekday_flex_per_daytime_data.h5', mode='w', key='df')
         weekend_flex_per_daytime.to_hdf(output_path + str(power) + '/Aggregated Data/weekend_flex_per_daytime_data.h5', mode='w', key='df')
+        day_flex_per_daytime.to_hdf(output_path + str(power) + '/Aggregated Data/day_flex_per_daytime_data.h5', mode='w', key='df')
 
         # prepare df for week heat map
         P_pos_tou_hm = pd.DataFrame(0, index=pd.date_range(start='00:00', end='23:45', freq='15Min').strftime('%H:%M'),
@@ -366,7 +520,7 @@ if __name__ == '__main__':
     # Read veh availabilities from file
     veh_avail = pd.read_csv('../input/chts_veh_availability.csv')
     # Extract a subsample for testing
-    veh_avail = veh_avail[68:88]
+    veh_avail = veh_avail[:]
 
     aggregate_ev_flex(veh_avail, output_path='../output/')
 

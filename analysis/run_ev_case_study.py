@@ -53,7 +53,9 @@ param_con = {'conversion_distance_2_km': 1.61,
              'output_path': output_path,
              'pricing_strategies': ['ToU', 'Constant', 'Con_mi', 'ToU_mi', 'RTP'],
              'plotting': False,
-             'info': False}
+             'info': False,
+             'save_ev_flex_as_feather': False,
+             'save_ems_object_as_json': True}
 for values in itertools.product(*map(params.get, keys)):
     # Store in list
     param_variations.append(list(values))
@@ -70,7 +72,7 @@ print('3. Aggregate optimal charging schedules, costs, and flexibility offers.')
 ev_case_study.aggregate_ev_flex(veh_availabilities,
                                 output_path=output_path,
                                 rtp_input_data_path=rtp_input_path)
-
+#%%
 print('4. Plot results.')
 
 # Create empty figures folder
@@ -96,6 +98,8 @@ for power in power_levels:
     overall_costs[power]['RTP'] = pd.read_hdf(output_path + str(power) + '/Aggregated Data/opt_sum_data.h5')['c_rtp_energy'].sum()
     # Plot aggregated flexibility offers over time
     ev_case_study.plot_opt_flex_timeseries(power, output_path=output_path + str(power) + '/', figure_path=figure_path)
+    # Plot flex prices over time
+    ev_case_study.plot_flex_prices(power, output_path=output_path + str(power) + '/', figure_path=figure_path)
 
 # Plot overall cost
 ev_case_study.plot_overall_cost(overall_costs=overall_costs, figure_path=figure_path)
