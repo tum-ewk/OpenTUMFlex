@@ -123,6 +123,20 @@ def aggregate_ev_flex(veh_availabilities, output_path='../output/', rtp_input_da
                                                               'max_c_flex_neg_rtp',
                                                               'min_c_flex_neg_rtp',
                                                               'Daytime_ID'})
+        # Assigning -inf/inf to max/minprice columns for calculation of upper and lower bounds of the flexibility price
+        max_prices_list = ['max_c_flex_pos_tou', 'max_c_flex_pos_tou_mi', 'max_c_flex_pos_con',
+                           'max_c_flex_pos_con_mi', 'max_c_flex_pos_rtp', 'max_c_flex_neg_tou',
+                           'max_c_flex_neg_tou_mi', 'max_c_flex_neg_con', 'max_c_flex_neg_con_mi',
+                           'max_c_flex_neg_rtp']
+        min_prices_list = ['min_c_flex_pos_tou', 'min_c_flex_pos_tou_mi', 'min_c_flex_pos_con',
+                           'min_c_flex_pos_con_mi', 'min_c_flex_pos_rtp', 'min_c_flex_neg_tou',
+                           'min_c_flex_neg_tou_mi', 'min_c_flex_neg_con', 'min_c_flex_neg_con_mi',
+                           'min_c_flex_neg_rtp']
+        for maxprice in max_prices_list:
+            flex_sum_df[maxprice] = -np.inf
+        for minprice in min_prices_list:
+            flex_sum_df[minprice] = np.inf
+
         # Get forecast electricity prices for each time step
         price_forecast = forecast.simulate_elect_price_fcst(rtp_input_data_path=rtp_input_data_path,
                                                             t_start=t_min,
@@ -136,13 +150,25 @@ def aggregate_ev_flex(veh_availabilities, output_path='../output/', rtp_input_da
         # Create a daytime identifier for weekday and time for heat map
         opt_sum_df['Daytime_ID'] = opt_sum_df.index.day_name().array + ', ' + opt_sum_df.index.strftime('%H:%M').array
         flex_sum_df['Daytime_ID'] = opt_sum_df.index.day_name().array + ', ' + opt_sum_df.index.strftime('%H:%M').array
-                # Go through all files
+        # Go through all files
         for result_name in file_names:
             my_ems_tou_mi = opentumflex.init_ems_js(path=output_path + str(power) + '/ToU_mi/' + result_name)
             my_ems_tou = opentumflex.init_ems_js(path=output_path + str(power) + '/ToU/' + result_name)
             my_ems_con_mi = opentumflex.init_ems_js(path=output_path + str(power) + '/Con_mi/' + result_name)
             my_ems_con = opentumflex.init_ems_js(path=output_path + str(power) + '/Constant/' + result_name)
             my_ems_rtp = opentumflex.init_ems_js(path=output_path + str(power) + '/RTP/' + result_name)
+
+            # Setting all flex prices that are zero & don't have a correlating flex power to NaN
+            my_ems_list = [my_ems_tou_mi, my_ems_tou, my_ems_con_mi, my_ems_con, my_ems_rtp]
+            price_l = ['Pos_Pr', 'Neg_Pr']
+            power_l = ['Pos_P', 'Neg_P']
+            # set_sign_l = [np.inf, -np.inf]
+            for my_ems in my_ems_list:
+                for pr, p in zip(price_l, power_l):
+                    my_ems['flexopts']['ev'].loc[((my_ems['flexopts']['ev'][pr] == 0) &
+                                                  (my_ems['flexopts']['ev'][p] == 0)), pr] = np.NAN
+            # my_ems_con['flexopts']['ev'].loc[((my_ems_con['flexopts']['ev']['Pos_Pr'] == 0) &
+            #                                   (my_ems_con['flexopts']['ev']['Pos_P'] == 0)), 'Pos_Pr'] = np.NAN
 
             opt_result_df = pd.DataFrame({'P_ev_opt_tou_mi': my_ems_tou_mi['optplan']['EV_power'],
                                           'P_ev_opt_tou': my_ems_tou['optplan']['EV_power'],
@@ -241,59 +267,61 @@ def aggregate_ev_flex(veh_availabilities, output_path='../output/', rtp_input_da
             flex_sum_df.loc[flex_result_df.index[0]:flex_result_df.index[-1], 'E_neg_sum_rtp'] \
                 += flex_result_df['E_neg_rtp']
 
-            # lists of all flex prices for combination in for loop, min/max NOT from absolute values
+            # lists of all flex prices for combination in for loop, min/max NOT from absolute values, max/min already
+            # assigned above
             flex_prices_list = ['c_flex_pos_tou', 'c_flex_pos_tou_mi', 'c_flex_pos_con',
                                 'c_flex_pos_con_mi', 'c_flex_pos_rtp', 'c_flex_neg_tou',
                                 'c_flex_neg_tou_mi', 'c_flex_neg_con', 'c_flex_neg_con_mi',
                                 'c_flex_neg_rtp']
-            max_prices_list = ['max_c_flex_pos_tou', 'max_c_flex_pos_tou_mi', 'max_c_flex_pos_con',
-                               'max_c_flex_pos_con_mi', 'max_c_flex_pos_rtp','max_c_flex_neg_tou',
-                               'max_c_flex_neg_tou_mi', 'max_c_flex_neg_con', 'max_c_flex_neg_con_mi',
-                               'max_c_flex_neg_rtp']
-            min_prices_list = ['min_c_flex_pos_tou', 'min_c_flex_pos_tou_mi', 'min_c_flex_pos_con',
-                               'min_c_flex_pos_con_mi', 'min_c_flex_pos_rtp', 'min_c_flex_neg_tou',
-                               'min_c_flex_neg_tou_mi', 'min_c_flex_neg_con', 'min_c_flex_neg_con_mi',
-                               'min_c_flex_neg_rtp']
-            # pos_neg_list = ['Pos_Pr', 'Neg_Pr'] #ursprünglich für 2. geschachtelte for loop aber nicht nötig?
+            # max_prices_list = ['max_c_flex_pos_tou', 'max_c_flex_pos_tou_mi', 'max_c_flex_pos_con',
+            #                    'max_c_flex_pos_con_mi', 'max_c_flex_pos_rtp','max_c_flex_neg_tou',
+            #                    'max_c_flex_neg_tou_mi', 'max_c_flex_neg_con', 'max_c_flex_neg_con_mi',
+            #                    'max_c_flex_neg_rtp']
+            # min_prices_list = ['min_c_flex_pos_tou', 'min_c_flex_pos_tou_mi', 'min_c_flex_pos_con',
+            #                    'min_c_flex_pos_con_mi', 'min_c_flex_pos_rtp', 'min_c_flex_neg_tou',
+            #                    'min_c_flex_neg_tou_mi', 'min_c_flex_neg_con', 'min_c_flex_neg_con_mi',
+            #                    'min_c_flex_neg_rtp']
 
-            # preparing the columns with zeros (necessary?)
-            # for flexprice in flex_prices_list:
-            #     flex_sum_df[flexprice] = 0
-            # flex_sum_df['c_flex_pos_tou'] = 0
-            # flex_sum_df['c_flex_pos_tou_mi'] = 0
-            # flex_sum_df['c_flex_pos_con'] = 0
-            # flex_sum_df['c_flex_pos_con_mi'] = 0
-            # flex_sum_df['c_flex_pos_rtp'] = 0
-            # flex_sum_df['c_flex_neg_tou'] = 0
-            # flex_sum_df['c_flex_neg_tou_mi'] = 0
-            # flex_sum_df['c_flex_neg_con'] = 0
-            # flex_sum_df['c_flex_neg_con_mi'] = 0
-            # flex_sum_df['c_flex_neg_rtp'] = 0
-
-
+            # filling max/minprice columns, by only replacing when value from current availability is bigger/smaller
+            ##### glz für pos/neg, weil ja nicht mehr "abs"
+            # for maxprice, minprice in zip(max_prices_list, min_prices_list):
+            #     flex_sum_df[maxprice] = -np.inf
+            #     flex_sum_df[minprice] = np.inf
             for maxprice, flexprice in zip(max_prices_list, flex_prices_list):
-                #flex_sum_df[maxprice] = 0 #scheint nicht nötig zu sein, würde auch sonst hier immer vorher wieder alles löschen
+                #flex_sum_df[maxprice] = 0 #scheint nicht nötig zu sein, würde auch sonst hier immer alles löschen
+                # df_temp = flex_sum_df.loc[flex_result_df.index, :] # achtung falsch wsl!
+                # flex_sum_df.loc[df_temp.index, maxprice] = np.where(
+                #     df_temp[flexprice] <= flex_result_df[flexprice],
+                #     flex_result_df[flexprice], df_temp[flexprice])
                 df_temp = flex_sum_df.loc[flex_result_df.index, :]
                 flex_sum_df.loc[df_temp.index, maxprice] = np.where(
-                    df_temp[flexprice] <= flex_result_df[flexprice],
-                    flex_result_df[flexprice], df_temp[flexprice])
+                    df_temp[maxprice] <= flex_result_df[flexprice],
+                    flex_result_df[flexprice], df_temp[maxprice])
             for minprice, flexprice in zip(min_prices_list, flex_prices_list):
-                #flex_sum_df[minprice] = 0
+                # df_temp = flex_sum_df.loc[flex_result_df.index, :] # alt und wsl falsch
+                # flex_sum_df.loc[df_temp.index, minprice] = np.where(
+                #     df_temp[flexprice] > flex_result_df[flexprice],
+                #     flex_result_df[flexprice], df_temp[flexprice])
                 df_temp = flex_sum_df.loc[flex_result_df.index, :]
                 flex_sum_df.loc[df_temp.index, minprice] = np.where(
-                    df_temp[flexprice].abs() >= flex_result_df[flexprice].abs(),
-                    flex_result_df[flexprice], df_temp[flexprice])
-            for flexprice in flex_prices_list:
-                #flex_sum_df[flexprice] = 0
-                flex_sum_df.loc[flex_result_df.index[0]:flex_result_df.index[-1], flexprice] \
-                    += flex_result_df[flexprice]
+                    df_temp[minprice] >= flex_result_df[flexprice],
+                    flex_result_df[flexprice], df_temp[minprice])
             # for flexprice in flex_prices_list:
-            #     flex_sum_df[]
-            # for flexprice in flex_prices_list:
-            #     if flex_sum_df[flexprice].abs().le(flex_result_df[flexprice]).abs():
-            #         flex_sum_df[flexprice] = flex_result_df[flexprice]
-            #     else:
-            #         flex_sum_df[flexprice] = flex_sum_df[flexprice]
+            #     flex_sum_df.loc[flex_result_df.index[0]:flex_result_df.index[-1], flexprice] \
+            #         += flex_result_df[flexprice]
+
+        # Setting all flex prices in max/min price columns that are zero & don't have a correlating flex power to NaN
+
+        # power_columns_list = ['P_pos_sum_tou', 'P_pos_sum_tou_mi', 'P_pos_sum_con', 'P_pos_sum_con_mi', 'P_pos_sum_rtp',
+        #                       'P_neg_sum_tou', 'P_neg_sum_tou_mi', 'P_neg_sum_con', 'P_neg_sum_con_mi', 'P_neg_sum_rtp',]
+        # for power_col, max_pr_col, min_pr_col in zip(power_columns_list, max_prices_list, min_prices_list):
+        #     flex_sum_df.loc[((flex_sum_df[max_pr_col] == 0) &
+        #                                   (flex_sum_df[power_col] == 0)), [max_pr_col]] = np.NAN
+        #     flex_sum_df.loc[((flex_sum_df[min_pr_col] == 0) &
+        #                                   (flex_sum_df[power_col] == 0)), [min_pr_col]] = np.NAN
+
+        # replace all remaining inf values with NAN
+        flex_sum_df.replace([np.inf, -np.inf], np.NAN, inplace=True)
 
         # Calculate energy costs
         opt_sum_df['c_tou_energy'] = opt_sum_df['c_tou_kwh'] * opt_sum_df['P_ev_opt_sum_tou'] \
@@ -320,149 +348,285 @@ def aggregate_ev_flex(veh_availabilities, output_path='../output/', rtp_input_da
         n_veh_avail_max = opt_sum_df['n_veh_avail'].max()
         n_veh_avail_min = opt_sum_df['n_veh_avail'].min()
 
-        """
-        ####################################################################
-        # Group optimal and flexible power schedules by daytime ID #########
-        ####################################################################
-        """
-        # Prepare heat map for optimal charging power
-        opt_per_daytime = pd.DataFrame()
-        opt_per_daytime_temp = opt_sum_df.groupby(by='Daytime_ID').mean()
-        opt_per_daytime = opt_per_daytime.append(opt_per_daytime_temp.iloc[96:192, :])
-        opt_per_daytime = opt_per_daytime.append(opt_per_daytime_temp.iloc[480:, :])
-        opt_per_daytime = opt_per_daytime.append(opt_per_daytime_temp.iloc[384:480, :])
-        opt_per_daytime = opt_per_daytime.append(opt_per_daytime_temp.iloc[0:96, :])
-        opt_per_daytime = opt_per_daytime.append(opt_per_daytime_temp.iloc[192:384, :])
-        opt_per_daytime = opt_per_daytime.reset_index()
+        # Differentiating between summer, winter and all months with a for loop
 
-        # Calculate weekday and weekend and day optimal schedule averages per daytime
-        weekday_opt_per_daytime = (opt_per_daytime_temp.iloc[96:192, :] +
+        # create lists for for loop
+        seasons = []
+        seasons_opt_df_l = []
+        seasons_flex_df_l = []
+        seasons_dict = {}
+        # create winter/summer dataframes and update lists for for loop
+        if any(x in opt_sum_df.index.month for x in [10, 11, 12, 1, 2, 3, 4, 5]):
+            wi_opt_sum_df = opt_sum_df.loc[(opt_sum_df.index.month >= 10) | (opt_sum_df.index.month <= 5)]
+            wi_flex_sum_df = flex_sum_df.loc[(flex_sum_df.index.month >= 10) | (flex_sum_df.index.month <= 5)]
+            seasons.append('winter')
+            seasons_opt_df_l.append(wi_opt_sum_df)
+            seasons_flex_df_l.append(wi_flex_sum_df)
+            seasons_dict['winter'] = {}
+            seasons_dict['winter']['opt_sum_df'] = opt_sum_df.loc[(opt_sum_df.index.month >= 10) | (opt_sum_df.index.month <= 5)]
+            seasons_dict['winter']['flex_sum_df'] = flex_sum_df.loc[
+                (flex_sum_df.index.month >= 10) | (flex_sum_df.index.month <= 5)]
+        if any(x in opt_sum_df.index.month for x in [6,7,8,9]):
+            su_opt_sum_df = opt_sum_df.loc[(opt_sum_df.index.month >= 6) & (opt_sum_df.index.month <= 9)]
+            su_flex_sum_df = flex_sum_df.loc[(flex_sum_df.index.month >= 6) & (flex_sum_df.index.month <= 9)]
+            seasons.append('summer')
+            seasons_opt_df_l.append(su_opt_sum_df)
+            seasons_flex_df_l.append(su_flex_sum_df)
+            seasons_dict['summer'] = {}
+            seasons_dict['summer']['opt_sum_df'] = opt_sum_df.loc[(opt_sum_df.index.month >= 6) | (opt_sum_df.index.month <= 9)]
+            seasons_dict['summer']['flex_sum_df'] = flex_sum_df.loc[(flex_sum_df.index.month >= 6) | (flex_sum_df.index.month <= 9)]
+
+        # add "all seasons" as last item in lists, as heatmap calculations after the for loop need data from all months
+        seasons.append('allseasons')
+        seasons_opt_df_l.append(opt_sum_df)
+        seasons_flex_df_l.append(flex_sum_df)
+        seasons_dict['allseasons'] = {}
+        seasons_dict['allseasons']['opt_sum_df'] = opt_sum_df
+        seasons_dict['allseasons']['flex_sum_df'] = flex_sum_df
+
+        # for loop over summer, winter and all seasons opt_sum and flex_sum dataframes
+        # for key, value in seasons_dict.items():
+        #     season = key
+        #     season_opt_sum_df = value['opt_sum_df']
+        #     season_flex_sum_df = value['flex_sum_df']
+
+        # # for loop over summer, winter and all seasons opt_sum and flex_sum dataframes
+        for season_opt_sum_df, season_flex_sum_df, season in zip(seasons_opt_df_l, seasons_flex_df_l, seasons):
+
+            """
+            ####################################################################
+            # Group optimal and flexible power schedules by daytime ID #########
+            ####################################################################
+            """
+            # Prepare heat map for optimal charging power
+            opt_per_daytime = pd.DataFrame()
+            opt_per_daytime_temp = season_opt_sum_df.groupby(by='Daytime_ID').mean()
+            opt_per_daytime = opt_per_daytime.append(opt_per_daytime_temp.iloc[96:192, :])
+            opt_per_daytime = opt_per_daytime.append(opt_per_daytime_temp.iloc[480:, :])
+            opt_per_daytime = opt_per_daytime.append(opt_per_daytime_temp.iloc[384:480, :])
+            opt_per_daytime = opt_per_daytime.append(opt_per_daytime_temp.iloc[0:96, :])
+            opt_per_daytime = opt_per_daytime.append(opt_per_daytime_temp.iloc[192:384, :])
+            opt_per_daytime = opt_per_daytime.reset_index()
+
+            # Calculate weekday and weekend and average day optimal schedule averages per daytime
+            weekday_opt_per_daytime = (opt_per_daytime_temp.iloc[96:192, :] +
+                                       opt_per_daytime_temp.iloc[480:576, :].values +
+                                       opt_per_daytime_temp.iloc[576:, :].values +
+                                       opt_per_daytime_temp.iloc[384:480, :].values +
+                                       opt_per_daytime_temp.iloc[0:96, :].values) / 5
+            weekday_opt_per_daytime = weekday_opt_per_daytime.set_index('Weekday, ' + pd.date_range(start='00:00',
+                                                                                                    end='23:45',
+                                                                                                    freq='15Min').strftime('%H:%M'))
+            weekend_opt_per_daytime = (opt_per_daytime_temp.iloc[192:288, :] +
+                                       opt_per_daytime_temp.iloc[288:384, :].values) / 2
+            weekend_opt_per_daytime = weekend_opt_per_daytime.set_index('Weekend, ' + pd.date_range(start='00:00',
+                                                                                                    end='23:45',
+                                                                                                    freq='15Min').strftime('%H:%M'))
+            day_opt_per_daytime = (opt_per_daytime_temp.iloc[96:192, :] +
                                    opt_per_daytime_temp.iloc[480:576, :].values +
                                    opt_per_daytime_temp.iloc[576:, :].values +
                                    opt_per_daytime_temp.iloc[384:480, :].values +
-                                   opt_per_daytime_temp.iloc[0:96, :].values) / 5
-        weekday_opt_per_daytime = weekday_opt_per_daytime.set_index('Weekday, ' + pd.date_range(start='00:00',
-                                                                                                end='23:45',
-                                                                                                freq='15Min').strftime('%H:%M'))
-        weekend_opt_per_daytime = (opt_per_daytime_temp.iloc[192:288, :] +
-                                   opt_per_daytime_temp.iloc[288:384, :].values) / 2
-        weekend_opt_per_daytime = weekend_opt_per_daytime.set_index('Weekend, ' + pd.date_range(start='00:00',
-                                                                                                end='23:45',
-                                                                                                freq='15Min').strftime('%H:%M'))
-        day_opt_per_daytime = (opt_per_daytime_temp.iloc[96:192, :] +
-                               opt_per_daytime_temp.iloc[480:576, :].values +
-                               opt_per_daytime_temp.iloc[576:, :].values +
-                               opt_per_daytime_temp.iloc[384:480, :].values +
-                               opt_per_daytime_temp.iloc[0:96, :].values +
-                               opt_per_daytime_temp.iloc[192:288, :].values +
-                               opt_per_daytime_temp.iloc[288:384, :].values) / 7
-        day_opt_per_daytime = day_opt_per_daytime.set_index('Day, ' + pd.date_range(start='00:00', end='23:45',
-                                                                                    freq='15Min').strftime('%H:%M'))
+                                   opt_per_daytime_temp.iloc[0:96, :].values +
+                                   opt_per_daytime_temp.iloc[192:288, :].values +
+                                   opt_per_daytime_temp.iloc[288:384, :].values) / 7
+            day_opt_per_daytime = day_opt_per_daytime.set_index('Day, ' + pd.date_range(start='00:00', end='23:45',
+                                                                                        freq='15Min').strftime('%H:%M'))
 
-        # Calculate percentiles per daytime
-        opt_per_daytime_qt = pd.DataFrame()
-        n_percentiles = 11           # Define number of percentiles
-        percentiles = np.linspace(start=0, stop=1, num=n_percentiles)
-        opt_per_daytime_temp = opt_sum_df.groupby(by='Daytime_ID').quantile(percentiles)
-        opt_per_daytime_qt = opt_per_daytime_qt.append(opt_per_daytime_temp.iloc[96 * n_percentiles:192 * n_percentiles, :])
-        opt_per_daytime_qt = opt_per_daytime_qt.append(opt_per_daytime_temp.iloc[480 * n_percentiles:, :])
-        opt_per_daytime_qt = opt_per_daytime_qt.append(opt_per_daytime_temp.iloc[384 * n_percentiles:480 * n_percentiles, :])
-        opt_per_daytime_qt = opt_per_daytime_qt.append(opt_per_daytime_temp.iloc[0:96 * n_percentiles, :])
-        opt_per_daytime_qt = opt_per_daytime_qt.append(opt_per_daytime_temp.iloc[192 * n_percentiles:384 * n_percentiles, :])
-        opt_per_daytime_qt = opt_per_daytime_qt.reset_index()
-        # Prepare heat map for flexible power
-        flex_per_daytime = pd.DataFrame()
-        # flex_per_daytime_temp = flex_sum_df.groupby(by='Daytime_ID').mean()
-        flex_per_daytime_temp = flex_sum_df.groupby(by='Daytime_ID').agg({'P_pos_sum_tou': 'mean',
-                                                                'P_pos_sum_tou_mi': 'mean',
-                                                                'P_pos_sum_con': 'mean',
-                                                                'P_pos_sum_con_mi': 'mean',
-                                                                'P_pos_sum_rtp': 'mean',
-                                                                'P_neg_sum_tou': 'mean',
-                                                                'P_neg_sum_tou_mi': 'mean',
-                                                                'P_neg_sum_con': 'mean',
-                                                                'P_neg_sum_con_mi': 'mean',
-                                                                'P_neg_sum_rtp': 'mean',
-                                                                'E_pos_sum_tou': 'mean',
-                                                                'E_pos_sum_tou_mi': 'mean',
-                                                                'E_pos_sum_con': 'mean',
-                                                                'E_pos_sum_con_mi': 'mean',
-                                                                'E_pos_sum_rtp': 'mean',
-                                                                'E_neg_sum_tou': 'mean',
-                                                                'E_neg_sum_tou_mi': 'mean',
-                                                                'E_neg_sum_con': 'mean',
-                                                                'E_neg_sum_con_mi': 'mean',
-                                                                'E_neg_sum_rtp': 'mean',
-                                                                'c_flex_pos_tou': 'mean',
-                                                                'max_c_flex_pos_tou': 'max',
-                                                                'min_c_flex_pos_tou': 'min',
-                                                                'c_flex_pos_tou_mi': 'mean',
-                                                                'max_c_flex_pos_tou_mi': 'max',
-                                                                'min_c_flex_pos_tou_mi': 'min',
-                                                                'c_flex_pos_con': 'mean',
-                                                                'max_c_flex_pos_con': 'max',
-                                                                'min_c_flex_pos_con': 'min',
-                                                                'c_flex_pos_con_mi': 'mean',
-                                                                'max_c_flex_pos_con_mi': 'max',
-                                                                'min_c_flex_pos_con_mi': 'min',
-                                                                'c_flex_pos_rtp': 'mean',
-                                                                'max_c_flex_pos_rtp': 'max',
-                                                                'min_c_flex_pos_rtp': 'min',
-                                                                'c_flex_neg_tou': 'mean',
-                                                                'max_c_flex_neg_tou': 'max',
-                                                                'min_c_flex_neg_tou': 'min',
-                                                                'c_flex_neg_tou_mi': 'mean',
-                                                                'max_c_flex_neg_tou_mi': 'max',
-                                                                'min_c_flex_neg_tou_mi': 'min',
-                                                                'c_flex_neg_con': 'mean',
-                                                                'max_c_flex_neg_con': 'max',
-                                                                'min_c_flex_neg_con': 'min',
-                                                                'c_flex_neg_con_mi': 'mean',
-                                                                'max_c_flex_neg_con_mi': 'max',
-                                                                'min_c_flex_neg_con_mi': 'min',
-                                                                'c_flex_neg_rtp': 'mean',
-                                                                'max_c_flex_neg_rtp': 'max',
-                                                                'min_c_flex_neg_rtp': 'min'})
-        flex_per_daytime = flex_per_daytime.append(flex_per_daytime_temp.iloc[96:192, :])
-        flex_per_daytime = flex_per_daytime.append(flex_per_daytime_temp.iloc[480:, :])
-        flex_per_daytime = flex_per_daytime.append(flex_per_daytime_temp.iloc[384:480, :])
-        flex_per_daytime = flex_per_daytime.append(flex_per_daytime_temp.iloc[0:96, :])
-        flex_per_daytime = flex_per_daytime.append(flex_per_daytime_temp.iloc[192:384, :])
-        flex_per_daytime = flex_per_daytime.reset_index()
+            # Calculate percentiles per daytime
+            opt_per_daytime_qt = pd.DataFrame()
+            n_percentiles = 11           # Define number of percentiles
+            percentiles = np.linspace(start=0, stop=1, num=n_percentiles)
+            opt_per_daytime_temp = opt_sum_df.groupby(by='Daytime_ID').quantile(percentiles)
+            opt_per_daytime_qt = opt_per_daytime_qt.append(opt_per_daytime_temp.iloc[96 * n_percentiles:192 * n_percentiles, :])
+            opt_per_daytime_qt = opt_per_daytime_qt.append(opt_per_daytime_temp.iloc[480 * n_percentiles:, :])
+            opt_per_daytime_qt = opt_per_daytime_qt.append(opt_per_daytime_temp.iloc[384 * n_percentiles:480 * n_percentiles, :])
+            opt_per_daytime_qt = opt_per_daytime_qt.append(opt_per_daytime_temp.iloc[0:96 * n_percentiles, :])
+            opt_per_daytime_qt = opt_per_daytime_qt.append(opt_per_daytime_temp.iloc[192 * n_percentiles:384 * n_percentiles, :])
+            opt_per_daytime_qt = opt_per_daytime_qt.reset_index()
+            # Prepare heat map for flexible power
+            flex_per_daytime = pd.DataFrame()
+            # flex_per_daytime_temp = flex_sum_df.groupby(by='Daytime_ID').mean()
+            flex_per_daytime_temp = season_flex_sum_df.groupby(by='Daytime_ID').agg({'P_pos_sum_tou': 'mean',
+                                                                                     'P_pos_sum_tou_mi': 'mean',
+                                                                                     'P_pos_sum_con': 'mean',
+                                                                                     'P_pos_sum_con_mi': 'mean',
+                                                                                     'P_pos_sum_rtp': 'mean',
+                                                                                     'P_neg_sum_tou': 'mean',
+                                                                                     'P_neg_sum_tou_mi': 'mean',
+                                                                                     'P_neg_sum_con': 'mean',
+                                                                                     'P_neg_sum_con_mi': 'mean',
+                                                                                     'P_neg_sum_rtp': 'mean',
+                                                                                     'E_pos_sum_tou': 'mean',
+                                                                                     'E_pos_sum_tou_mi': 'mean',
+                                                                                     'E_pos_sum_con': 'mean',
+                                                                                     'E_pos_sum_con_mi': 'mean',
+                                                                                     'E_pos_sum_rtp': 'mean',
+                                                                                     'E_neg_sum_tou': 'mean',
+                                                                                     'E_neg_sum_tou_mi': 'mean',
+                                                                                     'E_neg_sum_con': 'mean',
+                                                                                     'E_neg_sum_con_mi': 'mean',
+                                                                                     'E_neg_sum_rtp': 'mean',
+                                                                                     'c_flex_pos_tou': 'mean',
+                                                                                     'max_c_flex_pos_tou': 'max',
+                                                                                     'min_c_flex_pos_tou': 'min',
+                                                                                     'c_flex_pos_tou_mi': 'mean',
+                                                                                     'max_c_flex_pos_tou_mi': 'max',
+                                                                                     'min_c_flex_pos_tou_mi': 'min',
+                                                                                     'c_flex_pos_con': 'mean',
+                                                                                     'max_c_flex_pos_con': 'max',
+                                                                                     'min_c_flex_pos_con': 'min',
+                                                                                     'c_flex_pos_con_mi': 'mean',
+                                                                                     'max_c_flex_pos_con_mi': 'max',
+                                                                                     'min_c_flex_pos_con_mi': 'min',
+                                                                                     'c_flex_pos_rtp': 'mean',
+                                                                                     'max_c_flex_pos_rtp': 'max',
+                                                                                     'min_c_flex_pos_rtp': 'min',
+                                                                                     'c_flex_neg_tou': 'mean',
+                                                                                     'max_c_flex_neg_tou': 'max',
+                                                                                     'min_c_flex_neg_tou': 'min',
+                                                                                     'c_flex_neg_tou_mi': 'mean',
+                                                                                     'max_c_flex_neg_tou_mi': 'max',
+                                                                                     'min_c_flex_neg_tou_mi': 'min',
+                                                                                     'c_flex_neg_con': 'mean',
+                                                                                     'max_c_flex_neg_con': 'max',
+                                                                                     'min_c_flex_neg_con': 'min',
+                                                                                     'c_flex_neg_con_mi': 'mean',
+                                                                                     'max_c_flex_neg_con_mi': 'max',
+                                                                                     'min_c_flex_neg_con_mi': 'min',
+                                                                                     'c_flex_neg_rtp': 'mean',
+                                                                                     'max_c_flex_neg_rtp': 'max',
+                                                                                     'min_c_flex_neg_rtp': 'min'})
+            flex_per_daytime = flex_per_daytime.append(flex_per_daytime_temp.iloc[96:192, :])
+            flex_per_daytime = flex_per_daytime.append(flex_per_daytime_temp.iloc[480:, :])
+            flex_per_daytime = flex_per_daytime.append(flex_per_daytime_temp.iloc[384:480, :])
+            flex_per_daytime = flex_per_daytime.append(flex_per_daytime_temp.iloc[0:96, :])
+            flex_per_daytime = flex_per_daytime.append(flex_per_daytime_temp.iloc[192:384, :])
+            flex_per_daytime = flex_per_daytime.reset_index()
 
-        # Calculate weekday and weekend and day flexibility averages per daytime
-        weekday_flex_per_daytime = (flex_per_daytime_temp.iloc[96:192, :] +
+            # Calculate weekday and weekend and day flexibility averages per daytime
+            weekday_flex_per_daytime = (flex_per_daytime_temp.iloc[96:192, :] +
+                                        flex_per_daytime_temp.iloc[480:576, :].values +
+                                        flex_per_daytime_temp.iloc[576:, :].values +
+                                        flex_per_daytime_temp.iloc[384:480, :].values +
+                                        flex_per_daytime_temp.iloc[0:96, :].values) / 5
+            weekday_flex_per_daytime = weekday_flex_per_daytime.set_index('Weekday, ' + pd.date_range(start='00:00',
+                                                                                                      end='23:45',
+                                                                                                      freq='15Min').strftime('%H:%M'))
+            weekend_flex_per_daytime = (flex_per_daytime_temp.iloc[192:288, :] +
+                                        flex_per_daytime_temp.iloc[288:384, :].values) / 2
+            weekend_flex_per_daytime = weekend_flex_per_daytime.set_index('Weekend, ' + pd.date_range(start='00:00',
+                                                                                                      end='23:45',
+                                                                                                      freq='15Min').strftime('%H:%M'))
+            day_flex_per_daytime = (flex_per_daytime_temp.iloc[96:192, :] +
                                     flex_per_daytime_temp.iloc[480:576, :].values +
                                     flex_per_daytime_temp.iloc[576:, :].values +
                                     flex_per_daytime_temp.iloc[384:480, :].values +
-                                    flex_per_daytime_temp.iloc[0:96, :].values) / 5
-        weekday_flex_per_daytime = weekday_flex_per_daytime.set_index('Weekday, ' + pd.date_range(start='00:00',
-                                                                                                  end='23:45',
-                                                                                                  freq='15Min').strftime('%H:%M'))
-        weekend_flex_per_daytime = (flex_per_daytime_temp.iloc[192:288, :] +
-                                    flex_per_daytime_temp.iloc[288:384, :].values) / 2
-        weekend_flex_per_daytime = weekend_flex_per_daytime.set_index('Weekend, ' + pd.date_range(start='00:00',
-                                                                                                  end='23:45',
-                                                                                                  freq='15Min').strftime('%H:%M'))
-        day_flex_per_daytime = (flex_per_daytime_temp.iloc[96:192, :] +
-                                flex_per_daytime_temp.iloc[480:576, :].values +
-                                flex_per_daytime_temp.iloc[576:, :].values +
-                                flex_per_daytime_temp.iloc[384:480, :].values +
-                                flex_per_daytime_temp.iloc[0:96, :].values +
-                                flex_per_daytime_temp.iloc[192:288, :].values +
-                                flex_per_daytime_temp.iloc[288:384, :].values) / 7
-        day_flex_per_daytime = day_flex_per_daytime.set_index('Day, ' + pd.date_range(start='00:00', end='23:45',
-                                                                                      freq='15Min').strftime('%H:%M'))
-        # Save data to hdf files for further analysis
-        opt_per_daytime.to_hdf(output_path + str(power) + '/Aggregated Data/opt_per_daytime_data.h5', mode='w', key='df')
-        opt_per_daytime_qt.to_hdf(output_path + str(power) + '/Aggregated Data/opt_per_daytime_qt_data.h5', mode='w', key='df')
-        flex_per_daytime.to_hdf(output_path + str(power) + '/Aggregated Data/flex_per_daytime_data.h5', mode='w', key='df')
-        weekday_opt_per_daytime.to_hdf(output_path + str(power) + '/Aggregated Data/weekday_opt_per_daytime_data.h5', mode='w', key='df')
-        weekend_opt_per_daytime.to_hdf(output_path + str(power) + '/Aggregated Data/weekend_opt_per_daytime_data.h5', mode='w', key='df')
-        day_opt_per_daytime.to_hdf(output_path + str(power) + '/Aggregated Data/day_opt_per_daytime_data.h5', mode='w', key='df')
-        weekday_flex_per_daytime.to_hdf(output_path + str(power) + '/Aggregated Data/weekday_flex_per_daytime_data.h5', mode='w', key='df')
-        weekend_flex_per_daytime.to_hdf(output_path + str(power) + '/Aggregated Data/weekend_flex_per_daytime_data.h5', mode='w', key='df')
-        day_flex_per_daytime.to_hdf(output_path + str(power) + '/Aggregated Data/day_flex_per_daytime_data.h5', mode='w', key='df')
+                                    flex_per_daytime_temp.iloc[0:96, :].values +
+                                    flex_per_daytime_temp.iloc[192:288, :].values +
+                                    flex_per_daytime_temp.iloc[288:384, :].values) / 7
+            day_flex_per_daytime = day_flex_per_daytime.set_index('Day, ' + pd.date_range(start='00:00', end='23:45',
+                                                                                          freq='15Min').strftime('%H:%M'))
+
+            # Calculate Weekday/Weekend/Day flex for Flex prices (adding and dividing by 2/5/7 does not work because of NANs)
+            # list of columns that should be grouped/averaged by 15 min timestamp
+            power_column_list = ['P_pos_sum_tou', 'P_pos_sum_tou_mi', 'P_pos_sum_con', 'P_pos_sum_con_mi',
+                                 'P_pos_sum_rtp', 'P_neg_sum_tou', 'P_neg_sum_tou_mi', 'P_neg_sum_con',
+                                 'P_neg_sum_con_mi', 'P_neg_sum_rtp']
+            price_column_list = ['max_c_flex_pos_tou', 'min_c_flex_pos_tou',
+                                 'max_c_flex_pos_tou_mi', 'min_c_flex_pos_tou_mi',
+                                 'max_c_flex_pos_con', 'min_c_flex_pos_con',
+                                 'max_c_flex_pos_con_mi', 'min_c_flex_pos_con_mi',
+                                 'max_c_flex_pos_rtp', 'min_c_flex_pos_rtp',
+                                 'max_c_flex_neg_tou', 'min_c_flex_neg_tou',
+                                 'max_c_flex_neg_tou_mi', 'min_c_flex_neg_tou_mi',
+                                 'max_c_flex_neg_con', 'min_c_flex_neg_con',
+                                 'max_c_flex_neg_con_mi', 'min_c_flex_neg_con_mi',
+                                 'max_c_flex_neg_rtp', 'min_c_flex_neg_rtp']
+
+            # combining concat/join?
+            # weekday_flex_prices = flex_per_daytime[column_list].iloc[[]]
+            # weekend_flex_prices
+            day_flex_prices = pd.DataFrame()
+            weekday_flex_prices = pd.DataFrame()
+            weekend_flex_prices = pd.DataFrame()
+            test_flex_prices = pd.DataFrame()
+            for i in range(96):
+            # day_flex_prices = pd.concat([flex_per_daytime[power_column_list], #??
+                day_flex_prices = pd.concat([day_flex_prices,
+                                             pd.DataFrame(flex_per_daytime[price_column_list].iloc[i::96].mean(axis=0)).T],
+                                            ignore_index=True, axis=0)
+                weekday_flex_prices = pd.concat([weekday_flex_prices,
+                                                 pd.DataFrame(flex_per_daytime[price_column_list].iloc[i:480:96].mean(
+                                                     axis=0)).T],
+                                                ignore_index=True, axis=0)
+                weekend_flex_prices = pd.concat([weekend_flex_prices,
+                                                 pd.DataFrame(flex_per_daytime[price_column_list].iloc[i+480::96].mean(
+                                                     axis=0)).T],
+                                                ignore_index=True, axis=0)
+
+                test_flex_prices = pd.concat([test_flex_prices,
+                                              pd.DataFrame(flex_per_daytime[power_column_list].iloc[i + 480::96].mean(
+                                                  axis=0)).T],
+                                             ignore_index=True, axis=0)
+
+            # Save data to hdf files for further analysis
+            if season == 'allseasons':
+                opt_per_daytime.to_hdf(output_path + str(power) + '/Aggregated Data/opt_per_daytime_data.h5', mode='w', key='df')
+                opt_per_daytime_qt.to_hdf(output_path + str(power) + '/Aggregated Data/opt_per_daytime_qt_data.h5', mode='w', key='df')
+                flex_per_daytime.to_hdf(output_path + str(power) + '/Aggregated Data/flex_per_daytime_data.h5', mode='w', key='df')
+
+            weekday_opt_per_daytime.to_hdf(output_path + str(power) + '/Aggregated Data/' + str(season) + '_weekday_opt_per_daytime_data.h5', mode='w', key='df')
+            weekend_opt_per_daytime.to_hdf(output_path + str(power) + '/Aggregated Data/' + str(season) + '_weekend_opt_per_daytime_data.h5', mode='w', key='df')
+            day_opt_per_daytime.to_hdf(output_path + str(power) + '/Aggregated Data/' + str(season) + '_day_opt_per_daytime_data.h5', mode='w', key='df')
+            weekday_flex_per_daytime.to_hdf(output_path + str(power) + '/Aggregated Data/' + str(season) + '_weekday_flex_per_daytime_data.h5', mode='w', key='df')
+            weekend_flex_per_daytime.to_hdf(output_path + str(power) + '/Aggregated Data/' + str(season) + '_weekend_flex_per_daytime_data.h5', mode='w', key='df')
+            day_flex_per_daytime.to_hdf(output_path + str(power) + '/Aggregated Data/' + str(season) + '_day_flex_per_daytime_data.h5', mode='w', key='df')
+            day_flex_prices.to_hdf(output_path + str(power) + '/Aggregated Data/' + str(season) + '_day_flex_prices_data.h5', mode='w', key='df')
+            weekday_flex_prices.to_hdf(output_path + str(power) + '/Aggregated Data/' + str(season) + '_weekday_flex_prices_data.h5', mode='w', key='df')
+            weekend_flex_prices.to_hdf(output_path + str(power) + '/Aggregated Data/' + str(season) + '_weekend_flex_prices_data.h5', mode='w', key='df')
+
+        # Calculate ylim_dict for flex price plots (no su/wi differentiation for comparability, so from allseason)
+        # for price forecast
+        ylim_dict = {}
+        opt_df_list = [day_opt_per_daytime, weekday_opt_per_daytime, weekend_opt_per_daytime]
+        for df in day_opt_per_daytime, weekday_opt_per_daytime, weekend_opt_per_daytime:
+            max_forecast = min_forecast = 0
+            max_forecast_temp = df[['c_tou_kwh', 'c_con_kwh', 'c_tou_mi_kwh', 'c_con_mi_kwh', 'c_rtp_kwh']].max().max()
+            min_forecast_temp = df[['c_tou_kwh', 'c_con_kwh', 'c_tou_mi_kwh', 'c_con_mi_kwh', 'c_rtp_kwh']].min().min()
+            if max_forecast < max_forecast_temp:
+                max_forecast = max_forecast_temp
+            ylim_dict[power]['forecast']['max'] = max_forecast
+            if min_forecast > min_forecast_temp:
+                min_forecast = min_forecast_temp
+            ylim_dict= {power: {'forecast': {'min': min_forecast}}}
+
+        # for flexibility power --> loop oder einfach die max/min limits vor dem zu Wochentag/... mean?
+        ylim_dict = {power: {'flex power': {}}}
+        flex_df_list = [day_flex_per_daytime, weekday_flex_per_daytime, weekend_flex_per_daytime]
+        for df in flex_df_list:
+            x, y = 0
+            x_temp = df.max
+            y_temp = df.min
+            if x < x_temp:
+                x = x_temp
+                ylim_dict.update({power: {'flex power': {'max': x}}})
+            if y > y_temp:
+                y = y_temp
+                ylim_dict.update({power: {'flex power': {'min': y}}})
+
+        # for flexibility prices
+        ylim_dict = {power: {'flex prices': {}}}
+
+        for df in [day_flex_prices, weekday_flex_prices, weekend_flex_prices]:
+            x, y = 0
+            x_temp = df.max
+            y_temp = df.min
+            if x < x_temp:
+                x = x_temp
+                ylim_dict.update({power: {'flex prices': {'max': x}}})
+            if y > y_temp:
+                y = y_temp
+                ylim_dict.update({power: {'flex prices': {'min': y}}})
 
         # prepare df for week heat map
         P_pos_tou_hm = pd.DataFrame(0, index=pd.date_range(start='00:00', end='23:45', freq='15Min').strftime('%H:%M'),
@@ -515,6 +679,7 @@ def aggregate_ev_flex(veh_availabilities, output_path='../output/', rtp_input_da
         P_neg_rtp_hm.to_hdf(output_path + str(power) + '/Aggregated Data/P_neg_rtp_hm_data.h5', mode='w', key='df')
         n_avail_veh_hm.to_hdf(output_path + str(power) + '/Aggregated Data/n_veh_avail_hm_data.h5', mode='w', key='df')
 
+    return ylim_dict
 
 if __name__ == '__main__':
     # Read veh availabilities from file

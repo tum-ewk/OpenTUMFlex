@@ -69,9 +69,9 @@ Parallel(n_jobs=int(multiprocessing.cpu_count()))(
 print('3. Aggregate optimal charging schedules, costs, and flexibility offers.')
 
 # Aggregate single offers
-ev_case_study.aggregate_ev_flex(veh_availabilities,
-                                output_path=output_path,
-                                rtp_input_data_path=rtp_input_path)
+ylim_dict = ev_case_study.aggregate_ev_flex(veh_availabilities,
+                                            output_path=output_path,
+                                            rtp_input_data_path=rtp_input_path)
 #%%
 print('4. Plot results.')
 
@@ -99,7 +99,7 @@ for power in power_levels:
     # Plot aggregated flexibility offers over time
     ev_case_study.plot_opt_flex_timeseries(power, output_path=output_path + str(power) + '/', figure_path=figure_path)
     # Plot flex prices over time
-    ev_case_study.plot_flex_prices(power, output_path=output_path + str(power) + '/', figure_path=figure_path)
+    ev_case_study.plot_flex_prices(power, output_path=output_path + str(power) + '/', figure_path=figure_path, ylims=ylim_dict)
 
 # Plot overall cost
 ev_case_study.plot_overall_cost(overall_costs=overall_costs, figure_path=figure_path)
