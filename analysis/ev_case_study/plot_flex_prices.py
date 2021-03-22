@@ -138,32 +138,28 @@ def plot_flex_prices(power, output_path, save_figure=True, figure_path='figures/
     agg_type_l = wi_agg_type_l + su_agg_type_l
     title_l = wi_title_l + su_title_l
 
-    # lists for inner for loop (subplots, what column of df is called)
-    range_cols = range(ncols)
-    price_tariff_l = ['Con', 'Con + MI', 'ToU', 'ToU + MI', 'RTP']
-    price_fcast_l = ['c_con_kwh', 'c_con_mi_kwh', 'c_tou_kwh', 'c_tou_mi_kwh', 'c_rtp_kwh']
+    # dicts for inner for loops (subplots, what column of dataframe is called)
     fc_plot_dict = {0: {'price_tariff': 'Con', 'fc_kwh': 'c_con_kwh'},
                     1: {'price_tariff': 'Con + MI', 'fc_kwh': 'c_con_mi_kwh'},
                     2: {'price_tariff': 'ToU', 'fc_kwh': 'c_tou_kwh'},
                     3: {'price_tariff': 'ToU + MI', 'fc_kwh': 'c_tou_mi_kwh'},
                     4: {'price_tariff': 'RTP', 'fc_kwh': 'c_rtp_kwh'}}
-    p_pos_sum_l = ['P_pos_sum_con', 'P_pos_sum_con_mi', 'P_pos_sum_tou', 'P_pos_sum_tou_mi', 'P_pos_sum_rtp']
-    p_neg_sum_l = ['P_neg_sum_con', 'P_neg_sum_con_mi', 'P_neg_sum_tou', 'P_neg_sum_tou_mi', 'P_neg_sum_rtp']
-    p_opt_sum_l = ['P_ev_opt_sum_con', 'P_ev_opt_sum_con_mi', 'P_ev_opt_sum_tou', 'P_ev_opt_sum_tou_mi',
-                   'P_ev_opt_sum_rtp']
-    max_pr_pos_l = ['max_c_flex_pos_con', 'max_c_flex_pos_con_mi', 'max_c_flex_pos_tou', 'max_c_flex_pos_tou_mi',
-                    'max_c_flex_pos_rtp']
-    max_pr_neg_l = ['max_c_flex_neg_con', 'max_c_flex_neg_con_mi', 'max_c_flex_neg_tou', 'max_c_flex_neg_tou_mi',
-                    'max_c_flex_neg_rtp']
-    min_pr_pos_l = ['min_c_flex_pos_con', 'min_c_flex_pos_con_mi', 'min_c_flex_pos_tou', 'min_c_flex_pos_tou_mi',
-                    'min_c_flex_pos_rtp']
-    min_pr_neg_l = ['min_c_flex_neg_con', 'min_c_flex_neg_con_mi', 'min_c_flex_neg_tou', 'min_c_flex_neg_tou_mi',
-                    'min_c_flex_neg_rtp']
-    forecast_lists = [range_cols, price_fcast_l, price_tariff_l]
-    power_lists = [range_cols, p_pos_sum_l, p_neg_sum_l, p_opt_sum_l]
-    flex_price_lists = [range_cols, max_pr_pos_l,  min_pr_pos_l, max_pr_neg_l, min_pr_neg_l]
+    pow_plot_dict = {0: {'p_pos_sum': 'P_pos_sum_con', 'p_neg_sum': 'P_neg_sum_con', 'p_opt_sum': 'P_ev_opt_sum_con'},
+                     1: {'p_pos_sum': 'P_pos_sum_con_mi', 'p_neg_sum': 'P_neg_sum_con_mi', 'p_opt_sum': 'P_ev_opt_sum_con_mi'},
+                     2: {'p_pos_sum': 'P_pos_sum_tou', 'p_neg_sum': 'P_neg_sum_tou', 'p_opt_sum': 'P_ev_opt_sum_tou'},
+                     3: {'p_pos_sum': 'P_pos_sum_tou_mi', 'p_neg_sum': 'P_neg_sum_tou_mi', 'p_opt_sum': 'P_ev_opt_sum_tou_mi'},
+                     4: {'p_pos_sum': 'P_pos_sum_rtp', 'p_neg_sum': 'P_neg_sum_rtp', 'p_opt_sum': 'P_ev_opt_sum_rtp'}}
+    flex_prices_dict = {0: {'max_pr_pos': 'max_c_flex_pos_con', 'max_pr_neg': 'max_c_flex_neg_con',
+                            'min_pr_pos': 'min_c_flex_pos_con', 'min_pr_neg': 'min_c_flex_neg_con'},
+                        1: {'max_pr_pos': 'max_c_flex_pos_con_mi', 'max_pr_neg': 'max_c_flex_neg_con_mi',
+                            'min_pr_pos': 'min_c_flex_pos_con_mi', 'min_pr_neg': 'min_c_flex_neg_con_mi'},
+                        2: {'max_pr_pos': 'max_c_flex_pos_tou', 'max_pr_neg': 'max_c_flex_neg_tou',
+                            'min_pr_pos': 'min_c_flex_pos_tou', 'min_pr_neg': 'min_c_flex_neg_tou'},
+                        3: {'max_pr_pos': 'max_c_flex_pos_tou_mi', 'max_pr_neg': 'max_c_flex_neg_tou_mi',
+                            'min_pr_pos': 'min_c_flex_pos_tou_mi', 'min_pr_neg': 'min_c_flex_neg_tou_mi'},
+                        4: {'max_pr_pos': 'max_c_flex_pos_rtp', 'max_pr_neg': 'max_c_flex_neg_rtp',
+                            'min_pr_pos': 'min_c_flex_pos_rtp', 'min_pr_neg': 'min_c_flex_neg_rtp'}}
 
-    # for loop without summer/winter
     # for flex_per_daytime_df, opt_per_daytime_df, plottype, title in zip(flex_dfs, opt_dfs, plottype_l, title_l):
     for flex_per_daytime_df, opt_per_daytime_df, price_df, agg_type, title in zip(flex_dfs, opt_dfs, price_dfs, agg_type_l, title_l):
 
@@ -181,61 +177,42 @@ def plot_flex_prices(power, output_path, save_figure=True, figure_path='figures/
             axs[0, 0].set_ylim([0, .5])
 
         # Flexibility (area plot) + Optimal power (red line on top) subplots
-        for i, p_pos_sum, p_neg_sum, p_opt_sum in zip(*power_lists):
+        for i, value in pow_plot_dict.items():
             axs[1, i].fill_between(tick_range,
-                                   flex_per_daytime_df[p_pos_sum] / opt_per_daytime_df['n_veh_avail'],
-                                   flex_per_daytime_df[p_neg_sum] / opt_per_daytime_df['n_veh_avail'],
+                                   flex_per_daytime_df[value['p_pos_sum']]/opt_per_daytime_df['n_veh_avail'],
+                                   flex_per_daytime_df[value['p_neg_sum']]/opt_per_daytime_df['n_veh_avail'],
                                    alpha=0.5, zorder=5, linestyle='solid', facecolor=plot_color)
             axs[1, i].plot(tick_range,
-                           flex_per_daytime_df[p_pos_sum] / opt_per_daytime_df['n_veh_avail'],
+                           flex_per_daytime_df[value['p_pos_sum']]/opt_per_daytime_df['n_veh_avail'],
                            color=plot_color, linestyle='solid')
             axs[1, i].plot(tick_range,
-                           flex_per_daytime_df[p_neg_sum] / opt_per_daytime_df['n_veh_avail'],
+                           flex_per_daytime_df[value['p_neg_sum']]/opt_per_daytime_df['n_veh_avail'],
                            color=plot_color, linestyle='solid')
             axs[1, i].plot(tick_range,
-                           opt_per_daytime_df[p_opt_sum] / opt_per_daytime_df['n_veh_avail'],
+                           opt_per_daytime_df[value['p_opt_sum']]/opt_per_daytime_df['n_veh_avail'],
                            color='r', alpha=0.5, zorder=10, linestyle='solid')
             axs[1, i].grid()
+
+
             # if ylim_power != None:
             # axs[1, 0].set_ylim(ylim_power)
 
         # Flexibility Prices and weighted average price subplots
-        # for i, max_pr_pos, min_pr_pos, max_pr_neg, min_pr_neg in zip(*flex_price_lists):
-        #     # tick_range2 = np.linspace(0, 15, 46)
-        #     # [0:96]
-        #     axs[2, i].fill_between(tick_range,
-        #                            flex_per_daytime[max_pr_pos].iloc[0:96], flex_per_daytime[min_pr_pos].iloc[0:96],
-        #                            alpha=0.5, zorder=5, linestyle='solid', facecolor='g')
-        #     axs[2, i].plot(tick_range,
-        #                    flex_per_daytime[max_pr_pos].iloc[0:96], color='g', linestyle='solid')
-        #     axs[2, i].plot(tick_range,
-        #                    flex_per_daytime[min_pr_pos].iloc[0:96], color='g', linestyle='solid')
-        #     axs[2, i].fill_between(tick_range,
-        #                            flex_per_daytime[max_pr_neg].iloc[0:96], flex_per_daytime[min_pr_neg].iloc[0:96],
-        #                            alpha=0.5, zorder=5, linestyle='solid', facecolor=plot_color)
-        #     axs[2, i].plot(tick_range,
-        #                    flex_per_daytime[max_pr_neg].iloc[0:96], color='r', linestyle='solid')
-        #     axs[2, i].plot(tick_range,
-        #                    flex_per_daytime[min_pr_neg].iloc[0:96], color='r', linestyle='solid')
-        #     axs[2, i].grid()
-        #     axs[2, 0].set_ylim([-1, 1])
-
-        # # Flexibility Prices and weighted average price subplots
-        for i, max_pr_pos, min_pr_pos, max_pr_neg, min_pr_neg in zip(*flex_price_lists):
+        for i, value in flex_prices_dict.items():
             axs[2, i].fill_between(tick_range,
-                                   price_df[max_pr_pos], price_df[min_pr_pos],
+                                   price_df[value['max_pr_pos']], price_df[value['min_pr_pos']],
                                    alpha=0.5, label='RTP', zorder=5, linestyle='solid', facecolor='g')
             axs[2, i].plot(tick_range,
-                           price_df[max_pr_pos], color='g', linestyle='solid')
+                           price_df[value['max_pr_pos']], color='g', linestyle='solid')
             axs[2, i].plot(tick_range,
-                           price_df[min_pr_pos], color='g', linestyle='solid')
+                           price_df[value['min_pr_pos']], color='g', linestyle='solid')
             axs[2, i].fill_between(tick_range,
-                                   price_df[max_pr_neg], price_df[min_pr_neg],
+                                   price_df[value['max_pr_neg']], price_df[value['min_pr_neg']],
                                    alpha=0.5, label='RTP', zorder=5, linestyle='solid', facecolor=plot_color)
             axs[2, i].plot(tick_range,
-                           price_df[max_pr_neg], color=plot_color, linestyle='solid')
+                           price_df[value['max_pr_neg']], color=plot_color, linestyle='solid')
             axs[2, i].plot(tick_range,
-                           price_df[min_pr_neg], color=plot_color, linestyle='solid')
+                           price_df[value['min_pr_neg']], color=plot_color, linestyle='solid')
             axs[2, i].grid()
             axs[2, 0].set_ylim([-0.55, 0.55])
 
