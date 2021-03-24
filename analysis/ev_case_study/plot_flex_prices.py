@@ -22,7 +22,7 @@ from pathlib import Path
 register_matplotlib_converters()
 
 
-def plot_flex_prices(power, output_path, save_figure=True, figure_path='figures/', ylims={}):
+def plot_flex_prices(power, output_path, save_figure=True, figure_path='figures/', ylims=None):
     """
     This function plots the flexibility prices of a study over time
 
@@ -30,13 +30,14 @@ def plot_flex_prices(power, output_path, save_figure=True, figure_path='figures/
     :param output_path: path to results of the  case study
     :param figure_path: folder where figures are stored
     :param power: current power level
+    :param ylims: dictionary with max/min y-limit values for the plots, default None
     :return:
     """
 
     # Set font/figure style
     rcParams["font.family"] = "Times New Roman"
     rcParams["font.size"] = 10
-    rcParams["figure.figsize"] = [13, 11]
+    rcParams["figure.figsize"] = [25, 11]
     plot_color = 'tab:blue'
 
     # Read aggregated all seasons data from hdf files #########################################
@@ -124,11 +125,8 @@ def plot_flex_prices(power, output_path, save_figure=True, figure_path='figures/
     # define number of subplots
     nrows = 3
     ncols = 5
-    # lists for outer for loop (day, weekday, weekend) - without summer/winter
-    # flex_dfs = [day_flex_per_daytime, weekday_flex_per_daytime, weekend_flex_per_daytime]
-    # opt_dfs = [day_opt_per_daytime, weekday_opt_per_daytime, weekend_opt_per_daytime]
-    # agg_type_l = ['day', 'weekday', 'weekend']
-    # title_l = ['Day', 'Weekday', 'Weekend Day']
+    # percentage from highest (max & min) y value that is added to it to get the y-lim when ylims is not None
+    ylim_spacing = 0.1
 
     # lists for outer for loop (day, weekday, weekend for summer & winter each, depending on whether su and/or wi exist)
     opt_dfs = wi_opt_dfs + su_opt_dfs
@@ -172,10 +170,10 @@ def plot_flex_prices(power, output_path, save_figure=True, figure_path='figures/
         # for i, pricefcast, tariff in zip(*forecast_lists):
         for i, value in fc_plot_dict.items():
             axs[0, i].plot(tick_range, opt_per_daytime_df[value['fc_kwh']], color=plot_color,
-                                     linestyle='solid', label='Forecast Price')
+                           linestyle='solid', label='Mean Forecast price')
             axs[0, i].grid()
+            # set subplot columns title
             axs[0, i].set_title(value['price_tariff'], fontsize=font_size)
-            axs[0, 0].set_ylim([0, .5])
             # plot legend only for last subplot in row, to the right of the row
             if i == ncols - 1:
                 axs[0, i].legend(bbox_to_anchor=(1.03, .6), loc='upper left', frameon=False)
@@ -188,13 +186,13 @@ def plot_flex_prices(power, output_path, save_figure=True, figure_path='figures/
                                    flex_per_daytime_df[value['p_pos_sum']]/opt_per_daytime_df['n_veh_avail'],
                                    flex_per_daytime_df[value['p_neg_sum']]/opt_per_daytime_df['n_veh_avail'],
                                    alpha=0.5, zorder=5, linestyle='solid', facecolor=plot_color,
-                                   label='Power area')
+                                   label='Positive and negative flexible power')
             axs[1, i].plot(tick_range,
                            flex_per_daytime_df[value['p_pos_sum']]/opt_per_daytime_df['n_veh_avail'],
-                           color=plot_color, linestyle='solid', label='Mean positive power')
+                           color=plot_color, linestyle='solid')
             axs[1, i].plot(tick_range,
                            flex_per_daytime_df[value['p_neg_sum']]/opt_per_daytime_df['n_veh_avail'],
-                           color=plot_color, linestyle='solid', label='Mean negative power')
+                           color=plot_color, linestyle='solid')
             axs[1, i].plot(tick_range,
                            opt_per_daytime_df[value['p_opt_sum']]/opt_per_daytime_df['n_veh_avail'],
                            color='r', alpha=0.5, zorder=10, linestyle='solid', label='Optimal scheduled power')
@@ -214,8 +212,7 @@ def plot_flex_prices(power, output_path, save_figure=True, figure_path='figures/
                                    alpha=0.5, label='Positive Flexibility \nPrice Area', zorder=5, linestyle='solid',
                                    facecolor='g')
             axs[2, i].plot(tick_range,
-                           price_df[value['max_pr_pos']], color='g', linestyle='solid',
-                           label='Max/Min Positive Flexibility')
+                           price_df[value['max_pr_pos']], color='g', linestyle='solid')
             axs[2, i].plot(tick_range,
                            price_df[value['min_pr_pos']], color='g', linestyle='solid')
             axs[2, i].fill_between(tick_range,
@@ -223,12 +220,10 @@ def plot_flex_prices(power, output_path, save_figure=True, figure_path='figures/
                                    alpha=0.5, label='Negative Flexibility \nPrice Area', zorder=5, linestyle='solid',
                                    facecolor=plot_color)
             axs[2, i].plot(tick_range,
-                           price_df[value['max_pr_neg']], color=plot_color, linestyle='solid',
-                           label='Max/Min Negative Flexibility')
+                           price_df[value['max_pr_neg']], color=plot_color, linestyle='solid')
             axs[2, i].plot(tick_range,
                            price_df[value['min_pr_neg']], color=plot_color, linestyle='solid')
             axs[2, i].grid()
-            axs[2, 0].set_ylim([-0.55, 0.55])
             if i == ncols - 1:
                 axs[2, i].legend(bbox_to_anchor=(1.03, .72), loc='upper left', frameon=False)
 
@@ -245,6 +240,20 @@ def plot_flex_prices(power, output_path, save_figure=True, figure_path='figures/
         tick_labels = pd.date_range(start='2020-01-01 00:00', end='2020-01-02 00:00', freq='15Min').strftime(
             '%H:%M').to_list()
         resulting_labels = [tick_labels[i] for i in ticks]
+        if ylims is None:
+            axs[0, 0].set_ylim([0, .5])
+            axs[1, 0].set_ylim([-10, 17])
+            axs[2, 0].set_ylim([-.55, .55])
+        else:
+            if ylims['forecast']['min'] >= 0:
+                axs[0, 0].set_ylim([0, ylims['forecast']['max'] * (1 + ylim_spacing)])
+            else:
+                axs[0, 0].set_ylim([ylims['forecast']['min'] * (1 + ylim_spacing),
+                                    ylims['forecast']['max'] * (1 + ylim_spacing)])
+            axs[2, 0].set_ylim(ylims['flex price']['min'] * (1 + ylim_spacing),
+                               ylims['flex price']['max'] * (1 + ylim_spacing))
+            axs[1, 0].set_ylim(ylims['flex power']['min'] * (1 + ylim_spacing),
+                               ylims['flex power']['max'] * (1 + ylim_spacing))
         axs[0, 0].set_xlim([0, 97])
         axs[0, 0].set_xticks(ticks)
 
@@ -254,11 +263,19 @@ def plot_flex_prices(power, output_path, save_figure=True, figure_path='figures/
         plt.subplots_adjust(left=0.09, bottom=0.05, right=0.84, top=0.92, wspace=0.25, hspace=0.2)
 
         if save_figure:
-            plt.savefig(figure_path + str(power) + '_' + agg_type + '_flex_prices_plots333.png', dpi=600)
+            plt.savefig(figure_path + str(power) + '_' + agg_type + '_flex_prices_plots.png', dpi=600)
 
         plt.show()
 
 
 if __name__ == '__main__':
     # plot_n_avail_veh(output_path='../output/3.7/', figure_path='../figures/')
-    plot_flex_prices(power='3.7', output_path='../output/3.7/', figure_path='../figures/')
+    ylim_dict = {'forecast': {'max': 0.36, 'min': 0.13},
+                 'flex power': {'max': 12, 'min': -16},
+                 'flex price': {'max': 1, 'min': -0.5}}
+    # plot_flex_prices(power='3.7', output_path='../output/3.7/', figure_path='../figures/', ylims=None)
+    # plot_flex_prices(power='11', output_path='../output/11/', figure_path='../figures/', ylims=None)
+    # plot_flex_prices(power='22', output_path='../output/22/', figure_path='../figures/', ylims=None)
+    plot_flex_prices(power='3.7', output_path='../output/3.7/', figure_path='../figures/', ylims=ylim_dict)
+    plot_flex_prices(power='11', output_path='../output/11/', figure_path='../figures/', ylims=ylim_dict)
+    plot_flex_prices(power='22', output_path='../output/22/', figure_path='../figures/', ylims=ylim_dict)
