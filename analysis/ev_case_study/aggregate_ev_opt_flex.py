@@ -354,48 +354,31 @@ def aggregate_ev_flex(veh_availabilities, output_path='../output/', rtp_input_da
 
         # Differentiating between summer, winter and all months with a for loop
 
-        # create lists for for loop
-        seasons = []
-        seasons_opt_df_l = []
-        seasons_flex_df_l = []
+        # create dict for for loop
         seasons_dict = {}
-        # create winter/summer dataframes and update lists for for loop
+        # create winter/summer dataframes and update dict for for loop
         if any(x in opt_sum_df.index.month for x in [10, 11, 12, 1, 2, 3, 4, 5]):
-            wi_opt_sum_df = opt_sum_df.loc[(opt_sum_df.index.month >= 10) | (opt_sum_df.index.month <= 5)]
-            wi_flex_sum_df = flex_sum_df.loc[(flex_sum_df.index.month >= 10) | (flex_sum_df.index.month <= 5)]
-            seasons.append('winter')
-            seasons_opt_df_l.append(wi_opt_sum_df)
-            seasons_flex_df_l.append(wi_flex_sum_df)
             seasons_dict['winter'] = {}
             seasons_dict['winter']['opt_sum_df'] = opt_sum_df.loc[(opt_sum_df.index.month >= 10) | (opt_sum_df.index.month <= 5)]
             seasons_dict['winter']['flex_sum_df'] = flex_sum_df.loc[
                 (flex_sum_df.index.month >= 10) | (flex_sum_df.index.month <= 5)]
         if any(x in opt_sum_df.index.month for x in [6, 7, 8, 9]):
-            su_opt_sum_df = opt_sum_df.loc[(opt_sum_df.index.month >= 6) & (opt_sum_df.index.month <= 9)]
-            su_flex_sum_df = flex_sum_df.loc[(flex_sum_df.index.month >= 6) & (flex_sum_df.index.month <= 9)]
-            seasons.append('summer')
-            seasons_opt_df_l.append(su_opt_sum_df)
-            seasons_flex_df_l.append(su_flex_sum_df)
             seasons_dict['summer'] = {}
             seasons_dict['summer']['opt_sum_df'] = opt_sum_df.loc[(opt_sum_df.index.month >= 6) | (opt_sum_df.index.month <= 9)]
             seasons_dict['summer']['flex_sum_df'] = flex_sum_df.loc[(flex_sum_df.index.month >= 6) | (flex_sum_df.index.month <= 9)]
 
-        # add "all seasons" as last item in lists, as heatmap calculations after the for loop need data from all months
-        seasons.append('allseasons')
-        seasons_opt_df_l.append(opt_sum_df)
-        seasons_flex_df_l.append(flex_sum_df)
+        # add "all seasons" as last item in dict, as heatmap calculations after the for loop need data from all months
         seasons_dict['allseasons'] = {}
         seasons_dict['allseasons']['opt_sum_df'] = opt_sum_df
         seasons_dict['allseasons']['flex_sum_df'] = flex_sum_df
 
         # for loop over summer, winter and all seasons opt_sum and flex_sum dataframes
-        # for key, value in seasons_dict.items():
-        #     season = key
-        #     season_opt_sum_df = value['opt_sum_df']
-        #     season_flex_sum_df = value['flex_sum_df']
+        for season, value in seasons_dict.items():
+            season_opt_sum_df = value['opt_sum_df']
+            season_flex_sum_df = value['flex_sum_df']
 
         # # for loop over summer, winter and all seasons opt_sum and flex_sum dataframes
-        for season_opt_sum_df, season_flex_sum_df, season in zip(seasons_opt_df_l, seasons_flex_df_l, seasons):
+        # for season_opt_sum_df, season_flex_sum_df, season in zip(seasons_opt_df_l, seasons_flex_df_l, seasons):
 
             """
             ####################################################################
