@@ -616,10 +616,10 @@ def plot_opt_flex_timeseries(power, output_path, save_figure=True, figure_path='
     plot_color = 'tab:blue'
 
     # Read aggregated data from hdf files #########################################
-    weekday_flex_per_daytime = pd.read_hdf(output_path + 'Aggregated Data/weekday_flex_per_daytime_data.h5', key='df')
-    weekend_opt_per_daytime = pd.read_hdf(output_path + 'Aggregated Data/weekend_opt_per_daytime_data.h5', key='df')
-    weekend_flex_per_daytime = pd.read_hdf(output_path + 'Aggregated Data/weekend_flex_per_daytime_data.h5', key='df')
-    weekday_opt_per_daytime = pd.read_hdf(output_path + 'Aggregated Data/weekday_opt_per_daytime_data.h5', key='df')
+    weekday_flex_per_daytime = pd.read_hdf(output_path + 'Aggregated Data/allseasons_weekday_flex_per_daytime_data.h5', key='df')
+    weekend_opt_per_daytime = pd.read_hdf(output_path + 'Aggregated Data/allseasons_weekend_opt_per_daytime_data.h5', key='df')
+    weekend_flex_per_daytime = pd.read_hdf(output_path + 'Aggregated Data/allseasons_weekend_flex_per_daytime_data.h5', key='df')
+    weekday_opt_per_daytime = pd.read_hdf(output_path + 'Aggregated Data/allseasons_weekday_opt_per_daytime_data.h5', key='df')
 
     # Plot only weekdays and weekends
     tick_range = np.linspace(start=0, stop=96, num=96)
