@@ -173,17 +173,17 @@ def calc_flex_ev(my_ems, reopt=0):
             # Positive flexibility
             if ev_flex_temp[e_pos].iat[i] > 0 and ev_flex_temp[p_pos].iat[i] > 0:
                 idx_required = math.ceil(ev_flex_temp[e_pos].iat[i] / my_ems['devices']['ev']['maxpow']
-                                         / n_time_steps_phour)
-                idx_flex = math.ceil(ev_flex_temp[e_pos].iat[i] / ev_flex_temp[p_pos].iat[i]
                                          * n_time_steps_phour)
+                idx_flex = math.ceil(ev_flex_temp[e_pos].iat[i] / ev_flex_temp[p_pos].iat[i]
+                                     * n_time_steps_phour)
                 ev_flex_temp[pr_pos].iat[i] = ev_flex_temp[pr_fcst][i + idx_flex - 1:].nsmallest(idx_required).mean()\
                                                      * (1 + risk_margin)
             # Negative flexibility
             if ev_flex_temp[e_neg].iat[i] > 0 and ev_flex_temp[p_neg].iat[i] > 0:
-                idx_flex = math.ceil(ev_flex_temp[e_neg].iat[i] / \
-                                                   ev_flex_temp[p_neg].iat[i] * n_time_steps_phour)
+                idx_flex = math.ceil(ev_flex_temp[e_neg].iat[i] / 
+                                     ev_flex_temp[p_neg].iat[i] * n_time_steps_phour)
                 ev_flex_temp[pr_neg].iat[i] = ev_flex_temp[pr_fcst][i + idx_flex - 1:].nlargest(idx_flex).mean()\
-                                                     * (risk_margin - 1)
+                                              * (risk_margin - 1)
 
         # Clean-up ##########################################
         # Drop unnecessary columns
