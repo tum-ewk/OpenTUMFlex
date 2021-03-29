@@ -359,9 +359,9 @@ def aggregate_ev_flex(veh_availabilities, output_path='../output/', rtp_input_da
         # create winter/summer dataframes and update dict for for loop
         if any(x in opt_sum_df.index.month for x in [10, 11, 12, 1, 2, 3, 4, 5]):
             seasons_dict['winter'] = {}
-            seasons_dict['winter']['opt_sum_df'] = opt_sum_df.loc[(opt_sum_df.index.month >= 10) & (opt_sum_df.index.month <= 5)]
+            seasons_dict['winter']['opt_sum_df'] = opt_sum_df.loc[(opt_sum_df.index.month >= 10) | (opt_sum_df.index.month <= 5)]
             seasons_dict['winter']['flex_sum_df'] = flex_sum_df.loc[
-                (flex_sum_df.index.month >= 10) & (flex_sum_df.index.month <= 5)]
+                (flex_sum_df.index.month >= 10) | (flex_sum_df.index.month <= 5)]
         if any(x in opt_sum_df.index.month for x in [6, 7, 8, 9]):
             seasons_dict['summer'] = {}
             seasons_dict['summer']['opt_sum_df'] = opt_sum_df.loc[(opt_sum_df.index.month >= 6) & (opt_sum_df.index.month <= 9)]
