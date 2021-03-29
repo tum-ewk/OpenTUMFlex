@@ -571,42 +571,42 @@ def aggregate_ev_flex(veh_availabilities, output_path='../output/', rtp_input_da
             weekday_flex_prices.to_hdf(output_path + str(power) + '/Aggregated Data/' + str(season) + '_weekday_flex_prices_data.h5', mode='w', key='df')
             weekend_flex_prices.to_hdf(output_path + str(power) + '/Aggregated Data/' + str(season) + '_weekend_flex_prices_data.h5', mode='w', key='df')
 
-        # Calculate ylims for flex price plots (no su/wi differentiation for comparability, so from allseason)
-        # for price forecast
-        for df in [day_opt_per_daytime, weekday_opt_per_daytime, weekend_opt_per_daytime]:
-            max_forecast_temp = df[['c_tou_kwh', 'c_con_kwh', 'c_tou_mi_kwh', 'c_con_mi_kwh', 'c_rtp_kwh']].max().max()
-            min_forecast_temp = df[['c_tou_kwh', 'c_con_kwh', 'c_tou_mi_kwh', 'c_con_mi_kwh', 'c_rtp_kwh']].min().min()
-            if max_forecast < max_forecast_temp:
-                max_forecast = max_forecast_temp
-            if min_forecast > min_forecast_temp:
-                min_forecast = min_forecast_temp
+            # Calculate ylims for flex price plots
+            # for price forecast
+            for df in [day_opt_per_daytime, weekday_opt_per_daytime, weekend_opt_per_daytime]:
+                max_forecast_temp = df[['c_tou_kwh', 'c_con_kwh', 'c_tou_mi_kwh', 'c_con_mi_kwh', 'c_rtp_kwh']].max().max()
+                min_forecast_temp = df[['c_tou_kwh', 'c_con_kwh', 'c_tou_mi_kwh', 'c_con_mi_kwh', 'c_rtp_kwh']].min().min()
+                if max_forecast < max_forecast_temp:
+                    max_forecast = max_forecast_temp
+                if min_forecast > min_forecast_temp:
+                    min_forecast = min_forecast_temp
 
-        # for flexibility power --> loop oder einfach die max/min limits vor dem zu Wochentag/... mean?
-        flex_dfs_list = [day_flex_per_daytime, weekday_flex_per_daytime, weekend_flex_per_daytime]
-        opt_dfs_list = [day_opt_per_daytime, weekday_opt_per_daytime, weekend_opt_per_daytime]
-        for flex_df, opt_df in zip(flex_dfs_list, opt_dfs_list):
-            max_power_temp = (flex_df[['P_pos_sum_tou', 'P_pos_sum_tou_mi', 'P_pos_sum_con', 'P_pos_sum_con_mi',
-                                        'P_pos_sum_rtp']].div(opt_df['n_veh_avail'], axis=0)).max().max()
-            min_power_temp = (flex_df[['P_neg_sum_tou', 'P_neg_sum_tou_mi', 'P_neg_sum_con', 'P_neg_sum_con_mi',
-                                       'P_neg_sum_rtp']].div(opt_df['n_veh_avail'], axis=0)).min().min()
-            if max_power < max_power_temp:
-                max_power = max_power_temp
-            if min_power > min_power_temp:
-                min_power = min_power_temp
+            # for flexibility power --> loop oder einfach die max/min limits vor dem zu Wochentag/... mean?
+            flex_dfs_list = [day_flex_per_daytime, weekday_flex_per_daytime, weekend_flex_per_daytime]
+            opt_dfs_list = [day_opt_per_daytime, weekday_opt_per_daytime, weekend_opt_per_daytime]
+            for flex_df, opt_df in zip(flex_dfs_list, opt_dfs_list):
+                max_power_temp = (flex_df[['P_pos_sum_tou', 'P_pos_sum_tou_mi', 'P_pos_sum_con', 'P_pos_sum_con_mi',
+                                            'P_pos_sum_rtp']].div(opt_df['n_veh_avail'], axis=0)).max().max()
+                min_power_temp = (flex_df[['P_neg_sum_tou', 'P_neg_sum_tou_mi', 'P_neg_sum_con', 'P_neg_sum_con_mi',
+                                           'P_neg_sum_rtp']].div(opt_df['n_veh_avail'], axis=0)).min().min()
+                if max_power < max_power_temp:
+                    max_power = max_power_temp
+                if min_power > min_power_temp:
+                    min_power = min_power_temp
 
-        for df in [day_flex_prices, weekday_flex_prices, weekend_flex_prices]:
-            max_price_temp = df[['max_c_flex_pos_tou', 'max_c_flex_pos_tou_mi', 'max_c_flex_pos_con',
-                                 'max_c_flex_pos_con_mi', 'max_c_flex_pos_rtp', 'max_c_flex_neg_tou',
-                                 'max_c_flex_neg_tou_mi', 'max_c_flex_neg_con', 'max_c_flex_neg_con_mi',
-                                 'max_c_flex_neg_rtp']].max().max()
-            min_price_temp = df[['min_c_flex_pos_tou', 'min_c_flex_pos_tou_mi', 'min_c_flex_pos_con',
-                                 'min_c_flex_pos_con_mi', 'min_c_flex_pos_rtp', 'min_c_flex_neg_tou',
-                                 'min_c_flex_neg_tou_mi', 'min_c_flex_neg_con', 'min_c_flex_neg_con_mi',
-                                 'min_c_flex_neg_rtp']].min().min()
-            if max_price < max_price_temp:
-                max_price = max_price_temp
-            if min_price > min_price_temp:
-                min_price = min_price_temp
+            for df in [day_flex_prices, weekday_flex_prices, weekend_flex_prices]:
+                max_price_temp = df[['max_c_flex_pos_tou', 'max_c_flex_pos_tou_mi', 'max_c_flex_pos_con',
+                                     'max_c_flex_pos_con_mi', 'max_c_flex_pos_rtp', 'max_c_flex_neg_tou',
+                                     'max_c_flex_neg_tou_mi', 'max_c_flex_neg_con', 'max_c_flex_neg_con_mi',
+                                     'max_c_flex_neg_rtp']].max().max()
+                min_price_temp = df[['min_c_flex_pos_tou', 'min_c_flex_pos_tou_mi', 'min_c_flex_pos_con',
+                                     'min_c_flex_pos_con_mi', 'min_c_flex_pos_rtp', 'min_c_flex_neg_tou',
+                                     'min_c_flex_neg_tou_mi', 'min_c_flex_neg_con', 'min_c_flex_neg_con_mi',
+                                     'min_c_flex_neg_rtp']].min().min()
+                if max_price < max_price_temp:
+                    max_price = max_price_temp
+                if min_price > min_price_temp:
+                    min_price = min_price_temp
 
         # prepare df for week heat map
         P_pos_tou_hm = pd.DataFrame(0, index=pd.date_range(start='00:00', end='23:45', freq='15Min').strftime('%H:%M'),
