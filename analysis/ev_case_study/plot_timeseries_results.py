@@ -810,10 +810,9 @@ def plot_opt_flex_timeseries(power, output_path, save_figure=True, figure_path='
     axs[0, 0].set_xticks(ticks)
     axs[0, 0].set_xticklabels(resulting_labels, rotation=45)
     plt.subplots_adjust(left=0.08, bottom=0.05, right=0.98, top=0.95, wspace=0.25, hspace=0.2)
-    plt.show()
     if save_figure:
         plt.savefig(figure_path + str(power) + '_opt_flex_average_day_plots.png', dpi=600)
-
+    plt.show()
 
 if __name__ == '__main__':
     plot_n_avail_veh(output_path='../output/3.7/', figure_path='../figures/')
