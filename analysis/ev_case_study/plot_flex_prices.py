@@ -44,12 +44,20 @@ def plot_flex_prices(power, output_path, save_figure=True, figure_path='figures/
     flex_per_daytime = pd.read_hdf(output_path + '/Aggregated Data/flex_per_daytime_data.h5', key='df')
 
     # allseason files
-    # weekday_flex_per_daytime = pd.read_hdf(output_path + 'Aggregated Data/allseasons_weekday_flex_per_daytime_data.h5', key='df')
-    # weekend_opt_per_daytime = pd.read_hdf(output_path + 'Aggregated Data/allseasons_weekend_opt_per_daytime_data.h5', key='df')
-    # weekend_flex_per_daytime = pd.read_hdf(output_path + 'Aggregated Data/allseasons_weekend_flex_per_daytime_data.h5', key='df')
-    # weekday_opt_per_daytime = pd.read_hdf(output_path + 'Aggregated Data/allseasons_weekday_opt_per_daytime_data.h5', key='df')
-    # day_flex_per_daytime = pd.read_hdf(output_path + 'Aggregated Data/allseasons_day_flex_per_daytime_data.h5', key='df')
-    # day_opt_per_daytime = pd.read_hdf(output_path + 'Aggregated Data/allseasons_day_opt_per_daytime_data.h5', key='df')
+    day_flex_per_daytime = pd.read_hdf(output_path + 'Aggregated Data/allseasons_day_flex_per_daytime_data.h5', key='df')
+    weekday_flex_per_daytime = pd.read_hdf(output_path + 'Aggregated Data/allseasons_weekday_flex_per_daytime_data.h5', key='df')
+    weekend_opt_per_daytime = pd.read_hdf(output_path + 'Aggregated Data/allseasons_weekend_opt_per_daytime_data.h5', key='df')
+    day_opt_per_daytime = pd.read_hdf(output_path + 'Aggregated Data/allseasons_day_opt_per_daytime_data.h5', key='df')
+    weekday_opt_per_daytime = pd.read_hdf(output_path + 'Aggregated Data/allseasons_weekday_opt_per_daytime_data.h5', key='df')
+    weekend_flex_per_daytime = pd.read_hdf(output_path + 'Aggregated Data/allseasons_weekend_flex_per_daytime_data.h5', key='df')
+    day_flex_prices = pd.read_hdf(output_path + 'Aggregated Data/allseasons_day_flex_prices_data.h5', key='df')
+    weekday_flex_prices = pd.read_hdf(output_path + 'Aggregated Data/allseasons_weekday_flex_prices_data.h5', key='df')
+    weekend_flex_prices = pd.read_hdf(output_path + 'Aggregated Data/allseasons_weekend_flex_prices_data.h5', key='df')
+    all_opt_dfs = [day_opt_per_daytime, weekday_opt_per_daytime, weekend_opt_per_daytime]
+    all_flex_dfs = [day_flex_per_daytime, weekday_flex_per_daytime, weekend_flex_per_daytime]
+    all_price_dfs = [day_flex_prices, weekday_flex_prices, weekend_flex_prices]
+    all_agg_type_l = ['allseasons_day', 'allseasons_weekday', 'allseasons_weekend']
+    all_title_l = ['Day', 'Weekday', 'Weekend']
 
     # Check whether winter/summer files exist (if one exists, all exist) and read data from hdf files
     # seasons = ['winter', 'summer']
@@ -123,11 +131,11 @@ def plot_flex_prices(power, output_path, save_figure=True, figure_path='figures/
     ylim_spacing = 0.1
 
     # lists for outer for loop (day, weekday, weekend for summer & winter each, depending on whether su and/or wi exist)
-    opt_dfs = wi_opt_dfs + su_opt_dfs
-    flex_dfs = wi_flex_dfs + su_flex_dfs
-    price_dfs = wi_price_dfs + su_price_dfs
-    agg_type_l = wi_agg_type_l + su_agg_type_l
-    title_l = wi_title_l + su_title_l
+    opt_dfs = wi_opt_dfs + su_opt_dfs + all_opt_dfs
+    flex_dfs = wi_flex_dfs + su_flex_dfs + all_flex_dfs
+    price_dfs = wi_price_dfs + su_price_dfs + all_price_dfs
+    agg_type_l = wi_agg_type_l + su_agg_type_l + all_agg_type_l
+    title_l = wi_title_l + su_title_l + all_title_l
 
     # dicts for inner for loops (subplots, what column of dataframe is called)
     fc_plot_dict = {0: {'price_tariff': 'Con', 'fc_kwh': 'c_con_kwh'},
@@ -171,8 +179,6 @@ def plot_flex_prices(power, output_path, save_figure=True, figure_path='figures/
             if i == ncols - 1:
                 axs[0, i].legend(bbox_to_anchor=(1.03, .6), loc='upper left', frameon=False)
 
-
-
         # Flexibility (area plot) + Optimal power (red line on top) subplots
         for i, value in pow_plot_dict.items():
             axs[1, i].fill_between(tick_range,
@@ -192,11 +198,6 @@ def plot_flex_prices(power, output_path, save_figure=True, figure_path='figures/
             axs[1, i].grid()
             if i == ncols - 1:
                 axs[1, i].legend(bbox_to_anchor=(1.03, .69), loc='upper left', frameon=False)
-
-
-
-            # if ylim_power != None:
-            # axs[1, 0].set_ylim(ylim_power)
 
         # Flexibility Prices and weighted average price subplots
         for i, value in flex_prices_dict.items():
@@ -263,6 +264,7 @@ def plot_flex_prices(power, output_path, save_figure=True, figure_path='figures/
 
 if __name__ == '__main__':
     # plot_n_avail_veh(output_path='../output/3.7/', figure_path='../figures/')
+    # ylim_dict for testing
     ylim_dict = {'forecast': {'max': 0.36, 'min': 0.13},
                  'flex power': {'max': 12, 'min': -16},
                  'flex price': {'max': .6, 'min': -0.4}}
