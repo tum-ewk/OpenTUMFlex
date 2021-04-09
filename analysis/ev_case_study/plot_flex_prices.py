@@ -34,12 +34,6 @@ def plot_flex_prices(power, output_path, save_figure=True, figure_path='figures/
     :return:
     """
 
-    # Set font/figure style
-    rcParams["font.family"] = "Times New Roman"
-    rcParams["font.size"] = 10
-    rcParams["figure.figsize"] = [25, 11]
-    plot_color = 'tab:blue'
-
     # Read aggregated all seasons data from hdf files #########################################
     flex_per_daytime = pd.read_hdf(output_path + '/Aggregated Data/flex_per_daytime_data.h5', key='df')
 
@@ -123,6 +117,7 @@ def plot_flex_prices(power, output_path, save_figure=True, figure_path='figures/
     rcParams["mathtext.default"] = "regular"
     font_size = rcParams["font.size"] = 10
     rcParams["figure.figsize"] = [15, 11]
+    plot_color = 'tab:blue'
 
     # define number of subplots
     nrows = 3
