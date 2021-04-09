@@ -19,14 +19,15 @@ import pandas as pd
 import itertools
 import analysis.ev_case_study as ev_case_study
 import os
+import json
 
 # Define input and output paths
-output_path = 'output/'
-input_path = 'input/'
-figure_path = 'figures/'
-rtp_input_path = 'input/RTP/'
-# Read veh availabilities from file
-veh_availabilities = pd.read_csv('input/chts_veh_availability.csv')
+output_path = 'yourfolder/output/'
+input_path = 'yourfolder/input/'
+figure_path = 'yourfolder/figures/'
+rtp_input_path = 'yourfolder/input/RTP/'
+# Read veh availabilities from file - check for delimiter type before and specify if semicolon (, sep=';')
+veh_availabilities = pd.read_csv('yourfolder/input/some_availability.csv')
 
 print('1. Prepare input data.')
 
@@ -72,8 +73,17 @@ print('3. Aggregate optimal charging schedules, costs, and flexibility offers.')
 ylim_dict = ev_case_study.aggregate_ev_flex(veh_availabilities,
                                             output_path=output_path,
                                             rtp_input_data_path=rtp_input_path)
+
+# save y-limits dictionary to file
+with open(figure_path + '/y_limits.txt', 'w') as ylims:
+    json.dump(ylim_dict, ylims)
+
 #%%
 print('4. Plot results.')
+
+# optional: read ylim-dict from file if wanting to execute step '4.' alone
+# with open(figure_path + 'y_limits', 'r') as ylims:
+#     ylim_dict = ylims.load(ylims)
 
 # Create empty figures folder
 ev_case_study.create_figures_folder(figure_folder_path=figure_path)
@@ -83,7 +93,7 @@ ev_case_study.plot_n_avail_veh(output_path=output_path + str(params['power_level
                                figure_path=figure_path)
 
 # Plot aggregated flexibility offers in a heat map
-ev_case_study.plot_flex_heatmap(output_path=output_path)
+ev_case_study.plot_flex_heatmap(output_path=output_path, figure_path=figure_path)
 
 # List all power levels
 power_levels = os.listdir(output_path)
