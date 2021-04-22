@@ -39,8 +39,8 @@ def aggregate_ev_flex(veh_availabilities, output_path='../output/', rtp_input_da
     # Preparation ###################################################
     #################################################################
     """
-    # List all power levels
-    power_levels = os.listdir(output_path)
+    # List all power levels - sorted from low to high
+    power_levels = sorted(os.listdir(output_path), key=float)
     days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 
     # initialize variables for y-limits calculation (passed to plot function)
