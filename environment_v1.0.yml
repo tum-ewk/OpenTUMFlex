@@ -41,6 +41,7 @@ dependencies:
   - numexpr=2.7.1=py39h6ab05e5_3
   - numpy=1.19.2=py39h5659d19_1
   - olefile=0.46=pyh9f0ad1d_1
+  - openpyxl=3.0.6=pyhd3eb1b0_0
   - openssl=1.1.1h=he774522_0
   - pandas=1.1.4=py39h2e25243_0
   - patsy=0.5.1=py_0

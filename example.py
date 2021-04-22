@@ -3,7 +3,7 @@ import os
 
 
 base_dir = os.path.abspath(os.getcwd())
-input_file = r'\input\input_data.xlsx'
+input_file = r'\input\input_data.csv'
 output_dir = r'\output'
 
 path_input_data = base_dir + input_file
