@@ -44,6 +44,8 @@ params = {'power_levels': [3.7, 11, 22],
 ev_case_study.create_output_folder(output_path=output_path,
                                    power_levels=params['power_levels'],
                                    pricing_strategies=params['pricing'])
+# Create empty figures folder
+ev_case_study.create_figures_folder(figure_folder_path=figure_path)
 
 # Create all possible combinations of params
 keys = list(params)
@@ -73,9 +75,8 @@ print('3. Aggregate optimal charging schedules, costs, and flexibility offers.')
 ylim_dict = ev_case_study.aggregate_ev_flex(veh_availabilities,
                                             output_path=output_path,
                                             rtp_input_data_path=rtp_input_path)
-
 # save y-limits dictionary to file
-with open(figure_path + '/y_limits.txt', 'w') as ylims:
+with open(figure_path + 'y_limits.txt', 'w') as ylims:
     json.dump(ylim_dict, ylims)
 
 #%%
@@ -85,9 +86,6 @@ print('4. Plot results.')
 # with open(figure_path + 'y_limits', 'r') as ylims:
 #     ylim_dict = ylims.load(ylims)
 
-# Create empty figures folder
-ev_case_study.create_figures_folder(figure_folder_path=figure_path)
-
 # Plot number of available vehicles at home over a week (only for one power level, since it won't change)
 ev_case_study.plot_n_avail_veh(output_path=output_path + str(params['power_levels'][0]) + '/',
                                figure_path=figure_path)
@@ -95,8 +93,8 @@ ev_case_study.plot_n_avail_veh(output_path=output_path + str(params['power_level
 # Plot aggregated flexibility offers in a heat map
 ev_case_study.plot_flex_heatmap(output_path=output_path, figure_path=figure_path)
 
-# List all power levels
-power_levels = os.listdir(output_path)
+# List all power levels - sorted from low to high
+power_levels = sorted(os.listdir(output_path), key=float)
 # df for overall costs
 overall_costs = pd.DataFrame(columns=power_levels, index=params['pricing'])
 for power in power_levels:
