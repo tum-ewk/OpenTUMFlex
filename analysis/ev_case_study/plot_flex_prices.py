@@ -22,7 +22,7 @@ from pathlib import Path
 register_matplotlib_converters()
 
 
-def plot_flex_prices(power, output_path, save_figure=True, figure_path='figures/', ylims=None):
+def plot_flex_prices(power, output_path, save_figure=True, figure_path='figures/', ylims=None, results='all'):
     """
     This function plots the flexibility prices of a study over time
 
@@ -31,6 +31,7 @@ def plot_flex_prices(power, output_path, save_figure=True, figure_path='figures/
     :param figure_path: folder where figures are stored
     :param power: current power level
     :param ylims: dictionary with max/min y-limit values for the plots, default None
+    :param results: defines which figures are created and saved, default is all, case_study means allseason and average day only
     :return:
     """
 
@@ -49,8 +50,13 @@ def plot_flex_prices(power, output_path, save_figure=True, figure_path='figures/
     all_opt_dfs = [day_opt_per_daytime, weekday_opt_per_daytime, weekend_opt_per_daytime]
     all_flex_dfs = [day_flex_per_daytime, weekday_flex_per_daytime, weekend_flex_per_daytime]
     all_price_dfs = [day_flex_prices, weekday_flex_prices, weekend_flex_prices]
-    all_agg_type_l = ['allseasons_day', 'allseasons_weekday', 'allseasons_weekend']
-    all_title_l = ['Day', 'Weekday', 'Weekend']
+
+    if results == 'all':
+        all_agg_type_l = ['allseasons_day', 'allseasons_weekday', 'allseasons_weekend']
+        all_title_l = ['Day', 'Weekday', 'Weekend']
+    elif results == 'case_study':
+        all_agg_type_l = ['allseasons_day']
+        all_title_l = ['Day']
 
     # Check whether winter/summer files exist (if one exists, all exist) and read data from hdf files
     winter_path = Path(output_path + 'Aggregated Data/winter_day_flex_per_daytime_data.h5')
@@ -117,12 +123,21 @@ def plot_flex_prices(power, output_path, save_figure=True, figure_path='figures/
     # Percentage from highest (abs) y value that is added to it, to get the y-limit when parameter ylims is not None
     ylim_spacing = 0.1
 
-    # Lists for outer for loop (day, weekday, weekend for summer & winter each, depending on whether su and/or wi exist)
-    opt_dfs = wi_opt_dfs + su_opt_dfs + all_opt_dfs
-    flex_dfs = wi_flex_dfs + su_flex_dfs + all_flex_dfs
-    price_dfs = wi_price_dfs + su_price_dfs + all_price_dfs
-    agg_type_l = wi_agg_type_l + su_agg_type_l + all_agg_type_l
-    title_l = wi_title_l + su_title_l + all_title_l
+    # Select dataframes depending on wanted results (only allseason for run_ev_case_study execution)
+    if results == 'all':
+        # Lists for outer for loop (day, weekday, weekend for summer & winter each, depending on whether su and/or wi exist)
+        opt_dfs = wi_opt_dfs + su_opt_dfs + all_opt_dfs
+        flex_dfs = wi_flex_dfs + su_flex_dfs + all_flex_dfs
+        price_dfs = wi_price_dfs + su_price_dfs + all_price_dfs
+        agg_type_l = wi_agg_type_l + su_agg_type_l + all_agg_type_l
+        title_l = wi_title_l + su_title_l + all_title_l
+    elif results == 'case_study':
+        opt_dfs = all_opt_dfs
+        flex_dfs = all_flex_dfs
+        price_dfs = all_price_dfs
+        agg_type_l = all_agg_type_l
+        title_l = all_title_l
+
 
     # Dictionaries for inner for loops (subplots, what column of dataframe is called)
     fc_plot_dict = {0: {'price_tariff': 'Con', 'fc_kwh': 'c_con_kwh'},
@@ -258,6 +273,6 @@ if __name__ == '__main__':
     # plot_flex_prices(power='3.7', output_path='../output/3.7/', figure_path='../figures/', ylims=None)
     # plot_flex_prices(power='11', output_path='../output/11/', figure_path='../figures/', ylims=None)
     # plot_flex_prices(power='22', output_path='../output/22/', figure_path='../figures/', ylims=None)
-    plot_flex_prices(power='3.7', output_path='../output/3.7/', figure_path='../figures/', ylims=ylim_dict)
-    plot_flex_prices(power='11', output_path='../output/11/', figure_path='../figures/', ylims=ylim_dict)
-    plot_flex_prices(power='22', output_path='../output/22/', figure_path='../figures/', ylims=ylim_dict)
+    plot_flex_prices(power='3.7', output_path='../output/3.7/', figure_path='../figures/', ylims=ylim_dict, results='all')
+    plot_flex_prices(power='11', output_path='../output/11/', figure_path='../figures/', ylims=ylim_dict, results='all')
+    plot_flex_prices(power='22', output_path='../output/22/', figure_path='../figures/', ylims=ylim_dict, results='all')
