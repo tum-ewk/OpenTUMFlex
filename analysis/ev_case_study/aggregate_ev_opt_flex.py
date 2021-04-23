@@ -43,7 +43,7 @@ def aggregate_ev_flex(veh_availabilities, output_path='../output/', rtp_input_da
     power_levels = sorted(os.listdir(output_path), key=float)
     days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 
-    # initialize variables for y-limits calculation (passed to plot function)
+    # Initialize variables for y-limits calculation (passed to prices plot function)
     max_forecast = max_power = max_price = -np.inf
     min_forecast = min_power = min_price = np.inf
 
@@ -127,6 +127,7 @@ def aggregate_ev_flex(veh_availabilities, output_path='../output/', rtp_input_da
                                                               'max_c_flex_neg_rtp',
                                                               'min_c_flex_neg_rtp',
                                                               'Daytime_ID'})
+
         # Assigning -inf/inf to max/minprice columns for calculation of upper and lower bounds of the flexibility price
         max_prices_list = ['max_c_flex_pos_tou', 'max_c_flex_pos_tou_mi', 'max_c_flex_pos_con',
                            'max_c_flex_pos_con_mi', 'max_c_flex_pos_rtp', 'max_c_flex_neg_tou',
@@ -136,10 +137,8 @@ def aggregate_ev_flex(veh_availabilities, output_path='../output/', rtp_input_da
                            'min_c_flex_pos_con_mi', 'min_c_flex_pos_rtp', 'min_c_flex_neg_tou',
                            'min_c_flex_neg_tou_mi', 'min_c_flex_neg_con', 'min_c_flex_neg_con_mi',
                            'min_c_flex_neg_rtp']
-        for maxprice in max_prices_list:
-            flex_sum_df[maxprice] = -np.inf
-        for minprice in min_prices_list:
-            flex_sum_df[minprice] = np.inf
+        flex_sum_df[max_prices_list] = -np.inf
+        flex_sum_df[min_prices_list] = np.inf
 
         # Get forecast electricity prices for each time step
         price_forecast = forecast.simulate_elect_price_fcst(rtp_input_data_path=rtp_input_data_path,
@@ -166,13 +165,10 @@ def aggregate_ev_flex(veh_availabilities, output_path='../output/', rtp_input_da
             my_ems_list = [my_ems_tou_mi, my_ems_tou, my_ems_con_mi, my_ems_con, my_ems_rtp]
             price_l = ['Pos_Pr', 'Neg_Pr']
             power_l = ['Pos_P', 'Neg_P']
-            # set_sign_l = [np.inf, -np.inf]
             for my_ems in my_ems_list:
                 for pr, p in zip(price_l, power_l):
                     my_ems['flexopts']['ev'].loc[((my_ems['flexopts']['ev'][pr] == 0) &
                                                   (my_ems['flexopts']['ev'][p] == 0)), pr] = np.NAN
-            # my_ems_con['flexopts']['ev'].loc[((my_ems_con['flexopts']['ev']['Pos_Pr'] == 0) &
-            #                                   (my_ems_con['flexopts']['ev']['Pos_P'] == 0)), 'Pos_Pr'] = np.NAN
 
             opt_result_df = pd.DataFrame({'P_ev_opt_tou_mi': my_ems_tou_mi['optplan']['EV_power'],
                                           'P_ev_opt_tou': my_ems_tou['optplan']['EV_power'],
@@ -271,60 +267,25 @@ def aggregate_ev_flex(veh_availabilities, output_path='../output/', rtp_input_da
             flex_sum_df.loc[flex_result_df.index[0]:flex_result_df.index[-1], 'E_neg_sum_rtp'] \
                 += flex_result_df['E_neg_rtp']
 
-            # lists of all flex prices for combination in for loop, min/max NOT from absolute values, max/min already
-            # assigned above
+            # Lists of all flex prices for combination in for loop, max/min already assigned above
             flex_prices_list = ['c_flex_pos_tou', 'c_flex_pos_tou_mi', 'c_flex_pos_con',
                                 'c_flex_pos_con_mi', 'c_flex_pos_rtp', 'c_flex_neg_tou',
                                 'c_flex_neg_tou_mi', 'c_flex_neg_con', 'c_flex_neg_con_mi',
                                 'c_flex_neg_rtp']
-            # max_prices_list = ['max_c_flex_pos_tou', 'max_c_flex_pos_tou_mi', 'max_c_flex_pos_con',
-            #                    'max_c_flex_pos_con_mi', 'max_c_flex_pos_rtp','max_c_flex_neg_tou',
-            #                    'max_c_flex_neg_tou_mi', 'max_c_flex_neg_con', 'max_c_flex_neg_con_mi',
-            #                    'max_c_flex_neg_rtp']
-            # min_prices_list = ['min_c_flex_pos_tou', 'min_c_flex_pos_tou_mi', 'min_c_flex_pos_con',
-            #                    'min_c_flex_pos_con_mi', 'min_c_flex_pos_rtp', 'min_c_flex_neg_tou',
-            #                    'min_c_flex_neg_tou_mi', 'min_c_flex_neg_con', 'min_c_flex_neg_con_mi',
-            #                    'min_c_flex_neg_rtp']
 
-            # filling max/minprice columns, by only replacing when value from current availability is bigger/smaller
-            ##### glz für pos/neg, weil ja nicht mehr "abs"
-            # for maxprice, minprice in zip(max_prices_list, min_prices_list):
-            #     flex_sum_df[maxprice] = -np.inf
-            #     flex_sum_df[minprice] = np.inf
+            # Filling max/minprice columns, by only replacing when value from current availability is bigger/smaller
             for maxprice, flexprice in zip(max_prices_list, flex_prices_list):
-                #flex_sum_df[maxprice] = 0 #scheint nicht nötig zu sein, würde auch sonst hier immer alles löschen
-                # df_temp = flex_sum_df.loc[flex_result_df.index, :] # achtung falsch wsl!
-                # flex_sum_df.loc[df_temp.index, maxprice] = np.where(
-                #     df_temp[flexprice] <= flex_result_df[flexprice],
-                #     flex_result_df[flexprice], df_temp[flexprice])
                 df_temp = flex_sum_df.loc[flex_result_df.index, :]
                 flex_sum_df.loc[df_temp.index, maxprice] = np.where(
                     df_temp[maxprice] <= flex_result_df[flexprice],
                     flex_result_df[flexprice], df_temp[maxprice])
             for minprice, flexprice in zip(min_prices_list, flex_prices_list):
-                # df_temp = flex_sum_df.loc[flex_result_df.index, :] # alt und wsl falsch
-                # flex_sum_df.loc[df_temp.index, minprice] = np.where(
-                #     df_temp[flexprice] > flex_result_df[flexprice],
-                #     flex_result_df[flexprice], df_temp[flexprice])
                 df_temp = flex_sum_df.loc[flex_result_df.index, :]
                 flex_sum_df.loc[df_temp.index, minprice] = np.where(
                     df_temp[minprice] >= flex_result_df[flexprice],
                     flex_result_df[flexprice], df_temp[minprice])
-            # for flexprice in flex_prices_list:
-            #     flex_sum_df.loc[flex_result_df.index[0]:flex_result_df.index[-1], flexprice] \
-            #         += flex_result_df[flexprice]
 
-        # Setting all flex prices in max/min price columns that are zero & don't have a correlating flex power to NaN
-
-        # power_columns_list = ['P_pos_sum_tou', 'P_pos_sum_tou_mi', 'P_pos_sum_con', 'P_pos_sum_con_mi', 'P_pos_sum_rtp',
-        #                       'P_neg_sum_tou', 'P_neg_sum_tou_mi', 'P_neg_sum_con', 'P_neg_sum_con_mi', 'P_neg_sum_rtp',]
-        # for power_col, max_pr_col, min_pr_col in zip(power_columns_list, max_prices_list, min_prices_list):
-        #     flex_sum_df.loc[((flex_sum_df[max_pr_col] == 0) &
-        #                                   (flex_sum_df[power_col] == 0)), [max_pr_col]] = np.NAN
-        #     flex_sum_df.loc[((flex_sum_df[min_pr_col] == 0) &
-        #                                   (flex_sum_df[power_col] == 0)), [min_pr_col]] = np.NAN
-
-        # replace all remaining inf values with NAN
+        # Replace all remaining inf values with NAN
         flex_sum_df.replace([np.inf, -np.inf], np.NAN, inplace=True)
 
         # Calculate energy costs
@@ -353,10 +314,8 @@ def aggregate_ev_flex(veh_availabilities, output_path='../output/', rtp_input_da
         n_veh_avail_min = opt_sum_df['n_veh_avail'].min()
 
         # Differentiating between summer, winter and all months with a for loop
-
-        # create dict for for loop
+        # Create dict for for loop, create winter/summer dataframes and update dict for for loop
         seasons_dict = {}
-        # create winter/summer dataframes and update dict for for loop
         if any(x in opt_sum_df.index.month for x in [10, 11, 12, 1, 2, 3, 4, 5]):
             seasons_dict['winter'] = {}
             seasons_dict['winter']['opt_sum_df'] = opt_sum_df.loc[(opt_sum_df.index.month >= 10) | (opt_sum_df.index.month <= 5)]
@@ -367,18 +326,15 @@ def aggregate_ev_flex(veh_availabilities, output_path='../output/', rtp_input_da
             seasons_dict['summer']['opt_sum_df'] = opt_sum_df.loc[(opt_sum_df.index.month >= 6) & (opt_sum_df.index.month <= 9)]
             seasons_dict['summer']['flex_sum_df'] = flex_sum_df.loc[(flex_sum_df.index.month >= 6) & (flex_sum_df.index.month <= 9)]
 
-        # add "all seasons" as last item in dict, as heatmap calculations after the for loop need data from all months
+        # Add "all seasons" as last item in dict, as heatmap calculations after the for loop need data from all months
         seasons_dict['allseasons'] = {}
         seasons_dict['allseasons']['opt_sum_df'] = opt_sum_df
         seasons_dict['allseasons']['flex_sum_df'] = flex_sum_df
 
-        # for loop over summer, winter and all seasons opt_sum and flex_sum dataframes
+        # For loop over summer, winter and all seasons opt_sum and flex_sum dataframes
         for season, value in seasons_dict.items():
             season_opt_sum_df = value['opt_sum_df']
             season_flex_sum_df = value['flex_sum_df']
-
-        # # for loop over summer, winter and all seasons opt_sum and flex_sum dataframes
-        # for season_opt_sum_df, season_flex_sum_df, season in zip(seasons_opt_df_l, seasons_flex_df_l, seasons):
 
             """
             ####################################################################
@@ -432,7 +388,6 @@ def aggregate_ev_flex(veh_availabilities, output_path='../output/', rtp_input_da
             opt_per_daytime_qt = opt_per_daytime_qt.reset_index()
             # Prepare heat map for flexible power
             flex_per_daytime = pd.DataFrame()
-            # flex_per_daytime_temp = flex_sum_df.groupby(by='Daytime_ID').mean()
             flex_per_daytime_temp = season_flex_sum_df.groupby(by='Daytime_ID').agg({'P_pos_sum_tou': 'mean',
                                                                                      'P_pos_sum_tou_mi': 'mean',
                                                                                      'P_pos_sum_con': 'mean',
@@ -514,11 +469,8 @@ def aggregate_ev_flex(veh_availabilities, output_path='../output/', rtp_input_da
             day_flex_per_daytime = day_flex_per_daytime.set_index('Day, ' + pd.date_range(start='00:00', end='23:45',
                                                                                           freq='15Min').strftime('%H:%M'))
 
-            # Calculate Weekday/Weekend/Day flex for Flex prices (adding and dividing by 2/5/7 does not work because of NANs)
-            # list of columns that should be grouped/averaged by 15 min timestamp
-            power_column_list = ['P_pos_sum_tou', 'P_pos_sum_tou_mi', 'P_pos_sum_con', 'P_pos_sum_con_mi',
-                                 'P_pos_sum_rtp', 'P_neg_sum_tou', 'P_neg_sum_tou_mi', 'P_neg_sum_con',
-                                 'P_neg_sum_con_mi', 'P_neg_sum_rtp']
+            # Calculate Weekday/Weekend/Day average for flex prices (above method does not work because of NAN values)
+            # List of columns that should be grouped/averaged by 15 min timestamp
             price_column_list = ['max_c_flex_pos_tou', 'min_c_flex_pos_tou',
                                  'max_c_flex_pos_tou_mi', 'min_c_flex_pos_tou_mi',
                                  'max_c_flex_pos_con', 'min_c_flex_pos_con',
@@ -530,13 +482,9 @@ def aggregate_ev_flex(veh_availabilities, output_path='../output/', rtp_input_da
                                  'max_c_flex_neg_con_mi', 'min_c_flex_neg_con_mi',
                                  'max_c_flex_neg_rtp', 'min_c_flex_neg_rtp']
 
-            # combining concat/join?
-            # weekday_flex_prices = flex_per_daytime[column_list].iloc[[]]
-            # weekend_flex_prices
             day_flex_prices = pd.DataFrame()
             weekday_flex_prices = pd.DataFrame()
             weekend_flex_prices = pd.DataFrame()
-            test_flex_prices = pd.DataFrame()
             for i in range(96):
                 day_flex_prices = pd.concat([day_flex_prices,
                                              pd.DataFrame(flex_per_daytime[price_column_list].iloc[i::96].mean(axis=0)).T],
@@ -549,11 +497,6 @@ def aggregate_ev_flex(veh_availabilities, output_path='../output/', rtp_input_da
                                                  pd.DataFrame(flex_per_daytime[price_column_list].iloc[i+480::96].mean(
                                                      axis=0)).T],
                                                 ignore_index=True, axis=0)
-
-                test_flex_prices = pd.concat([test_flex_prices,
-                                              pd.DataFrame(flex_per_daytime[power_column_list].iloc[i + 480::96].mean(
-                                                  axis=0)).T],
-                                             ignore_index=True, axis=0)
 
             # Save data to hdf files for further analysis
             if season == 'allseasons':
@@ -572,7 +515,7 @@ def aggregate_ev_flex(veh_availabilities, output_path='../output/', rtp_input_da
             weekend_flex_prices.to_hdf(output_path + str(power) + '/Aggregated Data/' + str(season) + '_weekend_flex_prices_data.h5', mode='w', key='df')
 
             # Calculate ylims for flex price plots
-            # for price forecast
+            # For price forecast
             for df in [day_opt_per_daytime, weekday_opt_per_daytime, weekend_opt_per_daytime]:
                 max_forecast_temp = df[['c_tou_kwh', 'c_con_kwh', 'c_tou_mi_kwh', 'c_con_mi_kwh', 'c_rtp_kwh']].max().max()
                 min_forecast_temp = df[['c_tou_kwh', 'c_con_kwh', 'c_tou_mi_kwh', 'c_con_mi_kwh', 'c_rtp_kwh']].min().min()
@@ -581,7 +524,7 @@ def aggregate_ev_flex(veh_availabilities, output_path='../output/', rtp_input_da
                 if min_forecast > min_forecast_temp:
                     min_forecast = min_forecast_temp
 
-            # for flexibility power --> loop oder einfach die max/min limits vor dem zu Wochentag/... mean?
+            # For flexible power
             flex_dfs_list = [day_flex_per_daytime, weekday_flex_per_daytime, weekend_flex_per_daytime]
             opt_dfs_list = [day_opt_per_daytime, weekday_opt_per_daytime, weekend_opt_per_daytime]
             for flex_df, opt_df in zip(flex_dfs_list, opt_dfs_list):
@@ -594,6 +537,7 @@ def aggregate_ev_flex(veh_availabilities, output_path='../output/', rtp_input_da
                 if min_power > min_power_temp:
                     min_power = min_power_temp
 
+            # For flexibility price
             for df in [day_flex_prices, weekday_flex_prices, weekend_flex_prices]:
                 max_price_temp = df[['max_c_flex_pos_tou', 'max_c_flex_pos_tou_mi', 'max_c_flex_pos_con',
                                      'max_c_flex_pos_con_mi', 'max_c_flex_pos_rtp', 'max_c_flex_neg_tou',
@@ -608,7 +552,7 @@ def aggregate_ev_flex(veh_availabilities, output_path='../output/', rtp_input_da
                 if min_price > min_price_temp:
                     min_price = min_price_temp
 
-        # prepare df for week heat map
+        # Prepare df for week heat map
         P_pos_tou_hm = pd.DataFrame(0, index=pd.date_range(start='00:00', end='23:45', freq='15Min').strftime('%H:%M'),
                                     columns=days)
         P_pos_con_hm = pd.DataFrame(0, index=pd.date_range(start='00:00', end='23:45', freq='15Min').strftime('%H:%M'),
@@ -659,7 +603,7 @@ def aggregate_ev_flex(veh_availabilities, output_path='../output/', rtp_input_da
         P_neg_rtp_hm.to_hdf(output_path + str(power) + '/Aggregated Data/P_neg_rtp_hm_data.h5', mode='w', key='df')
         n_avail_veh_hm.to_hdf(output_path + str(power) + '/Aggregated Data/n_veh_avail_hm_data.h5', mode='w', key='df')
 
-    # create ylim-dict with overall maximum and minimum values to pass to plot flex prices function
+    # Create ylim-dict with overall maximum and minimum values from all power levels
     ylim_dict = {'forecast': {'max': max_forecast, 'min': min_forecast},
                  'flex power': {'max': max_power, 'min': min_power},
                  'flex price': {'max': max_price, 'min': min_price}}
