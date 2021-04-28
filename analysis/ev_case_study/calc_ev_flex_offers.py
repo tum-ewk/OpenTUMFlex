@@ -201,18 +201,10 @@ def calc_ev_flex_offers_parallel(param_variation,
     if param_fix['plotting']:
         opentumflex.plot_flex(my_ems, 'ev')
 
+    # Save results to files
+    opentumflex.save_ems(my_ems, path=param_fix['output_path'] + str(param_variation[0]) + '/' +
+                                      param_variation[1] + '/ev_avail_' + str(param_variation[2][0]) + '.txt')
 
-    if param_fix['save_ems_object_as_json']:
-        # Save results to files
-        opentumflex.save_ems(my_ems, path=param_fix['output_path'] + str(param_variation[0]) + '/' +
-                                          param_variation[1] + '/ev_avail_' + str(param_variation[2][0]) + '.txt')
-    '''
-    if param_fix['save_ev_flex_as_feather']:
-        my_ems['flexopts']['ev'].reset_index().to_feather(path=param_fix['output_path'] + str(param_variation[0]) + '/' +
-                                                 param_variation[1] + '/ev_avail_' + str(param_variation[2][0]) + '.ft')
-                                                 
-        https://towardsdatascience.com/the-best-format-to-save-pandas-data-414dca023e0d
-    '''
 
 if __name__ == '__main__':
     # Read veh availabilities from file
@@ -248,9 +240,7 @@ if __name__ == '__main__':
                  'rtp_input_data_path': 'C:/Users/ga47num/PycharmProjects/OpenTUMFlexPy/analysis/input/RTP/',
                  'output_path': 'C:/Users/ga47num/PycharmProjects/OpenTUMFlexPy/analysis/output/',
                  'pricing_strategies': ['ToU', 'Constant', 'Con_mi', 'ToU_mi', 'RTP'],
-                 'plotting': False,
-                 'save_ev_flex_as_feather': True,
-                 'save_ems_object_as_json': False}
+                 'plotting': False}
     for values in itertools.product(*map(params.get, keys)):
         # Store in list
         param_variations.append(list(values))
