@@ -187,7 +187,7 @@ def plot_optimal_results(ems, prnt_pgr=False, show_balance=True, show_soc=True):
         # plot SoC of battery
         fig1 = plt.figure()
         ax2 = plt.subplot(1, 3, 1)
-        font_size = 16
+        font_size = 10
         # p8 = plt.plot(ind, bat_cont/bat_max_cont*100,linewidth=1,color='red')
 
         p8 = plt.step(indplus1, np.append(opt_res['SOC_elec'], 0), linewidth=1, color='red', where='post')
@@ -200,7 +200,7 @@ def plot_optimal_results(ems, prnt_pgr=False, show_balance=True, show_soc=True):
         ax2.tick_params(axis="y", labelsize=font_size - 2)
         ax2.set_ylim(0, 100)
         ax2.set_xlim(0, N)
-        plt.show()
+        #plt.show()
 
         # plot EV soc
         ax2 = plt.subplot(1, 3, 2)
@@ -215,7 +215,7 @@ def plot_optimal_results(ems, prnt_pgr=False, show_balance=True, show_soc=True):
         ax2.tick_params(axis="y", labelsize=font_size - 2)
         ax2.set_ylim(0, 100)
         ax2.set_xlim(0, N)
-        plt.show()
+        #plt.show()
 
         # plot SoC of heat storage
         ax2 = plt.subplot(1, 3, 3)
@@ -228,3 +228,4 @@ def plot_optimal_results(ems, prnt_pgr=False, show_balance=True, show_soc=True):
         ax2.set_xlim(0, N)
         plt.title('Heat Storage', fontsize=font_size)
         # plt.tight_layout()
+        plt.show()
