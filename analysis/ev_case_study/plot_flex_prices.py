@@ -31,7 +31,7 @@ def plot_flex_prices(power, output_path, save_figure=True, figure_path='figures/
     :param figure_path: folder where figures are stored
     :param power: current power level
     :param ylims: dictionary with max/min y-limit values for the plots, default None
-    :param results: defines which figures are created and saved, default is all, case_study means allseason and average day only
+    :param results: defines which figures are created and saved, default is 'all', case_study means 'allseason' and average day only
     :return:
     """
 

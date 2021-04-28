@@ -56,9 +56,7 @@ param_con = {'conversion_distance_2_km': 1.61,
              'output_path': output_path,
              'pricing_strategies': ['ToU', 'Constant', 'Con_mi', 'ToU_mi', 'RTP'],
              'plotting': False,
-             'info': False,
-             'save_ev_flex_as_feather': False,
-             'save_ems_object_as_json': True}
+             'info': False}
 for values in itertools.product(*map(params.get, keys)):
     # Store in list
     param_variations.append(list(values))
