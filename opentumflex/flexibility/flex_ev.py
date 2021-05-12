@@ -175,8 +175,6 @@ def calc_flex_ev(my_ems, reopt=0):
                 idx_required = math.ceil(ev_flex_temp[e_pos].iat[i] / my_ems['devices']['ev']['maxpow']
                                          * n_time_steps_phour)
                 idx_flex = math.ceil(ev_flex_temp[e_pos].iat[i] / ev_flex_temp[p_pos].iat[i]
-                                         * n_time_steps_phour)
-                idx_flex = math.ceil(ev_flex_temp[e_pos].iat[i] / ev_flex_temp[p_pos].iat[i]
                                      * n_time_steps_phour)
                 ev_flex_temp[pr_pos].iat[i] = ev_flex_temp[pr_fcst][i + idx_flex - 1:].nsmallest(idx_required).mean()\
                                                      * (1 + risk_margin)
