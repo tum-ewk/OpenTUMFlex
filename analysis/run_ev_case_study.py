@@ -50,8 +50,7 @@ ev_case_study.create_figures_folder(figure_folder_path=figure_path)
 # Create all possible combinations of params
 keys = list(params)
 param_variations = list()
-param_con = {'conversion_distance_2_km': 1.61,
-             'conversion_km_2_kwh': 0.2,
+param_con = {'conversion_km_2_kwh': 0.2,
              'rtp_input_data_path': rtp_input_path,
              'output_path': output_path,
              'pricing_strategies': ['ToU', 'Constant', 'Con_mi', 'ToU_mi', 'RTP'],

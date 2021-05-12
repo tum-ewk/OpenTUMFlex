@@ -26,7 +26,7 @@ def calc_ev_flex_offers_parallel(param_variation,
 
     :param param_variation: parameter variation as a list containing charging power (float), pricing strategy (string)
                             and vehicle availability (list)
-    :param param_fix: fix parameters consisting of 'conversion_distance_2_km', 'conversion_km_2_kwh', 'rtp_input_data_path',
+    :param param_fix: fix parameters consisting of 'conversion_km_2_kwh', 'rtp_input_data_path',
                       'output_path', 'pricing_strategies', 'plotting'
     :return: None
     """
@@ -76,7 +76,6 @@ def calc_ev_flex_offers_parallel(param_variation,
     # Update EV parameters
     my_ems['devices'].update(opentumflex.create_device(device_name='ev', minpow=0, maxpow=param_variation[0],
                                                        stocap=round(param_variation[2][2] *
-                                                                    param_fix['conversion_distance_2_km'] *
                                                                     param_fix['conversion_km_2_kwh']),
                                                        init_soc=[0], end_soc=[100], eta=0.98,
                                                        ev_aval=[my_ems['time_data']['start_time'],
@@ -108,7 +107,7 @@ if __name__ == '__main__':
     # Read veh availabilities from file
     veh_avail = pd.read_csv('../input/chts_veh_availability.csv')
     # Extract a subsample for testing
-    veh_avail = veh_avail[68:88]
+    veh_avail = veh_avail[:]
     veh_avail = veh_avail.reset_index()
 
     # Make case study definitions
@@ -123,8 +122,7 @@ if __name__ == '__main__':
     # Create all possible combinations of params
     keys = list(params)
     param_variations = list()
-    param_con = {'conversion_distance_2_km': 1.61,
-                 'conversion_km_2_kwh': 0.2,
+    param_con = {'conversion_km_2_kwh': 0.2,
                  'rtp_input_data_path': '../input/RTP/',
                  'output_path': '../output/',
                  'pricing_strategies': ['ToU', 'Constant', 'Con_mi', 'ToU_mi', 'RTP'],
