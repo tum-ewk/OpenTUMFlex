@@ -80,8 +80,9 @@ with open(figure_path + 'y_limits.txt', 'w') as ylims:
 print('4. Plot results.')
 
 # optional: read ylim-dict from file if wanting to execute step '4.' alone
-# with open(figure_path + 'y_limits', 'r') as ylims:
-#     ylim_dict = ylims.load(ylims)
+# with open(figure_path + 'y_limits.txt') as ylims:
+#     data = ylims.read()
+#     ylim_dict = json.loads(data)
 
 # Plot number of available vehicles at home over a week (only for one power level, since it won't change)
 ev_case_study.plot_n_avail_veh(output_path=output_path + str(params['power_levels'][0]) + '/',
