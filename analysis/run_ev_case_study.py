@@ -50,8 +50,7 @@ ev_case_study.create_figures_folder(figure_folder_path=figure_path)
 # Create all possible combinations of params
 keys = list(params)
 param_variations = list()
-param_con = {'conversion_distance_2_km': 1.61,
-             'conversion_km_2_kwh': 0.2,
+param_con = {'conversion_km_2_kwh': 0.2,
              'rtp_input_data_path': rtp_input_path,
              'output_path': output_path,
              'pricing_strategies': ['ToU', 'Constant', 'Con_mi', 'ToU_mi', 'RTP'],
@@ -81,8 +80,9 @@ with open(figure_path + 'y_limits.txt', 'w') as ylims:
 print('4. Plot results.')
 
 # optional: read ylim-dict from file if wanting to execute step '4.' alone
-# with open(figure_path + 'y_limits', 'r') as ylims:
-#     ylim_dict = ylims.load(ylims)
+# with open(figure_path + 'y_limits.txt') as ylims:
+#     data = ylims.read()
+#     ylim_dict = json.loads(data)
 
 # Plot number of available vehicles at home over a week (only for one power level, since it won't change)
 ev_case_study.plot_n_avail_veh(output_path=output_path + str(params['power_levels'][0]) + '/',
