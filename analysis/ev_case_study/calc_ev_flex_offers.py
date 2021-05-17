@@ -44,7 +44,7 @@ def calc_ev_flex_offers_parallel(param_variation,
     # Floor departure time to previous quarter hour
     t_departure_floored = pd.Timestamp(param_variation[2][5]).floor(freq='15Min')
     # Check whether time between ceiled arrival and floored departure time are at least two time steps
-    if t_arrival_ceiled >= (t_departure_floored - pd.Timedelta(minutes=15)):
+    if t_departure_floored - t_arrival_ceiled < pd.Timedelta(minutes=2*my_ems['time_data']['t_inval']):
         if param_fix['info']:
             print('#' + str(param_variation[2][0]) + ': Time not sufficient.')
         return
