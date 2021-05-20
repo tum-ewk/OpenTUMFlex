@@ -90,12 +90,12 @@ def simulate_elect_price_fcst(rtp_input_data_path='../analysis/input/RTP/',
         price_fcst['Random'] = np.random.rand(len(price_fcst)) * 0.1 + 0.25
 
     if 'ToU_mi' in price_fcst.columns:
-        price_fcst['ToU_mi'] = price_fcst['ToU'] + np.linspace(start=0.00001,
-                                                               stop=0.00002,
+        price_fcst['ToU_mi'] = price_fcst['ToU'] + np.linspace(start=0.0001,
+                                                               stop=0.0002,
                                                                num=len(price_fcst))
     if 'Con_mi' in price_fcst.columns:
-        price_fcst['Con_mi'] = price_fcst['Constant'] + np.linspace(start=0.00001,
-                                                                    stop=0.00002,
+        price_fcst['Con_mi'] = price_fcst['Constant'] + np.linspace(start=0.0001,
+                                                                    stop=0.0002,
                                                                     num=len(price_fcst))
 
     if 'RTP' in price_fcst.columns:
