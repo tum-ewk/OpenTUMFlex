@@ -115,7 +115,7 @@ def plot_flex_prices(power, output_path, save_figure=True, figure_path='figures/
     rcParams["font.family"] = "Times New Roman"
     rcParams["mathtext.default"] = "regular"
     font_size = rcParams["font.size"] = 10
-    rcParams["figure.figsize"] = [15, 11]
+    rcParams["figure.figsize"] = [15, 10]
     plot_color = 'tab:blue'
     # Define number of subplots
     nrows = 3
@@ -165,8 +165,9 @@ def plot_flex_prices(power, output_path, save_figure=True, figure_path='figures/
 
         # Create figure with nrows * ncols subplots
         fig1, axs = plt.subplots(nrows=nrows, ncols=ncols, sharex=True, sharey='row')
-        fig1.suptitle('Price Forecast, Flexible and Scheduled Power and Flexibility Prices for an Average ' +
-                      str(title) + ' at ' + str(power) + ' kW', fontsize=16, y=0.98)
+        # optional figure title
+        # fig1.suptitle('Price Forecast, Flexible and Scheduled Power and Flexibility Prices for an Average ' +
+        #               str(title) + ' at ' + str(power) + ' kW', fontsize=16, y=0.98)
 
         # Price Forecast Subplots
         for i, value in fc_plot_dict.items():
@@ -199,7 +200,7 @@ def plot_flex_prices(power, output_path, save_figure=True, figure_path='figures/
             if i == ncols - 1:
                 axs[1, i].legend(bbox_to_anchor=(1.03, .69), loc='upper left', frameon=False)
 
-        # Flexibility Prices and weighted average price subplots
+        # Flexibility Prices
         for i, value in flex_prices_dict.items():
             axs[2, i].fill_between(tick_range,
                                    price_df[value['max_pr_pos']], price_df[value['min_pr_pos']],
@@ -222,13 +223,12 @@ def plot_flex_prices(power, output_path, save_figure=True, figure_path='figures/
                 axs[2, i].legend(bbox_to_anchor=(1.03, .72), loc='upper left', frameon=False)
 
         # Set labels
-        axs[0, 0].set_ylabel('Price Forecast $(€ \cdot kWh^{-1})$')
-        axs[1, 0].set_ylabel('Flexible Power per Available\n '
-                             'Vehicle $(kW \cdot EV^{-1})$ (area)\n '
-                             'Optimal Scheduled Power $(kW \cdot EV^{-1})$ (line)')
-        axs[2, 0].set_ylabel('Price Ranges for Positive and Negative Flexibility $(€ \cdot kW^{-1})$\n '
-                             'Weighted Average (by Offered Flex Power) of\n '
-                             'Flexibility Price $(€ \cdot kW^{-1})$')
+        axs[0, 0].set_ylabel('Price forecast $(€ \cdot kWh^{-1})$')
+        axs[1, 0].set_ylabel('Flexible power $(kW \cdot EV^{-1})$ and\n '
+                             'optimal scheduled power $(kW \cdot EV^{-1})$\n'
+                             'per available vehicle')
+        axs[2, 0].set_ylabel('Price ranges for pos. and neg. flexibility $(€ \cdot kW^{-1})$\n ')
+
         n_ticks = 5
         ticks = [int(x) for x in np.linspace(start=0, stop=96, num=n_ticks)]
         tick_labels = pd.date_range(start='2020-01-01 00:00', end='2020-01-02 00:00', freq='15Min').strftime(
@@ -250,14 +250,14 @@ def plot_flex_prices(power, output_path, save_figure=True, figure_path='figures/
                                ylims['flex price']['max'] * (1 + ylim_spacing))
             axs[1, 0].set_ylim(ylims['flex power']['min'] * (1 + ylim_spacing),
                                ylims['flex power']['max'] * (1 + ylim_spacing))
-        axs[0, 0].set_xlim([0, 97])
+        axs[0, 0].set_xlim([0, 96])
         axs[0, 0].set_xticks(ticks)
 
         # Rotate x labels
         for i in range(ncols):
             axs[nrows - 1, i].set_xticklabels(resulting_labels, rotation=45)
 
-        plt.subplots_adjust(left=0.09, bottom=0.05, right=0.87, top=0.92, wspace=0.25, hspace=0.2)
+        plt.subplots_adjust(left=0.09, bottom=0.05, right=0.87, top=0.96, wspace=0.25, hspace=0.1)
 
         if save_figure:
             plt.savefig(figure_path + str(power) + '_' + agg_type + '_flex_prices_plots.png', dpi=600)
