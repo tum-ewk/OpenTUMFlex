@@ -14,6 +14,7 @@ __status__ = "Development"
 import pandas as pd
 import numpy as np
 import os
+import matplotlib.pyplot as plt
 
 
 def simulate_elect_price_fcst(rtp_input_data_path='../analysis/input/RTP/',
@@ -89,12 +90,12 @@ def simulate_elect_price_fcst(rtp_input_data_path='../analysis/input/RTP/',
         price_fcst['Random'] = np.random.rand(len(price_fcst)) * 0.1 + 0.25
 
     if 'ToU_mi' in price_fcst.columns:
-        price_fcst['ToU_mi'] = price_fcst['ToU'] + np.linspace(start=0.00001,
-                                                               stop=0.00002,
+        price_fcst['ToU_mi'] = price_fcst['ToU'] + np.linspace(start=0.0001,
+                                                               stop=0.0002,
                                                                num=len(price_fcst))
     if 'Con_mi' in price_fcst.columns:
-        price_fcst['Con_mi'] = price_fcst['Constant'] + np.linspace(start=0.00001,
-                                                                    stop=0.00002,
+        price_fcst['Con_mi'] = price_fcst['Constant'] + np.linspace(start=0.0001,
+                                                                    stop=0.0002,
                                                                     num=len(price_fcst))
 
     if 'RTP' in price_fcst.columns:
@@ -132,9 +133,10 @@ if __name__ == '__main__':
     test = simulate_elect_price_fcst(rtp_input_data_path='../analysis/input/RTP/',
                                      t_start=pd.Timestamp('2013-4-30 00:00'),
                                      t_end=pd.Timestamp('2013-5-30 23:00'),
-                                     pr_constant=0.25, pricing={'ToU', 'Random', 'ToU_mi', 'RTP'})
+                                     pr_constant=0.20, pricing={'ToU', 'Constant', 'Con_mi', 'ToU_mi', 'RTP'})
 
     test.plot()
+    plt.show()
 
 
 

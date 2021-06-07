@@ -66,3 +66,5 @@ forecast/input/
 output/
 tester/
 *.png
+
+analysis/Data/

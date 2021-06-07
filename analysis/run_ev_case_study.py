@@ -19,14 +19,15 @@ import pandas as pd
 import itertools
 import analysis.ev_case_study as ev_case_study
 import os
+import json
 
 # Define input and output paths
-output_path = 'output/'
-input_path = 'input/'
-figure_path = 'figures/'
-rtp_input_path = 'input/RTP/'
-# Read veh availabilities from file
-veh_availabilities = pd.read_csv('input/chts_veh_availability.csv')
+output_path = 'yourfolder/output/'
+input_path = 'yourfolder/input/'
+figure_path = 'yourfolder/figures/'
+rtp_input_path = 'yourfolder/input/RTP/'
+# Read veh availabilities from file - check for delimiter type before and specify if semicolon (, sep=';')
+veh_availabilities = pd.read_csv('yourfolder/input/some_availability.csv')
 
 print('1. Prepare input data.')
 
@@ -43,12 +44,13 @@ params = {'power_levels': [3.7, 11, 22],
 ev_case_study.create_output_folder(output_path=output_path,
                                    power_levels=params['power_levels'],
                                    pricing_strategies=params['pricing'])
+# Create empty figures folder
+ev_case_study.create_figures_folder(figure_folder_path=figure_path)
 
 # Create all possible combinations of params
 keys = list(params)
 param_variations = list()
-param_con = {'conversion_distance_2_km': 1.61,
-             'conversion_km_2_kwh': 0.2,
+param_con = {'conversion_km_2_kwh': 0.2,
              'rtp_input_data_path': rtp_input_path,
              'output_path': output_path,
              'pricing_strategies': ['ToU', 'Constant', 'Con_mi', 'ToU_mi', 'RTP'],
@@ -67,24 +69,30 @@ Parallel(n_jobs=int(multiprocessing.cpu_count()))(
 print('3. Aggregate optimal charging schedules, costs, and flexibility offers.')
 
 # Aggregate single offers
-ev_case_study.aggregate_ev_flex(veh_availabilities,
-                                output_path=output_path,
-                                rtp_input_data_path=rtp_input_path)
+ylim_dict = ev_case_study.aggregate_ev_flex(veh_availabilities,
+                                            output_path=output_path,
+                                            rtp_input_data_path=rtp_input_path)
+# save y-limits dictionary to file
+with open(figure_path + 'y_limits.txt', 'w') as ylims:
+    json.dump(ylim_dict, ylims)
 
+#%%
 print('4. Plot results.')
 
-# Create empty figures folder
-ev_case_study.create_figures_folder(figure_folder_path=figure_path)
+# optional: read ylim-dict from file if wanting to execute step '4.' alone
+# with open(figure_path + 'y_limits.txt') as ylims:
+#     data = ylims.read()
+#     ylim_dict = json.loads(data)
 
 # Plot number of available vehicles at home over a week (only for one power level, since it won't change)
 ev_case_study.plot_n_avail_veh(output_path=output_path + str(params['power_levels'][0]) + '/',
                                figure_path=figure_path)
 
 # Plot aggregated flexibility offers in a heat map
-ev_case_study.plot_flex_heatmap(output_path=output_path)
+ev_case_study.plot_flex_heatmap(output_path=output_path, figure_path=figure_path)
 
-# List all power levels
-power_levels = os.listdir(output_path)
+# List all power levels - sorted from low to high
+power_levels = sorted(os.listdir(output_path), key=float)
 # df for overall costs
 overall_costs = pd.DataFrame(columns=power_levels, index=params['pricing'])
 for power in power_levels:
@@ -96,6 +104,8 @@ for power in power_levels:
     overall_costs[power]['RTP'] = pd.read_hdf(output_path + str(power) + '/Aggregated Data/opt_sum_data.h5')['c_rtp_energy'].sum()
     # Plot aggregated flexibility offers over time
     ev_case_study.plot_opt_flex_timeseries(power, output_path=output_path + str(power) + '/', figure_path=figure_path)
+    # Plot flex prices over time
+    ev_case_study.plot_flex_prices(power, output_path=output_path + str(power) + '/', figure_path=figure_path, ylims=ylim_dict, results='case_study')
 
 # Plot overall cost
 ev_case_study.plot_overall_cost(overall_costs=overall_costs, figure_path=figure_path)
