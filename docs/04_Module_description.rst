@@ -7,7 +7,7 @@ In this chapter we will disucss the OpenTUMFlex model structure and explanations
 ****************
 Workflow diagram
 ****************
-.. figure:: images/OTF_flowgraph.svg
+.. figure:: images/OTF_flowgraph.png
    :width: 800
 
 ****************
