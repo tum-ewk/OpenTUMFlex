@@ -1,4 +1,4 @@
-OpenTUMflex
+OpenTUMFlex
 =======
 
 An open-source python-based flexibility model to quantify and price the flexibility of household devices.
@@ -89,6 +89,8 @@ A scenario-based approach is incorporated in the OpenTUMFlex design. Here, a sce
 * **Analysis Toolbox:**
    * [EV Case Study - Quantifying the Flexibility of Electric Vehicles](analysis/)
 
+## Documentation
+Find detailed documentation about OpenTUMFlex [here](https://opentumflex.readthedocs.io/).
 
 <!---
 ## Conflict of Interest: 
