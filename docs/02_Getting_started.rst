@@ -48,6 +48,8 @@ Virtual environment
 
 To install all the required packages, the easiest way is to use a virtual environment.   
 
+Shift to the local directory where OpenTUMFlex is to installed ``cd "Local directory path"``
+
 **Pycharm** - Python 3.9.
 
 #. Create the virtual environment: ``open "Anaconda Prompt" -> conda env create -f environment_v1.0.yml``

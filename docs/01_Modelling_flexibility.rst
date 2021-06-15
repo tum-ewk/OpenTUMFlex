@@ -9,7 +9,7 @@ Background
 **********
 The increasing share of renewable energy requires alternative methods to provide power system ancillary services to ensure a stable operation of the electricity grids. Recent research has inclined their interests towards the aggregation of small-scale system flexibility potentials to accommodate grid variations. The advancements towards local flexibility markets allow prosumers participation in solving grid congestion problems. In order to allow prosumers to interact with the LFMs and submit their bids, a flexibility model is required. 
 
-.. figure:: images/Background.png
+.. figure:: images/background.png
    :width: 600
 
 ******
